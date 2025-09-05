@@ -122,30 +122,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Sends the transaction data to the backend to be saved in the history.
+     * Saves the transaction data to the browser's localStorage.
      * @param {object} data - The transaction data.
      */
     function saveToHistory(data) {
-        fetch('/api/history', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        });
+        // Get existing history or initialize a new array
+        const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
+
+        // Add a timestamp
+        data.timestamp = new Date().toLocaleString('es-ES');
+
+        // Add the new transaction to the beginning of the array
+        history.unshift(data);
+
+        // Save back to localStorage
+        localStorage.setItem('transactionHistory', JSON.stringify(history));
     }
 
     /**
-     * Example function to demonstrate calling the mock Arduino API.
+     * Example function to demonstrate calling a mock Arduino API.
+     * This is a placeholder for future integration.
      * @param {object} data - Data to be sent to the mock Arduino.
      */
     function sendToArduino(data) {
-        fetch('/api/arduino', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        })
-        .then(response => response.json())
-        .then(result => {
-            console.log('Arduino API response:', result);
-        });
+        console.log("Simulating sending data to Arduino:", data);
+        // In a real scenario, this would be a fetch call to the API endpoint
+        // fetch('/api/arduino', {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify(data),
+        // })
+        // .then(response => response.json())
+        // .then(result => {
+        //     console.log('Arduino API response:', result);
+        // });
     }
 });
