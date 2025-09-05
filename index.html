@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Cambio - ONCE App</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <meta name="description" content="Aplicación web accesible para la ONCE">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="static/img/logo.png" alt="Logotipo de la ONCE">
+        </div>
+        <nav>
+            <a href="index.html">Calculadora</a>
+            <a href="history.html">Historial</a>
+        </nav>
+        <div class="theme-switch-wrapper">
+            <label class="theme-switch" for="theme-toggle">
+                <input type="checkbox" id="theme-toggle" />
+                <div class="slider round"></div>
+            </label>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="calculator">
+            <h1>Calculadora de Cambio</h1>
+            <form id="change-form">
+                <div class="form-group">
+                    <label for="total-amount">Total a Pagar (€)</label>
+                    <input type="number" id="total-amount" placeholder="Ej: 15.50" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="amount-received">Importe Recibido (€)</label>
+                    <input type="number" id="amount-received" placeholder="Ej: 20.00" step="0.01" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" aria-label="Calcular el cambio">Calcular</button>
+                    <button type="button" id="voice-input-btn" class="btn btn-secondary" aria-label="Usar entrada de voz">
+                        🎤
+                    </button>
+                </div>
+            </form>
+            <div id="result" class="result-container" aria-live="polite">
+                <!-- El resultado se mostrará aquí -->
+            </div>
+        </section>
+    </main>
+
+    <script src="static/js/main.js"></script>
+</body>
+</html>
