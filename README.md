@@ -3,7 +3,6 @@
 
 Esta es una aplicación web estática, diseñada para ser una herramienta interna para la ONCE. La aplicación es completamente accesible y cuenta con funcionalidades como una calculadora de cambio con entrada por voz y un historial de operaciones que se guarda localmente en el navegador.
 
-
 ## Características
 
 - **Calculadora de Cambio**: Calcula el cambio para clientes de forma rápida y precisa.
@@ -13,7 +12,6 @@ Esta es una aplicación web estática, diseñada para ser una herramienta intern
 - **Historial de Operaciones**: Guarda un registro de todas las transacciones en el `localStorage` del navegador.
 - **Modo Día/Noche**: Tema visual adaptable para diferentes condiciones de iluminación.
 - **Diseño Accesible**: Contraste alto, botones grandes y compatibilidad con lectores de pantalla.
-
 
 ## Estructura del Proyecto
 

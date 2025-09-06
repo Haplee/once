@@ -83,29 +83,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Processes the transcribed voice command to fill form fields.
+
+     * Processes the transcribed voice command to fill form fields using more natural language.
+
      * @param {string} command - The voice command transcribed by the SpeechRecognition API.
      */
     function processVoiceCommand(command) {
         const totalAmountInput = document.getElementById('total-amount');
         const amountReceivedInput = document.getElementById('amount-received');
-
-        // Example commands: "total 10.50", "recibido 20"
         const commandLower = command.toLowerCase();
-        const words = commandLower.split(' ');
 
-        if (words.includes('total')) {
-            const index = words.indexOf('total') + 1;
-            if (words[index]) {
-                totalAmountInput.value = parseFloat(words[index].replace(',', '.'));
+        const totalKeywords = ['total', 'cuenta', 'pagar', 'es'];
+        const receivedKeywords = ['recibido', 'entregado', 'paga con', 'me da'];
+
+        // Regular expression to find numbers (including decimals with comma or dot)
+        const numberRegex = /(\d+([,.]\d+)?)/;
+
+        // Function to find a keyword and extract the next number
+        const extractNumberAfterKeyword = (keywords) => {
+            for (const keyword of keywords) {
+                const keywordIndex = commandLower.indexOf(keyword);
+                if (keywordIndex !== -1) {
+                    const restOfString = commandLower.substring(keywordIndex + keyword.length);
+                    const match = restOfString.match(numberRegex);
+                    if (match && match[0]) {
+                        return parseFloat(match[0].replace(',', '.'));
+                    }
+                }
             }
+            return null;
+        };
+
+        const totalValue = extractNumberAfterKeyword(totalKeywords);
+        if (totalValue !== null) {
+            totalAmountInput.value = totalValue;
         }
 
-        if (words.includes('recibido')) {
-            const index = words.indexOf('recibido') + 1;
-            if (words[index]) {
-                amountReceivedInput.value = parseFloat(words[index].replace(',', '.'));
-            }
+        const receivedValue = extractNumberAfterKeyword(receivedKeywords);
+        if (receivedValue !== null) {
+            amountReceivedInput.value = receivedValue;
         }
     }
 
