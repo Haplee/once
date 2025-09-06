@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Operaciones - ONCE App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/style.css">
+    <meta name="description" content="Aplicación web accesible para la ONCE">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="static/img/logo.png" alt="Logotipo de la ONCE">
+            </div>
+            <nav>
+                <a href="index.html">Calculadora</a>
+                <a href="history.html">Historial</a>
+            </nav>
+            <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="theme-toggle">
+                    <input type="checkbox" id="theme-toggle" />
+                    <div class="slider"></div>
+                </label>
+            </div>
+        </header>
+
+        <main>
+            <section id="history" class="content-card">
+                <h1>Historial de Operaciones</h1>
+                <div class="history-list">
+                    <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha y Hora</th>
+                            <th>Total Pagado</th>
+                            <th>Importe Recibido</th>
+                            <th>Cambio Devuelto</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <!-- El historial se insertará aquí mediante JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="static/js/history.js"></script>
+</body>
+</html>
