@@ -103,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert("Lo sentimos, tu navegador no es compatible con la función de reconocimiento de voz. Por favor, intenta con otro navegador como Google Chrome, Microsoft Edge o Safari.");
             }
         });
-
     }
 
     /**
