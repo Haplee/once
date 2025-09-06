@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Processes the transcribed voice command to fill form fields using more natural language.
+
      * @param {string} command - The voice command transcribed by the SpeechRecognition API.
      */
     function processVoiceCommand(command) {
