@@ -1,0 +1,251 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* --- Base Variables --- */
+:root {
+    --once-green: #00853F;
+    --once-yellow: #FDB913;
+    --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+    /* Light Mode Palette */
+    --bg-light: #f8f9fa;
+    --text-light: #212529;
+    --card-bg-light: #ffffff;
+    --border-light: #dee2e6;
+    --primary-light: var(--once-green);
+    --primary-text-light: #ffffff;
+
+    /* Dark Mode Palette */
+    --bg-dark: #121212;
+    --text-dark: #e9ecef;
+    --card-bg-dark: #1e1e1e;
+    --border-dark: #495057;
+    --primary-dark: var(--once-yellow);
+    --primary-text-dark: #121212;
+
+    /* Default to Light Mode */
+    --bg-color: var(--bg-light);
+    --text-color: var(--text-light);
+    --card-bg-color: var(--card-bg-light);
+    --border-color: var(--border-light);
+    --primary-color: var(--primary-light);
+    --primary-text-color: var(--primary-text-light);
+}
+
+body.dark-mode {
+    --bg-color: var(--bg-dark);
+    --text-color: var(--text-dark);
+    --card-bg-color: var(--card-bg-dark);
+    --border-color: var(--border-dark);
+    --primary-color: var(--primary-dark);
+    --primary-text-color: var(--primary-text-dark);
+}
+
+/* --- Global Styles --- */
+body {
+    font-family: var(--font-family);
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* --- Header --- */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+header .logo img {
+    height: 45px;
+}
+
+nav a {
+    margin: 0 0.75rem;
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+nav a:hover {
+    color: var(--primary-color);
+}
+
+/* --- Main Content Card --- */
+.content-card {
+    background-color: var(--card-bg-color);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+h1 {
+    font-weight: 600;
+    margin-top: 0;
+}
+
+/* --- Form Styles --- */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-family: var(--font-family);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    /* Fallback for browsers that don't support color-mix() */
+    box-shadow: 0 0 0 3px rgba(0, 133, 63, 0.25);
+    /* Modern browsers will override the above with this */
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 25%, transparent);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* --- Button Styles --- */
+.btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--font-family);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--primary-text-color);
+    flex-grow: 1;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem; /* Adjusted padding for an icon */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-secondary img {
+    width: 24px;
+    height: 24px;
+}
+
+body.dark-mode .btn-secondary img {
+    filter: invert(1);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+/* --- Result & History --- */
+.result-container {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    min-height: 50px;
+}
+
+.history-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.history-list th, .history-list td {
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem;
+    text-align: left;
+}
+
+.history-list th {
+    font-weight: 600;
+}
+
+/* --- Theme Switch --- */
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+}
+.theme-switch {
+    display: inline-block;
+    height: 28px;
+    position: relative;
+    width: 50px;
+}
+.theme-switch input { display:none; }
+.slider {
+    background-color: #ccc;
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    transition: .4s;
+    border-radius: 28px;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+input:checked + .slider { background-color: var(--once-green); }
+input:checked + .slider:before { transform: translateX(22px); }
+
+/* --- Responsive Design --- */
+@media (max-width: 600px) {
+    .container { margin: 1rem auto; }
+    header { flex-direction: column; gap: 1rem; }
+    .form-actions { flex-direction: column; }
+    .btn { width: 100%; }
+}
