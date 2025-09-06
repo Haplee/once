@@ -242,6 +242,18 @@ body.dark-mode .btn-secondary img {
 input:checked + .slider { background-color: var(--once-green); }
 input:checked + .slider:before { transform: translateX(22px); }
 
+/* --- Voice Message Container --- */
+#voice-message-container {
+    padding: 1rem;
+    margin-top: 1.5rem;
+    text-align: center;
+    border-radius: 8px;
+    border: 1px solid #d9534f;
+    color: #d9534f;
+    background-color: #f2dede;
+    display: none; /* Hidden by default, shown via JS */
+}
+
 /* --- Responsive Design --- */
 @media (max-width: 600px) {
     .container { margin: 1rem auto; }
