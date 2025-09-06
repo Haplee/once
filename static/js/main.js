@@ -59,51 +59,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Initializes Speech Recognition for voice commands with robust error handling.
+     * Handles the voice input button click, checking for compatibility first.
      */
     const voiceInputBtn = document.getElementById('voice-input-btn');
     if (voiceInputBtn) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        voiceInputBtn.addEventListener('click', () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-        if (SpeechRecognition) {
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'es-ES';
-            recognition.interimResults = false;
+            if (SpeechRecognition) {
+                // --- API is supported, proceed with recognition ---
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'es-ES';
+                recognition.interimResults = false;
 
-            let recognitionTimeout;
+                let recognitionTimeout;
 
-            recognition.onresult = (event) => {
-                clearTimeout(recognitionTimeout); // Success, clear the timeout
-                const command = event.results[event.results.length - 1][0].transcript;
-                processVoiceCommand(command);
-            };
+                recognition.onresult = (event) => {
+                    clearTimeout(recognitionTimeout);
+                    const command = event.results[event.results.length - 1][0].transcript;
+                    processVoiceCommand(command);
+                };
 
-            recognition.onerror = (event) => {
-                clearTimeout(recognitionTimeout); // Error, clear the timeout
-                alert(`Error en el reconocimiento de voz: ${event.error}. Es posible que necesites dar permisos de micrófono.`);
-            };
+                recognition.onerror = (event) => {
+                    clearTimeout(recognitionTimeout);
+                    alert(`Error en el reconocimiento de voz: ${event.error}. Es posible que necesites dar permisos de micrófono.`);
+                };
 
-            recognition.onstart = () => {
-                // Set a timeout to detect silent failures (e.g., in Opera)
-                recognitionTimeout = setTimeout(() => {
-                    recognition.stop();
-                    alert("El reconocimiento de voz no parece funcionar en este navegador. Te recomendamos usar Chrome o Edge para esta funcionalidad.");
-                }, 10000); // 10 seconds
-            };
+                recognition.onstart = () => {
+                    recognitionTimeout = setTimeout(() => {
+                        recognition.stop();
+                        alert("El reconocimiento de voz no parece funcionar correctamente en este navegador. Te recomendamos usar Chrome, Edge o Safari para esta funcionalidad.");
+                    }, 10000); // 10-second timeout for silent failures
+                };
 
-            voiceInputBtn.addEventListener('click', () => {
                 try {
                     recognition.start();
                 } catch (e) {
                     alert("No se pudo iniciar el reconocimiento de voz. Asegúrate de que el micrófono esté permitido y no esté siendo usado por otra aplicación.");
                 }
-            });
 
-        } else {
-            // Hide button completely and inform user if the API is not supported at all
-            voiceInputBtn.style.display = 'none';
-            console.log("Web Speech API (SpeechRecognition) no es compatible con este navegador.");
-        }
+            } else {
+                // --- API is not supported, show an alert ---
+                alert("Lo sentimos, tu navegador no es compatible con la función de reconocimiento de voz. Por favor, intenta con otro navegador como Google Chrome, Microsoft Edge o Safari.");
+            }
+        });
+
     }
 
     /**
