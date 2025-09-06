@@ -50,7 +50,6 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     line-height: 1.6;
-
     transition: background-color 0.3s, color 0.3s;
 }
 
@@ -62,7 +61,6 @@ body {
 }
 
 /* --- Header --- */
-
 header {
     display: flex;
     justify-content: space-between;
@@ -157,12 +155,10 @@ h1 {
 
     background-color: var(--primary-color);
     color: var(--primary-text-color);
-
     flex-grow: 1;
 }
 
 .btn-secondary {
-
     background-color: transparent;
     color: var(--text-color);
     border: 1px solid var(--border-color);
@@ -172,10 +168,14 @@ h1 {
     justify-content: center;
 }
 
-.icon-mic {
+
+.btn-secondary img {
     width: 24px;
     height: 24px;
+}
 
+body.dark-mode .btn-secondary img {
+    filter: invert(1);
 }
 
 .btn:hover {
