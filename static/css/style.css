@@ -1,3 +1,4 @@
+
 /* Import Google Font */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
@@ -53,6 +54,7 @@ body {
 }
 
 .container {
+
     max-width: 600px;
     margin: 2rem auto;
     padding: 0 1rem;
@@ -63,6 +65,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
     padding: 1rem 0;
     margin-bottom: 2rem;
     border-bottom: 1px solid var(--border-color);
@@ -126,6 +129,7 @@ h1 {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 25%, transparent);
+
 }
 
 .form-actions {
@@ -133,6 +137,7 @@ h1 {
     gap: 1rem;
     align-items: center;
 }
+
 
 /* --- Button Styles --- */
 .btn {
@@ -147,6 +152,7 @@ h1 {
 }
 
 .btn-primary {
+
     background-color: var(--primary-color);
     color: var(--primary-text-color);
     flex-grow: 1;
@@ -161,6 +167,7 @@ h1 {
     align-items: center;
     justify-content: center;
 }
+
 
 .btn-secondary img {
     width: 24px;
@@ -196,12 +203,14 @@ body.dark-mode .btn-secondary img {
 }
 
 .history-list th, .history-list td {
+
     border-bottom: 1px solid var(--border-color);
     padding: 1rem;
     text-align: left;
 }
 
 .history-list th {
+
     font-weight: 600;
 }
 

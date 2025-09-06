@@ -36,4 +36,6 @@ Simplemente abre el archivo `index.html` en tu navegador web. No se requiere ins
 
 1.  Asegúrate de que tu repositorio tenga una rama llamada `gh-pages`, o configura GitHub Pages para que se despliegue desde la rama `main` en la configuración de tu repositorio.
 2.  Sube todos los archivos del proyecto a esa rama.
+
 3.  GitHub Pages desplegará automáticamente el sitio y te proporcionará una URL.
+
