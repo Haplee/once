@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+
     // Limpiar cualquier estado de sesión anterior para asegurar un inicio de sesión limpio.
     sessionStorage.clear();
+
 
     const loginForm = document.getElementById('login-form');
     const errorMessageDiv = document.getElementById('login-error-message');
