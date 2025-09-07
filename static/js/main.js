@@ -4,25 +4,40 @@ document.addEventListener('DOMContentLoaded', () => {
      * Handles the theme switching between light and dark mode.
      * It persists the user's preference in localStorage.
      */
+    // --- Theme setup logic ---
+    const applyTheme = () => {
+        // 1. Check for saved theme, falling back to system preference if none is saved.
+        let theme = localStorage.getItem('theme');
+        if (!theme) {
+            theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-mode' : 'light-mode';
+            localStorage.setItem('theme', theme);
+        }
+
+        // 2. Apply theme, but NOT on the configuration page.
+        const isConfigPage = window.location.pathname.includes('configuracion.html');
+        document.body.classList.remove('dark-mode'); // Always reset first
+        if (theme === 'dark-mode' && !isConfigPage) {
+            document.body.classList.add('dark-mode');
+        }
+
+        // 3. Update the toggle state on the config page if it exists.
+        const themeToggleButton = document.getElementById('theme-toggle');
+        if (themeToggleButton) {
+            themeToggleButton.checked = theme === 'dark-mode';
+        }
+    };
+
+    // Apply theme on initial load
+    applyTheme();
+
+    // Add event listener for the toggle on the config page
     const themeToggleButton = document.getElementById('theme-toggle');
     if (themeToggleButton) {
-        // Apply saved theme on load
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme) {
-            document.body.classList.add(currentTheme);
-            if (currentTheme === 'dark-mode') {
-                themeToggleButton.checked = true;
-            }
-        }
-        // Add event listener for theme changes
         themeToggleButton.addEventListener('change', function() {
-            if(this.checked) {
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('theme', 'dark-mode');
-            } else {
-                document.body.classList.remove('dark-mode');
-                localStorage.setItem('theme', 'light-mode');
-            }
+            const newTheme = this.checked ? 'dark-mode' : 'light-mode';
+            localStorage.setItem('theme', newTheme);
+            // Re-apply theme to respect the "don't theme config page" rule
+            applyTheme();
         });
     }
 
@@ -63,7 +78,14 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     const voiceInputBtn = document.getElementById('voice-input-btn');
     if (voiceInputBtn) {
+        const voiceMessageContainer = document.getElementById('voice-message-container');
+
         voiceInputBtn.addEventListener('click', () => {
+            // Reset message container on new attempt
+            if (voiceMessageContainer) {
+                voiceMessageContainer.style.display = 'none';
+            }
+
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
             if (SpeechRecognition) {
@@ -71,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const recognition = new SpeechRecognition();
                 recognition.lang = 'es-ES';
                 recognition.interimResults = false;
-
                 let recognitionTimeout;
 
                 recognition.onresult = (event) => {
@@ -82,25 +103,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 recognition.onerror = (event) => {
                     clearTimeout(recognitionTimeout);
-                    alert(`Error en el reconocimiento de voz: ${event.error}. Es posible que necesites dar permisos de micrófono.`);
+                    let errorMessage = '';
+                    if (event.error === 'not-allowed' || event.error === 'aborted') {
+                        errorMessage = 'Acceso al micrófono denegado. Para usar esta función, por favor, permite el acceso al micrófono en tu navegador.';
+                    } else if (event.error === 'no-speech') {
+                        errorMessage = 'No se ha detectado ninguna voz. Inténtalo de nuevo hablando cerca del micrófono.';
+                    } else {
+                        errorMessage = `Error de reconocimiento: ${event.error}. Por favor, inténtalo de nuevo.`;
+                    }
+                    if (voiceMessageContainer) {
+                        voiceMessageContainer.textContent = errorMessage;
+                        voiceMessageContainer.style.display = 'block';
+                    }
                 };
 
                 recognition.onstart = () => {
+                    // Hide message container on successful start
+                    if (voiceMessageContainer) {
+                        voiceMessageContainer.style.display = 'none';
+                    }
                     recognitionTimeout = setTimeout(() => {
                         recognition.stop();
-                        alert("El reconocimiento de voz no parece funcionar correctamente en este navegador. Te recomendamos usar Chrome, Edge o Safari para esta funcionalidad.");
+                        if (voiceMessageContainer) {
+                            voiceMessageContainer.textContent = "El reconocimiento de voz se detuvo por inactividad.";
+                            voiceMessageContainer.style.display = 'block';
+                        }
                     }, 10000); // 10-second timeout for silent failures
                 };
 
                 try {
                     recognition.start();
                 } catch (e) {
-                    alert("No se pudo iniciar el reconocimiento de voz. Asegúrate de que el micrófono esté permitido y no esté siendo usado por otra aplicación.");
+                    if (voiceMessageContainer) {
+                        voiceMessageContainer.textContent = "No se pudo iniciar el reconocimiento. Asegúrate de que el micrófono esté permitido y no esté en uso.";
+                        voiceMessageContainer.style.display = 'block';
+                    }
                 }
 
             } else {
                 // --- API is not supported, show an alert ---
-                alert("Lo sentimos, tu navegador no es compatible con la función de reconocimiento de voz. Por favor, intenta con otro navegador como Google Chrome, Microsoft Edge o Safari.");
+                if (voiceMessageContainer) {
+                    voiceMessageContainer.textContent = "Lo sentimos, tu navegador no es compatible con el reconocimiento de voz.";
+                    voiceMessageContainer.style.display = 'block';
+                }
             }
         });
     }
@@ -174,6 +219,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Save back to localStorage
         localStorage.setItem('transactionHistory', JSON.stringify(history));
+    }
+
+    /**
+     * Handles language selection buttons on the settings page.
+     */
+    const languageSelector = document.getElementById('language-selector');
+    if (languageSelector) {
+        const langButtons = languageSelector.querySelectorAll('.lang-btn');
+
+        const setActiveButton = () => {
+            const currentLang = localStorage.getItem('language') || 'es';
+            langButtons.forEach(btn => {
+                if (btn.dataset.lang === currentLang) {
+                    btn.classList.add('btn-primary');
+                    btn.classList.remove('btn-secondary');
+                } else {
+                    btn.classList.add('btn-secondary');
+                    btn.classList.remove('btn-primary');
+                }
+            });
+        };
+
+        langButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const lang = e.currentTarget.dataset.lang;
+                // window.setLanguage is exposed by i18n.js
+                if (window.setLanguage) {
+                    window.setLanguage(lang).then(setActiveButton);
+                }
+            });
+        });
+
+        // Set initial state
+        setActiveButton();
     }
 
     /**

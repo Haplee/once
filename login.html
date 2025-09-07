@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - ONCE App</title>
+    <link rel="icon" href="static/img/logo.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <main>
+            <section id="login-section" class="content-card">
+                <h1 data-i18n-key="loginTitle"></h1>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username" data-i18n-key="loginUsernameLabel"></label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" data-i18n-key="loginPasswordLabel"></label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" data-i18n-key="loginButton"></button>
+                    </div>
+                </form>
+                <div id="login-error-message" style="display: none; color: #d9534f; margin-top: 1rem; text-align: center;"></div>
+            </section>
+        </main>
+    </div>
+    <script src="static/js/i18n.js"></script>
+    <script src="static/js/login.js"></script>
+</body>
+</html>
