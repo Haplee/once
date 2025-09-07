@@ -63,7 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     const voiceInputBtn = document.getElementById('voice-input-btn');
     if (voiceInputBtn) {
+        const voiceMessageContainer = document.getElementById('voice-message-container');
+
         voiceInputBtn.addEventListener('click', () => {
+            // Reset message container on new attempt
+            if (voiceMessageContainer) {
+                voiceMessageContainer.style.display = 'none';
+            }
+
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
             if (SpeechRecognition) {
@@ -71,7 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const recognition = new SpeechRecognition();
                 recognition.lang = 'es-ES';
                 recognition.interimResults = false;
-
                 let recognitionTimeout;
 
                 recognition.onresult = (event) => {
@@ -82,25 +88,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 recognition.onerror = (event) => {
                     clearTimeout(recognitionTimeout);
-                    alert(`Error en el reconocimiento de voz: ${event.error}. Es posible que necesites dar permisos de micrófono.`);
+                    let errorMessage = '';
+                    if (event.error === 'not-allowed' || event.error === 'aborted') {
+                        errorMessage = 'Acceso al micrófono denegado. Para usar esta función, por favor, permite el acceso al micrófono en tu navegador.';
+                    } else if (event.error === 'no-speech') {
+                        errorMessage = 'No se ha detectado ninguna voz. Inténtalo de nuevo hablando cerca del micrófono.';
+                    } else {
+                        errorMessage = `Error de reconocimiento: ${event.error}. Por favor, inténtalo de nuevo.`;
+                    }
+                    if (voiceMessageContainer) {
+                        voiceMessageContainer.textContent = errorMessage;
+                        voiceMessageContainer.style.display = 'block';
+                    }
                 };
 
                 recognition.onstart = () => {
+                    // Hide message container on successful start
+                    if (voiceMessageContainer) {
+                        voiceMessageContainer.style.display = 'none';
+                    }
                     recognitionTimeout = setTimeout(() => {
                         recognition.stop();
-                        alert("El reconocimiento de voz no parece funcionar correctamente en este navegador. Te recomendamos usar Chrome, Edge o Safari para esta funcionalidad.");
+                        if (voiceMessageContainer) {
+                            voiceMessageContainer.textContent = "El reconocimiento de voz se detuvo por inactividad.";
+                            voiceMessageContainer.style.display = 'block';
+                        }
                     }, 10000); // 10-second timeout for silent failures
                 };
 
                 try {
                     recognition.start();
                 } catch (e) {
-                    alert("No se pudo iniciar el reconocimiento de voz. Asegúrate de que el micrófono esté permitido y no esté siendo usado por otra aplicación.");
+                    if (voiceMessageContainer) {
+                        voiceMessageContainer.textContent = "No se pudo iniciar el reconocimiento. Asegúrate de que el micrófono esté permitido y no esté en uso.";
+                        voiceMessageContainer.style.display = 'block';
+                    }
                 }
 
             } else {
                 // --- API is not supported, show an alert ---
-                alert("Lo sentimos, tu navegador no es compatible con la función de reconocimiento de voz. Por favor, intenta con otro navegador como Google Chrome, Microsoft Edge o Safari.");
+                if (voiceMessageContainer) {
+                    voiceMessageContainer.textContent = "Lo sentimos, tu navegador no es compatible con el reconocimiento de voz.";
+                    voiceMessageContainer.style.display = 'block';
+                }
             }
         });
     }

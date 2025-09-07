@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historial de Operaciones - ONCE App</title>
+    <title>Configuración - ONCE App</title>
     <link rel="icon" href="static/img/logo.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="static/css/style.css">
-    <meta name="description" content="Aplicación web accesible para la ONCE">
     <script src="static/js/auth.js"></script>
 </head>
 <body>
@@ -25,28 +24,21 @@
                 <a href="configuracion.html">Configuración</a>
             </nav>
         </header>
-
         <main>
-            <section id="history" class="content-card">
-                <h1>Historial de Operaciones</h1>
-                <div class="history-list">
-                    <table>
-                    <thead>
-                        <tr>
-                            <th>Fecha y Hora</th>
-                            <th>Total Pagado</th>
-                            <th>Importe Recibido</th>
-                            <th>Cambio Devuelto</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-table-body">
-                        <!-- El historial se insertará aquí mediante JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
-
-    <script src="static/js/history.js"></script>
+            <section id="configuracion" class="content-card">
+                <h1>Configuración</h1>
+                <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                    <label for="theme-toggle" style="font-weight: 500; font-size: 1.1rem;">Modo Oscuro</label>
+                    <div class="theme-switch-wrapper">
+                        <label class="theme-switch" for="theme-toggle">
+                            <input type="checkbox" id="theme-toggle" />
+                            <div class="slider"></div>
+                        </label>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="static/js/main.js"></script>
 </body>
 </html>
