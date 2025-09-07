@@ -1,94 +1,147 @@
-// Objeto global para almacenar las traducciones cargadas.
-let translations = {};
+const allTranslations = {
+    "es": {
+        "appTitle": "Calculadora de Cambio - ONCE App",
+        "loginPageTitle": "Iniciar Sesión - ONCE App",
+        "historyPageTitle": "Historial de Operaciones - ONCE App",
+        "settingsPageTitle": "Configuración - ONCE App",
+        "navCalculator": "Calculadora",
+        "navHistory": "Historial",
+        "navSettings": "Configuración",
+        "loginTitle": "Iniciar Sesión",
+        "loginUsernameLabel": "Usuario",
+        "loginPasswordLabel": "Contraseña",
+        "loginButton": "Entrar",
+        "loginErrorIncorrect": "Usuario o contraseña incorrectos.",
+        "loginErrorUnexpected": "Ha ocurrido un error inesperado. Por favor, inténtalo más tarde.",
+        "calculatorTitle": "Calculadora de Cambio",
+        "totalToPayLabel": "Total a Pagar (€)",
+        "totalToPayPlaceholder": "Ej: 5.50",
+        "amountReceivedLabel": "Importe Recibido (€)",
+        "amountReceivedPlaceholder": "Ej: 10.00",
+        "calculateButton": "Calcular",
+        "voiceInputButtonLabel": "Usar entrada de voz",
+        "voiceErrorPermission": "Acceso al micrófono denegado. Para usar esta función, por favor, permite el acceso al micrófono en tu navegador.",
+        "voiceErrorNoSpeech": "No se ha detectado ninguna voz. Inténtalo de nuevo hablando cerca del micrófono.",
+        "voiceErrorInfo": "Error de reconocimiento: {error}. Por favor, inténtalo de nuevo.",
+        "voiceErrorTimeout": "El reconocimiento de voz se detuvo por inactividad.",
+        "voiceErrorStart": "No se pudo iniciar el reconocimiento. Asegúrate de que el micrófono esté permitido y no esté en uso.",
+        "voiceErrorUnsupported": "Lo sentimos, tu navegador no es compatible con el reconocimiento de voz.",
+        "changeResultText": "El cambio a devolver es: {change} €",
+        "invalidInputText": "Por favor, introduce importes válidos.",
+        "amountReceivedLowText": "El importe recibido es menor que el total a pagar.",
+        "historyTitle": "Historial de Operaciones",
+        "historyHeaderDate": "Fecha y Hora",
+        "historyHeaderTotal": "Total Pagado",
+        "historyHeaderReceived": "Importe Recibido",
+        "historyHeaderChange": "Cambio Devuelto",
+        "settingsTitle": "Configuración",
+        "settingsDarkModeLabel": "Modo Oscuro",
+        "settingsLanguageLabel": "Idioma",
+        "settingsLangSpanish": "Español",
+        "settingsLangEnglish": "Inglés",
+        "logoutButton": "Cerrar Sesión"
+    },
+    "en": {
+        "appTitle": "Change Calculator - ONCE App",
+        "loginPageTitle": "Login - ONCE App",
+        "historyPageTitle": "Transaction History - ONCE App",
+        "settingsPageTitle": "Settings - ONCE App",
+        "navCalculator": "Calculator",
+        "navHistory": "History",
+        "navSettings": "Settings",
+        "loginTitle": "Login",
+        "loginUsernameLabel": "Username",
+        "loginPasswordLabel": "Password",
+        "loginButton": "Sign In",
+        "loginErrorIncorrect": "Incorrect username or password.",
+        "loginErrorUnexpected": "An unexpected error occurred. Please try again later.",
+        "calculatorTitle": "Change Calculator",
+        "totalToPayLabel": "Total to Pay (€)",
+        "totalToPayPlaceholder": "e.g., 5.50",
+        "amountReceivedLabel": "Amount Received (€)",
+        "amountReceivedPlaceholder": "e.g., 10.00",
+        "calculateButton": "Calculate",
+        "voiceInputButtonLabel": "Use voice input",
+        "voiceErrorPermission": "Microphone access denied. To use this feature, please allow microphone access in your browser.",
+        "voiceErrorNoSpeech": "No speech was detected. Try again, speaking clearly near the microphone.",
+        "voiceErrorInfo": "Recognition error: {error}. Please try again.",
+        "voiceErrorTimeout": "Voice recognition timed out due to inactivity.",
+        "voiceErrorStart": "Could not start recognition. Make sure the microphone is allowed and not in use.",
+        "voiceErrorUnsupported": "Sorry, your browser does not support voice recognition.",
+        "changeResultText": "The change to return is: {change} €",
+        "invalidInputText": "Please enter valid amounts.",
+        "amountReceivedLowText": "The amount received is less than the total to pay.",
+        "historyTitle": "Transaction History",
+        "historyHeaderDate": "Date and Time",
+        "historyHeaderTotal": "Total Paid",
+        "historyHeaderReceived": "Amount Received",
+        "historyHeaderChange": "Change Returned",
+        "settingsTitle": "Settings",
+        "settingsDarkModeLabel": "Dark Mode",
+        "settingsLanguageLabel": "Language",
+        "settingsLangSpanish": "Spanish",
+        "settingsLangEnglish": "English",
+        "logoutButton": "Log Out"
+    }
+};
 
-// Función para obtener el idioma actual. Revisa localStorage o usa 'es' por defecto.
+let currentTranslations = {};
+
 const getCurrentLanguage = () => {
     return localStorage.getItem('language') || 'es';
 };
 
-// Función para cargar el archivo de idioma JSON.
-const fetchTranslations = async (lang) => {
-    try {
-        const response = await fetch(`static/lang/${lang}.json`);
-        if (!response.ok) {
-            throw new Error(`No se pudo cargar el archivo de idioma: ${lang}.json`);
-        }
-        translations = await response.json();
-    } catch (error) {
-        console.error(error);
-        // Cargar el idioma por defecto (español) en caso de error.
-        const response = await fetch(`static/lang/es.json`);
-        translations = await response.json();
-    }
+// Carga las traducciones desde el objeto global en lugar de un archivo.
+const loadTranslations = (lang) => {
+    currentTranslations = allTranslations[lang] || allTranslations['es'];
 };
 
-// Función para traducir la página.
 const translatePage = () => {
-    // Traducir todos los elementos con 'data-i18n-key'
     document.querySelectorAll('[data-i18n-key]').forEach(element => {
         const key = element.getAttribute('data-i18n-key');
-        element.textContent = translations[key] || key; // Usar la clave como fallback
+        element.textContent = currentTranslations[key] || key;
     });
-
-    // Traducir los placeholders
     document.querySelectorAll('[data-i18n-placeholder-key]').forEach(element => {
         const key = element.getAttribute('data-i18n-placeholder-key');
-        element.placeholder = translations[key] || key;
+        element.placeholder = currentTranslations[key] || key;
     });
-
-    // Traducir los aria-labels
     document.querySelectorAll('[data-i18n-aria-key]').forEach(element => {
         const key = element.getAttribute('data-i18n-aria-key');
-        element.setAttribute('aria-label', translations[key] || key);
+        element.setAttribute('aria-label', currentTranslations[key] || key);
     });
-
-    // Traducir el título de la página
     const pageKey = document.body.dataset.pageKey;
-    if (pageKey && translations[pageKey]) {
-        document.title = translations[pageKey];
+    if (pageKey && currentTranslations[pageKey]) {
+        document.title = currentTranslations[pageKey];
     }
 };
 
-// Función principal que se ejecuta al cargar el script.
-const initializeI18n = async () => {
+const initializeI18n = () => {
     const lang = getCurrentLanguage();
-    await fetchTranslations(lang);
+    loadTranslations(lang);
     translatePage();
 };
 
-// Añadir data-page-key al body para identificar la página actual y traducir el título.
-// Esto se hace aquí para que sea fácil de encontrar.
 const identifyPage = () => {
     const path = window.location.pathname.split("/").pop();
     let pageKey = '';
-    switch (path) {
-        case 'index.html':
-            pageKey = 'appTitle';
-            break;
-        case 'login.html':
-            pageKey = 'loginPageTitle';
-            break;
-        case 'history.html':
-            pageKey = 'historyPageTitle';
-            break;
-        case 'configuracion.html':
-            pageKey = 'settingsPageTitle';
-            break;
-        default:
-            // Para cuando se accede a la raíz del sitio
-             pageKey = 'appTitle';
+    if (path.includes('index.html') || path === '') {
+        pageKey = 'appTitle';
+    } else if (path.includes('login.html')) {
+        pageKey = 'loginPageTitle';
+    } else if (path.includes('history.html')) {
+        pageKey = 'historyPageTitle';
+    } else if (path.includes('configuracion.html')) {
+        pageKey = 'settingsPageTitle';
     }
     document.body.dataset.pageKey = pageKey;
 };
 
-// Ejecutar al cargar el DOM.
 document.addEventListener('DOMContentLoaded', () => {
     identifyPage();
     initializeI18n();
 });
 
-// Exponer la función para que pueda ser llamada desde otros scripts (ej. al cambiar de idioma).
-window.setLanguage = async (lang) => {
+window.setLanguage = (lang) => {
     localStorage.setItem('language', lang);
-    await initializeI18n();
+    initializeI18n();
 };
