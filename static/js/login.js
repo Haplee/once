@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+    // Limpiar cualquier estado de sesión anterior para asegurar un inicio de sesión limpio.
+    sessionStorage.clear();
+
+
     const loginForm = document.getElementById('login-form');
     const errorMessageDiv = document.getElementById('login-error-message');
 
@@ -9,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
-
 
             try {
                 const response = await fetch('static/users.json');
