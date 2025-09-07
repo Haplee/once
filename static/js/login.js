@@ -7,8 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             errorMessageDiv.style.display = 'none'; // Hide previous errors
 
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
 
             try {
                 const response = await fetch('static/users.json');
