@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
 
+
             try {
                 const response = await fetch('static/users.json');
                 if (!response.ok) {
