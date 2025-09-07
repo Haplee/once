@@ -20,23 +20,23 @@
                 <img src="static/img/logo-dark.png" alt="Logotipo de la ONCE" class="logo-dark">
             </div>
             <nav>
-                <a href="index.html">Calculadora</a>
-                <a href="history.html">Historial</a>
-                <a href="configuracion.html">Configuración</a>
+                <a href="index.html" data-i18n-key="navCalculator"></a>
+                <a href="history.html" data-i18n-key="navHistory"></a>
+                <a href="configuracion.html" data-i18n-key="navSettings"></a>
             </nav>
         </header>
 
         <main>
             <section id="history" class="content-card">
-                <h1>Historial de Operaciones</h1>
+                <h1 data-i18n-key="historyTitle"></h1>
                 <div class="history-list">
                     <table>
                     <thead>
                         <tr>
-                            <th>Fecha y Hora</th>
-                            <th>Total Pagado</th>
-                            <th>Importe Recibido</th>
-                            <th>Cambio Devuelto</th>
+                            <th data-i18n-key="historyHeaderDate"></th>
+                            <th data-i18n-key="historyHeaderTotal"></th>
+                            <th data-i18n-key="historyHeaderReceived"></th>
+                            <th data-i18n-key="historyHeaderChange"></th>
                         </tr>
                     </thead>
                     <tbody id="history-table-body">
@@ -47,6 +47,7 @@
         </section>
     </main>
 
+    <script src="static/js/i18n.js"></script>
     <script src="static/js/history.js"></script>
 </body>
 </html>

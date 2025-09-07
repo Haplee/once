@@ -1,0 +1,46 @@
+{
+    "appTitle": "Calculadora de Cambio - ONCE App",
+    "loginPageTitle": "Iniciar Sesión - ONCE App",
+    "historyPageTitle": "Historial de Operaciones - ONCE App",
+    "settingsPageTitle": "Configuración - ONCE App",
+
+    "navCalculator": "Calculadora",
+    "navHistory": "Historial",
+    "navSettings": "Configuración",
+
+    "loginTitle": "Iniciar Sesión",
+    "loginUsernameLabel": "Usuario",
+    "loginPasswordLabel": "Contraseña",
+    "loginButton": "Entrar",
+    "loginErrorIncorrect": "Usuario o contraseña incorrectos.",
+    "loginErrorUnexpected": "Ha ocurrido un error inesperado. Por favor, inténtalo más tarde.",
+
+    "calculatorTitle": "Calculadora de Cambio",
+    "totalToPayLabel": "Total a Pagar (€)",
+    "totalToPayPlaceholder": "Ej: 5.50",
+    "amountReceivedLabel": "Importe Recibido (€)",
+    "amountReceivedPlaceholder": "Ej: 10.00",
+    "calculateButton": "Calcular",
+    "voiceInputButtonLabel": "Usar entrada de voz",
+    "voiceErrorPermission": "Acceso al micrófono denegado. Para usar esta función, por favor, permite el acceso al micrófono en tu navegador.",
+    "voiceErrorNoSpeech": "No se ha detectado ninguna voz. Inténtalo de nuevo hablando cerca del micrófono.",
+    "voiceErrorInfo": "Error de reconocimiento: {error}. Por favor, inténtalo de nuevo.",
+    "voiceErrorTimeout": "El reconocimiento de voz se detuvo por inactividad.",
+    "voiceErrorStart": "No se pudo iniciar el reconocimiento. Asegúrate de que el micrófono esté permitido y no esté en uso.",
+    "voiceErrorUnsupported": "Lo sentimos, tu navegador no es compatible con el reconocimiento de voz.",
+    "changeResultText": "El cambio a devolver es: {change} €",
+    "invalidInputText": "Por favor, introduce importes válidos.",
+    "amountReceivedLowText": "El importe recibido es menor que el total a pagar.",
+
+    "historyTitle": "Historial de Operaciones",
+    "historyHeaderDate": "Fecha y Hora",
+    "historyHeaderTotal": "Total Pagado",
+    "historyHeaderReceived": "Importe Recibido",
+    "historyHeaderChange": "Cambio Devuelto",
+
+    "settingsTitle": "Configuración",
+    "settingsDarkModeLabel": "Modo Oscuro",
+    "settingsLanguageLabel": "Idioma",
+    "settingsLangSpanish": "Español",
+    "settingsLangEnglish": "Inglés"
+}

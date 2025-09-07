@@ -19,16 +19,17 @@
                 <img src="static/img/logo-dark.png" alt="Logotipo de la ONCE" class="logo-dark">
             </div>
             <nav>
-                <a href="index.html">Calculadora</a>
-                <a href="history.html">Historial</a>
-                <a href="configuracion.html">Configuración</a>
+                <a href="index.html" data-i18n-key="navCalculator"></a>
+                <a href="history.html" data-i18n-key="navHistory"></a>
+                <a href="configuracion.html" data-i18n-key="navSettings"></a>
             </nav>
         </header>
         <main>
             <section id="configuracion" class="content-card">
-                <h1>Configuración</h1>
+                <h1 data-i18n-key="settingsTitle"></h1>
+
                 <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-                    <label for="theme-toggle" style="font-weight: 500; font-size: 1.1rem;">Modo Oscuro</label>
+                    <label for="theme-toggle" style="font-weight: 500; font-size: 1.1rem;" data-i18n-key="settingsDarkModeLabel"></label>
                     <div class="theme-switch-wrapper">
                         <label class="theme-switch" for="theme-toggle">
                             <input type="checkbox" id="theme-toggle" />
@@ -36,9 +37,18 @@
                         </label>
                     </div>
                 </div>
+
+                <div class="setting-item" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                    <h2 style="font-weight: 500; font-size: 1.1rem; margin-bottom: 1rem;" data-i18n-key="settingsLanguageLabel"></h2>
+                    <div id="language-selector" style="display: flex; gap: 1rem;">
+                        <button class="btn btn-secondary lang-btn" data-lang="es" data-i18n-key="settingsLangSpanish"></button>
+                        <button class="btn btn-secondary lang-btn" data-lang="en" data-i18n-key="settingsLangEnglish"></button>
+                    </div>
+                </div>
             </section>
         </main>
     </div>
+    <script src="static/js/i18n.js"></script>
     <script src="static/js/main.js"></script>
 </body>
 </html>

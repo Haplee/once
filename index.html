@@ -20,31 +20,31 @@
                 <img src="static/img/logo-dark.png" alt="Logotipo de la ONCE" class="logo-dark">
             </div>
             <nav>
-                <a href="index.html">Calculadora</a>
-                <a href="history.html">Historial</a>
-                <a href="configuracion.html">Configuración</a>
+                <a href="index.html" data-i18n-key="navCalculator"></a>
+                <a href="history.html" data-i18n-key="navHistory"></a>
+                <a href="configuracion.html" data-i18n-key="navSettings"></a>
             </nav>
         </header>
 
         <main>
             <section id="calculator" class="content-card">
-                <h1>Calculadora de Cambio</h1>
+                <h1 data-i18n-key="calculatorTitle"></h1>
                 <form id="change-form">
                     <div class="form-group">
-                    <label for="total-amount">Total a Pagar (€)</label>
-                    <input type="number" id="total-amount" placeholder="Ej: 5.50" step="0.10" required>
-                </div>
-                <div class="form-group">
-                    <label for="amount-received">Importe Recibido (€)</label>
-                    <input type="number" id="amount-received" placeholder="Ej: 10.00" step="0.10" required>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary" aria-label="Calcular el cambio">Calcular</button>
-                    <button type="button" id="voice-input-btn" class="btn btn-secondary" aria-label="Usar entrada de voz">
-                        <img src="static/img/microphone.svg" alt="Icono de micrófono" class="icon-mic">
-                    </button>
-                </div>
-            </form>
+                        <label for="total-amount" data-i18n-key="totalToPayLabel"></label>
+                        <input type="number" id="total-amount" data-i18n-placeholder-key="totalToPayPlaceholder" step="0.10" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="amount-received" data-i18n-key="amountReceivedLabel"></label>
+                        <input type="number" id="amount-received" data-i18n-placeholder-key="amountReceivedPlaceholder" step="0.10" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" data-i18n-key="calculateButton"></button>
+                        <button type="button" id="voice-input-btn" class="btn btn-secondary" data-i18n-aria-key="voiceInputButtonLabel">
+                            <img src="static/img/microphone.svg" alt="Icono de micrófono" class="icon-mic">
+                        </button>
+                    </div>
+                </form>
             <div id="voice-message-container" aria-live="assertive"></div>
             <div id="result" class="result-container" aria-live="polite">
                 <!-- El resultado se mostrará aquí -->
@@ -52,6 +52,7 @@
         </section>
     </main>
 
+    <script src="static/js/i18n.js"></script>
     <script src="static/js/main.js"></script>
 </body>
 </html>
