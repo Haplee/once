@@ -4,25 +4,40 @@ document.addEventListener('DOMContentLoaded', () => {
      * Handles the theme switching between light and dark mode.
      * It persists the user's preference in localStorage.
      */
+    // --- Theme setup logic ---
+    const applyTheme = () => {
+        // 1. Check for saved theme, falling back to system preference if none is saved.
+        let theme = localStorage.getItem('theme');
+        if (!theme) {
+            theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-mode' : 'light-mode';
+            localStorage.setItem('theme', theme);
+        }
+
+        // 2. Apply theme, but NOT on the configuration page.
+        const isConfigPage = window.location.pathname.includes('configuracion.html');
+        document.body.classList.remove('dark-mode'); // Always reset first
+        if (theme === 'dark-mode' && !isConfigPage) {
+            document.body.classList.add('dark-mode');
+        }
+
+        // 3. Update the toggle state on the config page if it exists.
+        const themeToggleButton = document.getElementById('theme-toggle');
+        if (themeToggleButton) {
+            themeToggleButton.checked = theme === 'dark-mode';
+        }
+    };
+
+    // Apply theme on initial load
+    applyTheme();
+
+    // Add event listener for the toggle on the config page
     const themeToggleButton = document.getElementById('theme-toggle');
     if (themeToggleButton) {
-        // Apply saved theme on load
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme) {
-            document.body.classList.add(currentTheme);
-            if (currentTheme === 'dark-mode') {
-                themeToggleButton.checked = true;
-            }
-        }
-        // Add event listener for theme changes
         themeToggleButton.addEventListener('change', function() {
-            if(this.checked) {
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('theme', 'dark-mode');
-            } else {
-                document.body.classList.remove('dark-mode');
-                localStorage.setItem('theme', 'light-mode');
-            }
+            const newTheme = this.checked ? 'dark-mode' : 'light-mode';
+            localStorage.setItem('theme', newTheme);
+            // Re-apply theme to respect the "don't theme config page" rule
+            applyTheme();
         });
     }
 
@@ -204,6 +219,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Save back to localStorage
         localStorage.setItem('transactionHistory', JSON.stringify(history));
+    }
+
+    /**
+     * Handles language selection buttons on the settings page.
+     */
+    const languageSelector = document.getElementById('language-selector');
+    if (languageSelector) {
+        const langButtons = languageSelector.querySelectorAll('.lang-btn');
+
+        const setActiveButton = () => {
+            const currentLang = localStorage.getItem('language') || 'es';
+            langButtons.forEach(btn => {
+                if (btn.dataset.lang === currentLang) {
+                    btn.classList.add('btn-primary');
+                    btn.classList.remove('btn-secondary');
+                } else {
+                    btn.classList.add('btn-secondary');
+                    btn.classList.remove('btn-primary');
+                }
+            });
+        };
+
+        langButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const lang = e.currentTarget.dataset.lang;
+                // window.setLanguage is exposed by i18n.js
+                if (window.setLanguage) {
+                    window.setLanguage(lang).then(setActiveButton);
+                }
+            });
+        });
+
+        // Set initial state
+        setActiveButton();
     }
 
     /**
