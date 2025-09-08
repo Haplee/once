@@ -65,10 +65,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const change = amountReceived - totalAmount;
-            const changeText = `El cambio a devolver es: ${change.toFixed(2)} €`;
-            resultDiv.textContent = changeText;
 
-            speak(changeText); // Announce the result
+            // Format for display
+            const changeTextForDisplay = `El cambio a devolver es: ${change.toFixed(2)} €`;
+            resultDiv.textContent = changeTextForDisplay;
+
+            // Format for speech using the new helper function
+            const speakableChange = formatChangeForSpeech(change);
+            const changeTextForSpeech = `El cambio a devolver es: ${speakableChange}`;
+            speak(changeTextForSpeech); // Announce the result
+
             saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
         });
     }
@@ -159,36 +165,84 @@ document.addEventListener('DOMContentLoaded', () => {
         const amountReceivedInput = document.getElementById('amount-received');
         const commandLower = command.toLowerCase();
 
-        const totalKeywords = ['total', 'cuenta', 'pagar', 'es'];
-        const receivedKeywords = ['recibido', 'entregado', 'paga con', 'me da'];
+        // Regular expression to find all numbers (including decimals with comma or dot)
+        const numberRegex = /(\d+([,.]\d+)?)/g;
+        const matches = commandLower.match(numberRegex);
 
-        // Regular expression to find numbers (including decimals with comma or dot)
-        const numberRegex = /(\d+([,.]\d+)?)/;
+        if (!matches) {
+            // No numbers detected in the voice command.
+            return;
+        }
 
-        // Function to find a keyword and extract the next number
-        const extractNumberAfterKeyword = (keywords) => {
-            for (const keyword of keywords) {
-                const keywordIndex = commandLower.indexOf(keyword);
-                if (keywordIndex !== -1) {
-                    const restOfString = commandLower.substring(keywordIndex + keyword.length);
-                    const match = restOfString.match(numberRegex);
-                    if (match && match[0]) {
-                        return parseFloat(match[0].replace(',', '.'));
-                    }
+        const numbers = matches.map(n => parseFloat(n.replace(',', '.')));
+
+        // If two or more numbers are detected, the user's primary request is to use positional assignment.
+        // First number is total, second is amount received. This overwrites existing values.
+        if (numbers.length >= 2) {
+            totalAmountInput.value = numbers[0];
+            amountReceivedInput.value = numbers[1];
+        }
+        // If only one number is detected, we use keywords to determine its destination to avoid ambiguity.
+        else if (numbers.length === 1) {
+            const number = numbers[0];
+
+            // Refined keyword lists to be more specific and avoid overlap.
+            const totalKeywords = ['total', 'cuenta', 'cobrar', 'es']; // 'pagar' was too ambiguous
+            const receivedKeywords = ['recibido', 'entregado', 'paga con', 'me da'];
+
+            const isForTotal = totalKeywords.some(k => commandLower.includes(k));
+            const isForReceived = receivedKeywords.some(k => commandLower.includes(k));
+
+            // Assign to the field explicitly mentioned.
+            if (isForTotal && !isForReceived) {
+                totalAmountInput.value = number;
+            } else if (isForReceived && !isForTotal) {
+                amountReceivedInput.value = number;
+            } else {
+                // If keywords are ambiguous (e.g., none, or for both), fall back to a simple rule:
+                // fill the first empty field, starting with 'total'.
+                if (totalAmountInput.value === '') {
+                    totalAmountInput.value = number;
+                } else if (amountReceivedInput.value === '') {
+                    amountReceivedInput.value = number;
+                } else {
+                    // If both fields are already filled, update the amount received as it's the most likely to be said last.
+                    amountReceivedInput.value = number;
                 }
             }
-            return null;
-        };
+        }
+    }
 
-        const totalValue = extractNumberAfterKeyword(totalKeywords);
-        if (totalValue !== null) {
-            totalAmountInput.value = totalValue;
+    /**
+     * Formats the change amount into a natural-sounding Spanish string for speech.
+     * @param {number} change - The amount of change.
+     * @returns {string} - A natural language string (e.g., "dos euros con cincuenta céntimos").
+     */
+    function formatChangeForSpeech(change) {
+        const euros = Math.floor(change);
+        const cents = Math.round((change - euros) * 100);
+
+        if (euros === 0 && cents === 0) {
+            return 'cero euros';
         }
 
-        const receivedValue = extractNumberAfterKeyword(receivedKeywords);
-        if (receivedValue !== null) {
-            amountReceivedInput.value = receivedValue;
+        let parts = [];
+
+        if (euros === 1) {
+            parts.push('un euro');
+        } else if (euros > 1) {
+            parts.push(`${euros} euros`);
         }
+
+        if (cents > 0) {
+            if (cents === 1) {
+                parts.push('un céntimo');
+            } else {
+                parts.push(`${cents} céntimos`);
+            }
+        }
+
+        return parts.join(' con ');
     }
 
     /**
