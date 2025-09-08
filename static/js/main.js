@@ -65,10 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const change = amountReceived - totalAmount;
-            const changeText = `El cambio a devolver es: ${change.toFixed(2)} €`;
-            resultDiv.textContent = changeText;
+            const changeInEuros = change.toFixed(2);
+            const changeTextForDisplay = `El cambio a devolver es: ${changeInEuros} €`;
+            resultDiv.textContent = changeTextForDisplay;
 
-            speak(changeText); // Announce the result
+            // Create a more natural-sounding version for speech, replacing '.' with ',' for Spanish pronunciation.
+            const speakableChange = changeInEuros.replace('.', ',');
+            const changeTextForSpeech = `El cambio a devolver es: ${speakableChange} euros`;
+            speak(changeTextForSpeech); // Announce the result
+
             saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
         });
     }
@@ -151,7 +156,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Processes the transcribed voice command to fill form fields using more natural language.
+     * Processes the transcribed voice command to fill form fields.
+     * This function uses a hybrid approach:
+     * - If two or more numbers are detected, it uses positional assignment (1st is total, 2nd is received).
+     * - If one number is detected, it uses keywords to determine the target field.
      * @param {string} command - The voice command transcribed by the SpeechRecognition API.
      */
     function processVoiceCommand(command) {
@@ -159,35 +167,51 @@ document.addEventListener('DOMContentLoaded', () => {
         const amountReceivedInput = document.getElementById('amount-received');
         const commandLower = command.toLowerCase();
 
-        const totalKeywords = ['total', 'cuenta', 'pagar', 'es'];
-        const receivedKeywords = ['recibido', 'entregado', 'paga con', 'me da'];
+        // Regular expression to find all numbers (including decimals with comma or dot)
+        const numberRegex = /(\d+([,.]\d+)?)/g;
+        const matches = commandLower.match(numberRegex);
 
-        // Regular expression to find numbers (including decimals with comma or dot)
-        const numberRegex = /(\d+([,.]\d+)?)/;
-
-        // Function to find a keyword and extract the next number
-        const extractNumberAfterKeyword = (keywords) => {
-            for (const keyword of keywords) {
-                const keywordIndex = commandLower.indexOf(keyword);
-                if (keywordIndex !== -1) {
-                    const restOfString = commandLower.substring(keywordIndex + keyword.length);
-                    const match = restOfString.match(numberRegex);
-                    if (match && match[0]) {
-                        return parseFloat(match[0].replace(',', '.'));
-                    }
-                }
-            }
-            return null;
-        };
-
-        const totalValue = extractNumberAfterKeyword(totalKeywords);
-        if (totalValue !== null) {
-            totalAmountInput.value = totalValue;
+        if (!matches) {
+            // No numbers detected in the voice command.
+            return;
         }
 
-        const receivedValue = extractNumberAfterKeyword(receivedKeywords);
-        if (receivedValue !== null) {
-            amountReceivedInput.value = receivedValue;
+        const numbers = matches.map(n => parseFloat(n.replace(',', '.')));
+
+        // If two or more numbers are detected, the user's primary request is to use positional assignment.
+        // First number is total, second is amount received. This overwrites existing values.
+        if (numbers.length >= 2) {
+            totalAmountInput.value = numbers[0];
+            amountReceivedInput.value = numbers[1];
+        }
+        // If only one number is detected, we use keywords to determine its destination to avoid ambiguity.
+        else if (numbers.length === 1) {
+            const number = numbers[0];
+
+            // Refined keyword lists to be more specific and avoid overlap.
+            const totalKeywords = ['total', 'cuenta', 'cobrar', 'es']; // 'pagar' was too ambiguous
+            const receivedKeywords = ['recibido', 'entregado', 'paga con', 'me da'];
+
+            const isForTotal = totalKeywords.some(k => commandLower.includes(k));
+            const isForReceived = receivedKeywords.some(k => commandLower.includes(k));
+
+            // Assign to the field explicitly mentioned.
+            if (isForTotal && !isForReceived) {
+                totalAmountInput.value = number;
+            } else if (isForReceived && !isForTotal) {
+                amountReceivedInput.value = number;
+            } else {
+                // If keywords are ambiguous (e.g., none, or for both), fall back to a simple rule:
+                // fill the first empty field, starting with 'total'.
+                if (totalAmountInput.value === '') {
+                    totalAmountInput.value = number;
+                } else if (amountReceivedInput.value === '') {
+                    amountReceivedInput.value = number;
+                } else {
+                    // If both fields are already filled, update the amount received as it's the most likely to be said last.
+                    amountReceivedInput.value = number;
+                }
+            }
         }
     }
 
