@@ -65,15 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const change = amountReceived - totalAmount;
-            const changeInEuros = change.toFixed(2);
-            const changeTextForDisplay = `El cambio a devolver es: ${changeInEuros} €`;
+
+            // Format for display
+            const changeTextForDisplay = `El cambio a devolver es: ${change.toFixed(2)} €`;
             resultDiv.textContent = changeTextForDisplay;
 
-            // Create a more natural-sounding version for speech, replacing '.' with ',' for Spanish pronunciation.
-            const speakableChange = changeInEuros.replace('.', ',');
-            const changeTextForSpeech = `El cambio a devolver es: ${speakableChange} euros`;
+            // Format for speech using the new helper function
+            const speakableChange = formatChangeForSpeech(change);
+            const changeTextForSpeech = `El cambio a devolver es: ${speakableChange}`;
             speak(changeTextForSpeech); // Announce the result
-
             saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
         });
     }
@@ -213,6 +213,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+    }
+
+    /**
+     * Formats the change amount into a natural-sounding Spanish string for speech.
+     * @param {number} change - The amount of change.
+     * @returns {string} - A natural language string (e.g., "dos euros con cincuenta céntimos").
+     */
+    function formatChangeForSpeech(change) {
+        const euros = Math.floor(change);
+        const cents = Math.round((change - euros) * 100);
+
+        if (euros === 0 && cents === 0) {
+            return 'cero euros';
+        }
+
+        let parts = [];
+
+        if (euros === 1) {
+            parts.push('un euro');
+        } else if (euros > 1) {
+            parts.push(`${euros} euros`);
+        }
+
+        if (cents > 0) {
+            if (cents === 1) {
+                parts.push('un céntimo');
+            } else {
+                parts.push(`${cents} céntimos`);
+            }
+        }
+
+        return parts.join(' con ');
     }
 
     /**
