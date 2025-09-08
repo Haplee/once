@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeI18n();
 });
 
-window.setLanguage = (lang) => {
+window.setLanguage = async (lang) => {
     localStorage.setItem('language', lang);
     initializeI18n();
 };

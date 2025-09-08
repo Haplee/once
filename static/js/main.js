@@ -6,21 +6,20 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     // --- Theme setup logic ---
     const applyTheme = () => {
-        // 1. Check for saved theme, falling back to system preference if none is saved.
         let theme = localStorage.getItem('theme');
         if (!theme) {
             theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-mode' : 'light-mode';
             localStorage.setItem('theme', theme);
         }
 
-        // 2. Apply theme, but NOT on the configuration page.
-        const isConfigPage = window.location.pathname.includes('configuracion.html');
-        document.body.classList.remove('dark-mode'); // Always reset first
-        if (theme === 'dark-mode' && !isConfigPage) {
+        // Apply the theme to the body
+        if (theme === 'dark-mode') {
             document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
         }
 
-        // 3. Update the toggle state on the config page if it exists.
+        // Update the toggle state on the config page if it exists.
         const themeToggleButton = document.getElementById('theme-toggle');
         if (themeToggleButton) {
             themeToggleButton.checked = theme === 'dark-mode';
@@ -74,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const speakableChange = formatChangeForSpeech(change);
             const changeTextForSpeech = `El cambio a devolver es: ${speakableChange}`;
             speak(changeTextForSpeech); // Announce the result
+
             saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
         });
     }
@@ -156,10 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Processes the transcribed voice command to fill form fields.
-     * This function uses a hybrid approach:
-     * - If two or more numbers are detected, it uses positional assignment (1st is total, 2nd is received).
-     * - If one number is detected, it uses keywords to determine the target field.
+     * Processes the transcribed voice command to fill form fields using more natural language.
      * @param {string} command - The voice command transcribed by the SpeechRecognition API.
      */
     function processVoiceCommand(command) {
