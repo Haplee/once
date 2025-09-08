@@ -74,7 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const speakableChange = formatChangeForSpeech(change);
             const changeTextForSpeech = `El cambio a devolver es: ${speakableChange}`;
             speak(changeTextForSpeech); // Announce the result
-
             saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
         });
     }
@@ -157,7 +156,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Processes the transcribed voice command to fill form fields using more natural language.
+     * Processes the transcribed voice command to fill form fields.
+     * This function uses a hybrid approach:
+     * - If two or more numbers are detected, it uses positional assignment (1st is total, 2nd is received).
+     * - If one number is detected, it uses keywords to determine the target field.
      * @param {string} command - The voice command transcribed by the SpeechRecognition API.
      */
     function processVoiceCommand(command) {
