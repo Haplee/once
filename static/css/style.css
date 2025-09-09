@@ -84,6 +84,61 @@ nav a:hover {
     color: var(--primary-color);
 }
 
+/* --- Bootstrap Component Overrides --- */
+.card, .list-group-item {
+    background-color: var(--card-bg-color) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+.table {
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .table {
+    color: var(--text-color) !important;
+}
+
+.form-switch .form-check-input {
+    background-color: #ccc; /* Default light-mode off color */
+    border-color: #ccc;
+}
+
+body.dark-mode .form-switch .form-check-input {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* Ensure form controls also adopt theme colors */
+.form-control {
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+.form-control:focus {
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--primary-color) 25%, transparent) !important;
+}
+
+body.dark-mode .btn-outline-secondary {
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode .btn-outline-secondary:hover {
+    background-color: var(--primary-color) !important;
+    color: var(--primary-text-color) !important;
+}
+
+
 /* --- Main Content Card --- */
 h1 {
     font-weight: 600;
@@ -224,6 +279,32 @@ body.dark-mode .logo .logo-light {
 body.dark-mode .logo .logo-dark {
     display: block;
 }
+
+/* --- Login Page Specific Styles --- */
+.login-body {
+  display: flex;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.form-signin {
+  max-width: 400px;
+  padding: 2rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background-color: var(--card-bg-color);
+}
+
+.form-signin .form-floating:focus-within {
+  z-index: 2;
+}
+
+/* Adjust floating label positioning within an input group */
+.input-group .form-floating {
+    flex: 1 1 auto;
+}
+
 
 /* --- Responsive Design --- */
 @media (max-width: 600px) {
