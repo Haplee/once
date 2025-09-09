@@ -52,29 +52,43 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalAmount = parseFloat(document.getElementById('total-amount').value);
             const amountReceived = parseFloat(document.getElementById('amount-received').value);
             const resultDiv = document.getElementById('result');
+            const resultSpinner = document.getElementById('result-spinner');
 
+            // Clear previous result and show spinner
+            resultDiv.textContent = '';
+            resultSpinner.classList.remove('d-none');
+
+            // --- Basic Validation ---
             if (isNaN(totalAmount) || isNaN(amountReceived)) {
                 resultDiv.textContent = 'Por favor, introduce importes válidos.';
+                resultSpinner.classList.add('d-none'); // Hide spinner
                 return;
             }
 
             if (amountReceived < totalAmount) {
                 resultDiv.textContent = 'El importe recibido es menor que el total a pagar.';
+                resultSpinner.classList.add('d-none'); // Hide spinner
                 return;
             }
 
             const change = amountReceived - totalAmount;
 
-            // Format for display
-            const changeTextForDisplay = `El cambio a devolver es: ${change.toFixed(2)} €`;
-            resultDiv.textContent = changeTextForDisplay;
+            // --- Simulate a short delay for showing the spinner ---
+            setTimeout(() => {
+                // Hide spinner
+                resultSpinner.classList.add('d-none');
 
-            // Format for speech using the new helper function
-            const speakableChange = formatChangeForSpeech(change);
-            const changeTextForSpeech = `El cambio a devolver es: ${speakableChange}`;
-            speak(changeTextForSpeech); // Announce the result
+                // Format for display
+                const changeTextForDisplay = `El cambio a devolver es: ${change.toFixed(2)} €`;
+                resultDiv.textContent = changeTextForDisplay;
 
-            saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
+                // Format for speech using the new helper function
+                const speakableChange = formatChangeForSpeech(change);
+                const changeTextForSpeech = `El cambio a devolver es: ${speakableChange}`;
+                speak(changeTextForSpeech); // Announce the result
+
+                saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
+            }, 500); // 0.5 second delay
         });
     }
 
@@ -84,12 +98,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const voiceInputBtn = document.getElementById('voice-input-btn');
     if (voiceInputBtn) {
         const voiceMessageContainer = document.getElementById('voice-message-container');
+        const voiceSpinner = document.getElementById('voice-spinner');
 
         voiceInputBtn.addEventListener('click', () => {
-            // Reset message container on new attempt
+            // Reset message container and hide spinner on new attempt
             if (voiceMessageContainer) {
                 voiceMessageContainer.style.display = 'none';
+                voiceMessageContainer.textContent = ''; // Clear previous messages
             }
+            voiceSpinner.classList.add('d-none');
 
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -100,14 +117,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 recognition.interimResults = false;
                 let recognitionTimeout;
 
-                recognition.onresult = (event) => {
+                const stopRecognition = () => {
                     clearTimeout(recognitionTimeout);
+                    voiceSpinner.classList.add('d-none');
+                };
+
+                recognition.onresult = (event) => {
+                    stopRecognition();
                     const command = event.results[event.results.length - 1][0].transcript;
                     processVoiceCommand(command);
                 };
 
                 recognition.onerror = (event) => {
-                    clearTimeout(recognitionTimeout);
+                    stopRecognition();
                     let errorMessage = '';
                     if (event.error === 'not-allowed' || event.error === 'aborted') {
                         errorMessage = 'Acceso al micrófono denegado. Para usar esta función, por favor, permite el acceso al micrófono en tu navegador.';
@@ -123,7 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 recognition.onstart = () => {
-                    // Hide message container on successful start
+                    // Show spinner and hide any previous messages
+                    voiceSpinner.classList.remove('d-none');
                     if (voiceMessageContainer) {
                         voiceMessageContainer.style.display = 'none';
                     }
@@ -133,12 +156,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             voiceMessageContainer.textContent = "El reconocimiento de voz se detuvo por inactividad.";
                             voiceMessageContainer.style.display = 'block';
                         }
+                        stopRecognition(); // Also hide spinner on timeout
                     }, 10000); // 10-second timeout for silent failures
                 };
 
                 try {
                     recognition.start();
                 } catch (e) {
+                    voiceSpinner.classList.add('d-none'); // Hide spinner on failure to start
                     if (voiceMessageContainer) {
                         voiceMessageContainer.textContent = "No se pudo iniciar el reconocimiento. Asegúrate de que el micrófono esté permitido y no esté en uso.";
                         voiceMessageContainer.style.display = 'block';
