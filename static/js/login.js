@@ -12,6 +12,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loginForm = document.getElementById('login-form');
     const errorMessageDiv = document.getElementById('login-error-message');
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    const passwordInput = document.getElementById('password');
+
+    if (togglePasswordBtn) {
+        togglePasswordBtn.addEventListener('click', () => {
+            // Toggle the type attribute
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+
+            // Toggle the icon
+            const icon = togglePasswordBtn.querySelector('i');
+            if (type === 'password') {
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        });
+    }
 
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
