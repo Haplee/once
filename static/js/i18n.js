@@ -109,6 +109,7 @@ const allTranslations = {
         "forgotPasswordButton": "Send Instructions",
         "forgotPasswordConfirmation": "If an account with that username exists, password recovery instructions have been sent to the associated email address.",
         "backToLoginLink": "Back to login",
+
         "loginErrorIncorrect": "Incorrect username or password.",
         "loginErrorUnexpected": "An unexpected error occurred. Please try again later.",
         "calculatorTitle": "Change Calculator",
