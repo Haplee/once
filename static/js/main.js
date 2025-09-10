@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     /**
-     * Handles the theme switching between light and dark mode.
-     * It persists the user's preference in localStorage.
+     * Applies the selected theme (light/dark) to the application.
+     * It reads the theme from localStorage, applies it to the body, and updates
+     * the theme toggle switch. It specifically avoids theming the configuration page.
      */
-    // --- Theme setup logic ---
     const applyTheme = () => {
         let theme = localStorage.getItem('theme');
         if (!theme) {
@@ -12,10 +12,18 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('theme', theme);
         }
 
-        // Apply the theme to the body
-        if (theme === 'dark-mode') {
-            document.body.classList.add('dark-mode');
+        // The configuration page, identified by the 'configuracion' ID, should not be themed.
+        const onConfigPage = document.getElementById('configuracion') !== null;
+
+        // Only apply the theme to the body if we are NOT on the configuration page.
+        if (!onConfigPage) {
+            if (theme === 'dark-mode') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
         } else {
+            // If we are on the config page, ensure the theme is always reset to the default (light) by removing the class.
             document.body.classList.remove('dark-mode');
         }
 

@@ -13,24 +13,42 @@ Esta es una aplicación web estática, diseñada para ser una herramienta intern
 
 ## Estructura del Proyecto
 
+El proyecto se organiza de la siguiente manera:
+
 ```
 .
-├── index.html            # Página principal de la calculadora
-├── history.html          # Página del historial de operaciones
+├── index.html              # Página principal de la calculadora (requiere login)
+├── history.html            # Página del historial de operaciones
+├── configuracion.html      # Página de configuración (tema, idioma, serial)
+├── login.html              # Página de inicio de sesión
+├── signup.html             # Página de registro de usuarios
+├── forgot_password.html    # Página de recuperación de contraseña
 ├── static/
-│   ├── css/
-│   │   └── style.css     # Estilos de la aplicación
+│   ├── css/style.css       # Estilos principales de la aplicación
 │   ├── js/
-│   │   ├── main.js       # Lógica de la calculadora
-│   │   └── history.js    # Lógica de la página de historial
-│   └── img/
-│       └── logo.png      # Logotipo de la ONCE
-└── README.md             # Este archivo
+│   │   ├── main.js         # Lógica principal de la calculadora
+│   │   ├── history.js      # Lógica de la página de historial
+│   │   ├── auth.js         # Gestiona la autenticación y sesión de usuario
+│   │   ├── serial.js       # Lógica para la comunicación con Web Serial API
+│   │   ├── i18n.js         # Gestor de internacionalización
+│   │   └── ...             # Otros scripts para login, registro, etc.
+│   └── img/                # Logotipos e iconos
+├── scripts/
+│   └── translate.js        # Script de Node.js para gestionar claves de traducción
+└── README.md               # Este archivo
 ```
 
 ## Cómo Empezar
 
-Simplemente abre el archivo `index.html` en tu navegador web. No se requiere instalación ni servidor.
+Simplemente abre el archivo `login.html` en tu navegador web. No se requiere instalación ni servidor.
+
+### Autenticación
+
+La aplicación cuenta con un sistema de registro e inicio de sesión. Para fines de demostración, puedes usar los siguientes usuarios pre-cargados que se encuentran en `static/users.json`:
+- **Usuario:** `admin`, **Contraseña:** `admin123`
+- **Usuario:** `user`, **Contraseña:** `user123`
+
+También puedes registrar nuevos usuarios.
 
 ## Despliegue en GitHub Pages
 
