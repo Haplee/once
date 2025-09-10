@@ -152,42 +152,70 @@ const allTranslations = {
     }
 };
 
+/**
+ * @type {Object.<string, string>}
+ * @description Holds the translations for the currently selected language.
+ */
 let currentTranslations = {};
 
+/**
+ * Retrieves the current language from localStorage or defaults to Spanish ('es').
+ * @returns {string} The current language code (e.g., 'es', 'en').
+ */
 const getCurrentLanguage = () => {
     return localStorage.getItem('language') || 'es';
 };
 
-// Carga las traducciones desde el objeto global en lugar de un archivo.
+/**
+ * Loads the translation dictionary for a given language.
+ * Falls back to Spanish if the specified language is not found.
+ * @param {string} lang - The language code to load (e.g., 'es').
+ */
 const loadTranslations = (lang) => {
     currentTranslations = allTranslations[lang] || allTranslations['es'];
 };
 
+/**
+ * Traverses the DOM and replaces the content of elements with i18n keys
+ * with the corresponding translations from the loaded dictionary.
+ */
 const translatePage = () => {
+    // Translate text content
     document.querySelectorAll('[data-i18n-key]').forEach(element => {
         const key = element.getAttribute('data-i18n-key');
         element.textContent = currentTranslations[key] || key;
     });
+    // Translate placeholder attributes
     document.querySelectorAll('[data-i18n-placeholder-key]').forEach(element => {
         const key = element.getAttribute('data-i18n-placeholder-key');
         element.placeholder = currentTranslations[key] || key;
     });
+    // Translate ARIA labels for accessibility
     document.querySelectorAll('[data-i18n-aria-key]').forEach(element => {
         const key = element.getAttribute('data-i18n-aria-key');
         element.setAttribute('aria-label', currentTranslations[key] || key);
     });
+    // Translate the page title
     const pageKey = document.body.dataset.pageKey;
     if (pageKey && currentTranslations[pageKey]) {
         document.title = currentTranslations[pageKey];
     }
 };
 
+/**
+ * Initializes the internationalization process on page load.
+ * It identifies the current language, loads the translations, and translates the page.
+ */
 const initializeI18n = () => {
     const lang = getCurrentLanguage();
     loadTranslations(lang);
     translatePage();
 };
 
+/**
+ * Identifies the current HTML page and sets a data attribute on the body
+ * with a corresponding key for title translation.
+ */
 const identifyPage = () => {
     const path = window.location.pathname.split("/").pop();
     let pageKey = '';
@@ -203,11 +231,20 @@ const identifyPage = () => {
     document.body.dataset.pageKey = pageKey;
 };
 
+
+// --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     identifyPage();
     initializeI18n();
 });
 
+/**
+ * Sets the application's language, stores it in localStorage, and re-initializes
+ * the internationalization process to apply the new language.
+ * This function is exposed globally so it can be called from other scripts.
+ * @param {string} lang - The language code to set (e.g., 'en').
+ * @returns {Promise<void>} A promise that resolves when the language is set and applied.
+ */
 window.setLanguage = async (lang) => {
     localStorage.setItem('language', lang);
     initializeI18n();

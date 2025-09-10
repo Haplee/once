@@ -1,12 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    /**
-     * Handles the theme switching between light and dark mode.
-     * It persists the user's preference in localStorage.
-     */
+    // --- Theme Management ---
+    // Note: This is a simplified theme handler specific to the history page.
+    // It ensures the theme toggle reflects the state from localStorage and applies it.
     const themeToggleButton = document.getElementById('theme-toggle');
     if (themeToggleButton) {
-        // Apply saved theme on load
+        // Apply saved theme on initial page load.
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme) {
             document.body.classList.add(currentTheme);
@@ -14,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 themeToggleButton.checked = true;
             }
         }
-        // Add event listener for theme changes
+        // Listen for changes on the toggle to update theme in real-time and in storage.
         themeToggleButton.addEventListener('change', function() {
             if(this.checked) {
                 document.body.classList.add('dark-mode');
@@ -26,9 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /**
-     * Loads and displays the transaction history from localStorage.
-     */
+    // --- History Loading ---
+    // Fetches transaction history from localStorage and populates the table.
+    // If no history is found, it displays a message to the user.
     const historyTableBody = document.getElementById('history-table-body');
     const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
 

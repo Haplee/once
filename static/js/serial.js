@@ -13,28 +13,30 @@ document.addEventListener('DOMContentLoaded', () => {
     let writer;
     let reader;
 
-    const baudRate = 9600; // Baud rate configurable.
+    const baudRate = 9600;
 
-    // Función para añadir mensajes a la consola en la página.
+    /**
+     * Appends a message to the on-page console with a timestamp and color-coding.
+     * @param {string} message - The message to log.
+     * @param {'info'|'sent'|'received'|'error'} [type='info'] - The type of message, for styling.
+     */
     function logToConsole(message, type = 'info') {
         const now = new Date();
         const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
-        let color = '#333'; // Color por defecto para 'info'.
-        if (type === 'sent') {
-            color = '#007bff'; // Azul para mensajes enviados.
-        } else if (type === 'received') {
-            color = '#28a745'; // Verde para mensajes recibidos.
-        } else if (type === 'error') {
-            color = '#dc3545'; // Rojo para errores.
+        let color;
+        switch (type) {
+            case 'sent': color = '#007bff'; break;
+            case 'received': color = '#28a745'; break;
+            case 'error': color = '#dc3545'; break;
+            default: color = '#333';
         }
 
         consoleLog.innerHTML += `<span style="color: ${color};">[${timeString}] ${message}</span>\n`;
-        // Desplaza la consola hacia abajo automáticamente para ver el último mensaje.
         consoleLog.scrollTop = consoleLog.scrollHeight;
     }
 
-    // Comprueba si la Web Serial API es compatible con el navegador.
+    // Check for Web Serial API compatibility and set up initial event listeners.
     if ('serial' in navigator) {
         connectButton.addEventListener('click', connectToSerial);
         sendButton.addEventListener('click', sendSerialData);
@@ -45,7 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
         machineModelSelect.disabled = true;
     }
 
-    // Función para enviar la configuración del modelo de máquina al Arduino.
+    /**
+     * Sends the selected machine model configuration to the connected device.
+     * This is triggered when the dropdown value changes.
+     */
     async function sendConfiguration() {
         if (writer) {
             const model = machineModelSelect.value;
@@ -59,94 +64,85 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Función para conectar al puerto serie.
+    /**
+     * Initiates a connection to a serial device.
+     * It prompts the user to select a port, opens it, and sets up readers/writers.
+     */
     async function connectToSerial() {
         try {
-            // Solicita al usuario que seleccione un puerto serie.
             port = await navigator.serial.requestPort();
-            // Abre el puerto con el baud rate especificado.
             await port.open({ baudRate });
-
             logToConsole('Conectado al puerto serie.', 'info');
 
-            // Prepara el stream para enviar datos (codifica texto a UTF-8).
             const textEncoder = new TextEncoderStream();
-            const writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
+            textEncoder.readable.pipeTo(port.writable);
             writer = textEncoder.writable.getWriter();
 
-            // Prepara el stream para recibir datos (decodifica UTF-8 a texto).
             const textDecoder = new TextDecoderStream();
-            const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+            port.readable.pipeTo(textDecoder.writable);
             reader = textDecoder.readable.getReader();
 
-            // Muestra los controles de envío y actualiza el botón de conexión.
+            // Update UI to reflect connected state
             serialControls.style.display = 'block';
             connectButton.textContent = 'Desconectar';
-            connectButton.classList.remove('btn-primary');
-            connectButton.classList.add('btn-danger');
+            connectButton.classList.replace('btn-primary', 'btn-danger');
 
-            // Cambia el evento del botón para desconectar.
+            // Switch event listener from connect to disconnect
             connectButton.removeEventListener('click', connectToSerial);
             connectButton.addEventListener('click', disconnectFromSerial);
 
-            // Envía la configuración inicial del modelo de máquina.
-            await sendConfiguration();
-
-            // Inicia el bucle de lectura.
-            readLoop();
+            await sendConfiguration(); // Send initial configuration
+            readLoop(); // Start listening for data
 
         } catch (error) {
             logToConsole(`Error al conectar: ${error.message}`, 'error');
         }
     }
 
-    // Función para desconectar del puerto serie.
+    /**
+     * Disconnects from the serial port and resets the UI to its initial state.
+     */
     async function disconnectFromSerial() {
-        if (!port || !port.writable) {
-            return;
-        }
+        if (!port) return;
 
         try {
-            // Cierra el escritor y el lector antes de cerrar el puerto.
+            if (reader) {
+                await reader.cancel();
+                reader.releaseLock();
+                reader = null;
+            }
             if (writer) {
                 await writer.close();
+                writer = null;
             }
-            if (reader) {
-                await reader.cancel(); // Esto provoca que el bucle de lectura termine.
-            }
-
             await port.close();
-
-        } catch (error) {
-            // No es necesario un log de error aquí, ya que el evento 'disconnect' se encargará.
-        } finally {
             port = null;
-            writer = null;
-            reader = null;
 
             logToConsole('Desconectado del puerto serie.', 'info');
-
-            // Restaura la interfaz de usuario a su estado inicial.
+        } catch (error) {
+            logToConsole(`Error al desconectar: ${error.message}`, 'error');
+        } finally {
+            // Restore UI to initial state
             serialControls.style.display = 'none';
             connectButton.textContent = 'Conectar Dispositivo';
-            connectButton.classList.remove('btn-danger');
-            connectButton.classList.add('btn-primary');
-            machineModelSelect.disabled = false; // Habilita el selector de nuevo.
+            connectButton.classList.replace('btn-danger', 'btn-primary');
+            machineModelSelect.disabled = false;
 
-            // Cambia el evento del botón de nuevo a conectar.
+            // Switch event listener back to connect
             connectButton.removeEventListener('click', disconnectFromSerial);
             connectButton.addEventListener('click', connectToSerial);
         }
     }
 
-    // Bucle para leer datos del puerto serie continuamente.
+    /**
+     * Continuously reads data from the serial port and logs it to the console.
+     * The loop is broken when the reader is cancelled or an error occurs.
+     */
     async function readLoop() {
         try {
-            while (true) {
+            while (port && port.readable) {
                 const { value, done } = await reader.read();
                 if (done) {
-                    // El lector se ha cerrado, salir del bucle.
-                    reader.releaseLock();
                     break;
                 }
                 if (value) {
@@ -154,21 +150,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         } catch (error) {
-            logToConsole(`Error de lectura: ${error.message}`, 'error');
+            if (!error.message.includes('The read operation was cancelled')) {
+                logToConsole(`Error de lectura: ${error.message}`, 'error');
+            }
             await disconnectFromSerial();
         }
     }
 
-    // Función para enviar datos al puerto serie.
+    /**
+     * Sends the text from the command input field to the connected serial device.
+     */
     async function sendSerialData() {
         const dataToSend = commandInput.value;
         if (dataToSend && writer) {
             try {
-                // Se añade '\n' para que Arduino pueda usar readStringUntil('\n').
                 await writer.write(dataToSend + '\n');
                 logToConsole(`Enviado: ${dataToSend}`, 'sent');
-                commandInput.value = ''; // Limpia el input.
-                commandInput.focus(); // Devuelve el foco al input.
+                commandInput.value = '';
+                commandInput.focus();
             } catch (error) {
                 logToConsole(`Error al enviar: ${error.message}`, 'error');
             }
