@@ -39,6 +39,16 @@ const allTranslations = {
         "settingsLanguageLabel": "Idioma",
         "settingsLangSpanish": "Español",
         "settingsLangEnglish": "Inglés",
+        "settingsSerialTitle": "Comunicación con Dispositivo Externo",
+        "settingsSerialDescription": "Conecta un dispositivo por USB para enviar y recibir datos.",
+        "settingsMachineModelLabel": "Modelo de Máquina",
+        "settingsMachineModelS": "Modelo S (Básico)",
+        "settingsMachineModelM": "Modelo M (Estándar)",
+        "settingsMachineModelMax": "Modelo MAX (Completo)",
+        "settingsSerialConnect": "Conectar Dispositivo",
+        "settingsSerialSend": "Enviar",
+        "settingsSerialPlaceholder": "Escribe un comando...",
+        "settingsSerialConsoleLabel": "Consola de comunicación",
         "logoutButton": "Cerrar Sesión"
     },
     "en": {
@@ -81,6 +91,16 @@ const allTranslations = {
         "settingsLanguageLabel": "Language",
         "settingsLangSpanish": "Spanish",
         "settingsLangEnglish": "English",
+        "settingsSerialTitle": "External Device Communication",
+        "settingsSerialDescription": "Connect a device via USB to send and receive data.",
+        "settingsMachineModelLabel": "Machine Model",
+        "settingsMachineModelS": "Model S (Basic)",
+        "settingsMachineModelM": "Model M (Standard)",
+        "settingsMachineModelMax": "Model MAX (Complete)",
+        "settingsSerialConnect": "Connect Device",
+        "settingsSerialSend": "Send",
+        "settingsSerialPlaceholder": "Type a command...",
+        "settingsSerialConsoleLabel": "Communication console",
         "logoutButton": "Log Out"
     }
 };
