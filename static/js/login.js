@@ -2,13 +2,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Limpiar cualquier estado de sesión anterior para asegurar un inicio de sesión limpio.
     sessionStorage.clear();
 
-    // Los datos de usuario se internalizan para evitar la necesidad de 'fetch' y un servidor.
-    const users = [
+    // Los datos de usuario se obtienen de una lista hardcodeada y se combinan con usuarios guardados en localStorage.
+    const baseUsers = [
         {
             "username": "test",
             "password": "123"
         }
     ];
+
+    const getCustomUsers = () => {
+        try {
+            const usersJson = localStorage.getItem('custom_users');
+            return usersJson ? JSON.parse(usersJson) : [];
+        } catch (e) {
+            console.error("Error parsing custom users from localStorage", e);
+            return [];
+        }
+    };
+
+    const allUsers = [...baseUsers, ...getCustomUsers()];
 
     const loginForm = document.getElementById('login-form');
     const errorMessageDiv = document.getElementById('login-error-message');
@@ -41,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
 
-            const foundUser = users.find(user => user.username === username && user.password === password);
+            const foundUser = allUsers.find(user => user.username === username && user.password === password);
 
             if (foundUser) {
                 // Store login state in session storage
