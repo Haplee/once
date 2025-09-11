@@ -76,7 +76,15 @@ const allTranslations = {
         "settingsSerialSend": "Enviar",
         "settingsSerialPlaceholder": "Escribe un comando...",
         "settingsSerialConsoleLabel": "Consola de comunicación",
-        "logoutButton": "Cerrar Sesión"
+        "logoutButton": "Cerrar Sesión",
+        "speechEuroSingular": "euro",
+        "speechEuroPlural": "euros",
+        "speechCentSingular": "céntimo",
+        "speechCentPlural": "céntimos",
+        "speechCon": "con",
+        "speechCero": "cero",
+        "speechOneEuro": "un euro",
+        "speechOneCent": "un céntimo"
     },
     "en": {
         "appTitle": "Change Calculator - ONCE App",
@@ -155,7 +163,15 @@ const allTranslations = {
         "settingsSerialSend": "Send",
         "settingsSerialPlaceholder": "Type a command...",
         "settingsSerialConsoleLabel": "Communication console",
-        "logoutButton": "Log Out"
+        "logoutButton": "Log Out",
+        "speechEuroSingular": "euro",
+        "speechEuroPlural": "euros",
+        "speechCentSingular": "cent",
+        "speechCentPlural": "cents",
+        "speechCon": "with",
+        "speechCero": "zero",
+        "speechOneEuro": "one euro",
+        "speechOneCent": "one cent"
     },
     "gl": {
         "appTitle": "Calculadora de Troco - ONCE App",
@@ -234,7 +250,15 @@ const allTranslations = {
         "settingsSerialSend": "Enviar",
         "settingsSerialPlaceholder": "Escribe un comando...",
         "settingsSerialConsoleLabel": "Consola de comunicación",
-        "logoutButton": "Pechar sesión"
+        "logoutButton": "Pechar sesión",
+        "speechEuroSingular": "euro",
+        "speechEuroPlural": "euros",
+        "speechCentSingular": "céntimo",
+        "speechCentPlural": "céntimos",
+        "speechCon": "con",
+        "speechCero": "cero",
+        "speechOneEuro": "un euro",
+        "speechOneCent": "un céntimo"
     },
     "ca": {
         "appTitle": "Calculadora de Canvi - ONCE App",
@@ -313,7 +337,15 @@ const allTranslations = {
         "settingsSerialSend": "Enviar",
         "settingsSerialPlaceholder": "Escriu una orde...",
         "settingsSerialConsoleLabel": "Consola de comunicació",
-        "logoutButton": "Tancar Sessió"
+        "logoutButton": "Tancar Sessió",
+        "speechEuroSingular": "euro",
+        "speechEuroPlural": "euros",
+        "speechCentSingular": "cèntim",
+        "speechCentPlural": "cèntims",
+        "speechCon": "amb",
+        "speechCero": "zero",
+        "speechOneEuro": "un euro",
+        "speechOneCent": "un cèntim"
     },
     "va": {
         "appTitle": "Calculadora de Canvi - ONCE App",
@@ -392,7 +424,15 @@ const allTranslations = {
         "settingsSerialSend": "Enviar",
         "settingsSerialPlaceholder": "Escriu una ordre...",
         "settingsSerialConsoleLabel": "Consola de comunicació",
-        "logoutButton": "Tancar Sessió"
+        "logoutButton": "Tancar Sessió",
+        "speechEuroSingular": "euro",
+        "speechEuroPlural": "euros",
+        "speechCentSingular": "cèntim",
+        "speechCentPlural": "cèntims",
+        "speechCon": "amb",
+        "speechCero": "zero",
+        "speechOneEuro": "un euro",
+        "speechOneCent": "un cèntim"
     },
     "eu": {
         "appTitle": "Aldaketa Kalkulagailua - ONCE App",
@@ -471,7 +511,15 @@ const allTranslations = {
         "settingsSerialSend": "Bidali",
         "settingsSerialPlaceholder": "Idatzi komando bat...",
         "settingsSerialConsoleLabel": "Komunikazio kontsola",
-        "logoutButton": "Saioa itxi"
+        "logoutButton": "Saioa itxi",
+        "speechEuroSingular": "euro",
+        "speechEuroPlural": "euro",
+        "speechCentSingular": "zentimo",
+        "speechCentPlural": "zentimo",
+        "speechCon": "eta",
+        "speechCero": "zero",
+        "speechOneEuro": "euro bat",
+        "speechOneCent": "zentimo bat"
     }
 };
 
@@ -496,6 +544,7 @@ const getCurrentLanguage = () => {
  */
 const loadTranslations = (lang) => {
     currentTranslations = allTranslations[lang] || allTranslations['es'];
+    window.currentTranslations = currentTranslations;
 };
 
 /**
