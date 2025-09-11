@@ -62,6 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const amountReceived = parseFloat(document.getElementById('amount-received').value);
             const resultDiv = document.getElementById('result');
             const resultSpinner = document.getElementById('result-spinner');
+            const calculateBtn = document.getElementById('calculate-btn');
+
+            // Disable button to prevent multiple submissions
+            calculateBtn.disabled = true;
 
             // Clear previous result and show spinner
             resultDiv.textContent = '';
@@ -71,12 +75,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isNaN(totalAmount) || isNaN(amountReceived)) {
                 resultDiv.textContent = 'Por favor, introduce importes válidos.';
                 resultSpinner.classList.add('d-none'); // Hide spinner
+                calculateBtn.disabled = false; // Re-enable button
                 return;
             }
 
             if (amountReceived < totalAmount) {
                 resultDiv.textContent = 'El importe recibido es menor que el total a pagar.';
                 resultSpinner.classList.add('d-none'); // Hide spinner
+                calculateBtn.disabled = false; // Re-enable button
                 return;
             }
 
@@ -99,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 speak(changeTextForSpeech); // Announce the result
 
                 saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
+                calculateBtn.disabled = false; // Re-enable button
             }, 500); // 0.5 second delay
         });
     }
