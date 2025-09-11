@@ -1,15 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Limpiar cualquier estado de sesión anterior para asegurar un inicio de sesión limpio.
+    // --- Theme & i18n Initialization ---
+    const applyTheme = () => {
+        const savedTheme = localStorage.getItem('once_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    };
+
+    applyTheme();
+    if (window.I18N) {
+        I18N.applyToDOM();
+    }
+
+    // --- User Data ---
     sessionStorage.clear();
-
-    // Los datos de usuario se obtienen de una lista hardcodeada y se combinan con usuarios guardados en localStorage.
-    const baseUsers = [
-        {
-            "username": "test",
-            "password": "123"
-        }
-    ];
-
+    const baseUsers = [{ "username": "test", "password": "123" }];
     const getCustomUsers = () => {
         try {
             const usersJson = localStorage.getItem('custom_users');
@@ -19,54 +22,50 @@ document.addEventListener('DOMContentLoaded', () => {
             return [];
         }
     };
-
     const allUsers = [...baseUsers, ...getCustomUsers()];
 
-    const loginForm = document.getElementById('login-form');
-    const errorMessageDiv = document.getElementById('login-error-message');
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const passwordInput = document.getElementById('password');
+    // --- Form Handling Logic ---
+    const handleLogin = (e) => {
+        e.preventDefault();
 
+        const form = e.target;
+        const isMobile = form.id === 'mobile-login-form';
+        const username = document.getElementById(isMobile ? 'mobile-username' : 'username').value.trim();
+        const password = document.getElementById(isMobile ? 'mobile-password' : 'password').value.trim();
+        const errorMessageDiv = document.getElementById(isMobile ? 'mobile-login-error-message' : 'login-error-message');
+
+        errorMessageDiv.style.display = 'none';
+
+        const foundUser = allUsers.find(user => user.username === username && user.password === password);
+
+        if (foundUser) {
+            sessionStorage.setItem('isLoggedIn', 'true');
+            window.location.href = 'index.html';
+        } else {
+            errorMessageDiv.setAttribute('data-i18n', 'loginErrorIncorrect');
+            errorMessageDiv.textContent = I18N.t('loginErrorIncorrect'); // Set text immediately
+            errorMessageDiv.style.display = 'block';
+        }
+    };
+
+    const desktopForm = document.getElementById('login-form');
+    const mobileForm = document.getElementById('mobile-login-form');
+
+    if (desktopForm) desktopForm.addEventListener('submit', handleLogin);
+    if (mobileForm) mobileForm.addEventListener('submit', handleLogin);
+
+
+    // --- Password Toggle ---
+    const togglePasswordBtn = document.getElementById('toggle-password');
     if (togglePasswordBtn) {
         togglePasswordBtn.addEventListener('click', () => {
-            // Toggle the type attribute
+            const passwordInput = document.getElementById('password');
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
 
-            // Toggle the icon
             const icon = togglePasswordBtn.querySelector('i');
-            if (type === 'password') {
-                icon.classList.remove('bi-eye');
-                icon.classList.add('bi-eye-slash');
-            } else {
-                icon.classList.remove('bi-eye-slash');
-                icon.classList.add('bi-eye');
-            }
-        });
-    }
-
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            errorMessageDiv.style.display = 'none'; // Hide previous errors
-
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-
-            const foundUser = allUsers.find(user => user.username === username && user.password === password);
-
-            if (foundUser) {
-                // Store login state in session storage
-                sessionStorage.setItem('isLoggedIn', 'true');
-                // Redirect to the main page
-                window.location.href = 'index.html';
-            } else {
-                // Usar la clave de traducción para el mensaje de error
-                errorMessageDiv.setAttribute('data-i18n-key', 'loginErrorIncorrect');
-                // La traducción real la hará i18n.js, pero mostramos un texto por si acaso.
-                errorMessageDiv.textContent = 'Usuario o contraseña incorrectos.';
-                errorMessageDiv.style.display = 'block';
-            }
+            icon.classList.toggle('bi-eye');
+            icon.classList.toggle('bi-eye-slash');
         });
     }
 });
