@@ -219,3 +219,27 @@ void dispenseCoin(int coinIndex) {
     - Escribe cualquier texto en el campo de comando (ej. "dame una moneda") y presiona **"Enviar"**. Esto simulará la dispensación de una moneda aleatoria permitida por el modelo actual.
     - Todos los eventos (configuración, monedas dispensadas) se mostrarán en la consola de la página.
 7.  **Desconecta**: Cuando termines, haz clic en **"Desconectar"**.
+
+---
+
+# Cómo probar el login responsive
+
+## 1) Preparar y arrancar el servidor
+1. Clona el repo y cambia a la rama `feature/responsive-login`.
+2. Esta es una aplicación estática, por lo que no se requiere un servidor. Simplemente abre `login.html` en tu navegador.
+
+## 2) Probar la vista de escritorio
+1. Abre la página de login en una ventana del navegador con un ancho de 881px o más.
+2. Deberías ver una tarjeta grande dividida en dos paneles: una ilustración a la izquierda y el formulario de inicio de sesión a la derecha.
+3. Comprueba que todos los elementos son visibles y están bien alineados.
+
+## 3) Probar la vista móvil
+1. Reduce el ancho de la ventana del navegador a 880px o menos, o usa las herramientas de desarrollador de tu navegador para simular un dispositivo móvil.
+2. La vista de escritorio debería desaparecer y en su lugar deberían aparecer dos tarjetas apiladas más pequeñas.
+3. La primera tarjeta contiene el formulario de inicio de sesión y la segunda un enlace para registrarse.
+
+## 4) Probar la funcionalidad
+1. Tanto en la vista de escritorio como en la móvil, intenta iniciar sesión con credenciales válidas (ej. `test`/`123`) e inválidas.
+2. Comprueba que los mensajes de error aparecen correctamente.
+3. Asegúrate de que el botón para mostrar/ocultar la contraseña funciona en la vista de escritorio.
+4. Verifica que el modo oscuro funciona correctamente en ambas vistas.

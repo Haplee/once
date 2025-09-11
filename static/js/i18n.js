@@ -17,6 +17,10 @@ const I18N = (() => {
             "loginForgotPassword": "¿Olvidaste tu contraseña?",
             "loginNoAccount": "¿No tienes una cuenta?",
             "loginSignUp": "Regístrate",
+            "illustrationTitle": "Bienvenido a la plataforma",
+            "illustrationSubtitle": "Accesibilidad e innovación a tu alcance.",
+            "loginRememberMe": "Recordarme",
+            "loginSocialPrompt": "O inicia sesión con",
             "signupTitle": "Crear una Cuenta",
             "signupPrompt": "Introduce tus datos para registrarte.",
             "signupUsernameLabel": "Nombre de usuario",
@@ -97,6 +101,10 @@ const I18N = (() => {
             "loginForgotPassword": "Forgot your password?",
             "loginNoAccount": "Don't have an account?",
             "loginSignUp": "Sign Up",
+            "illustrationTitle": "Welcome to the platform",
+            "illustrationSubtitle": "Accessibility and innovation at your fingertips.",
+            "loginRememberMe": "Remember me",
+            "loginSocialPrompt": "Or sign in with",
             "signupTitle": "Create an Account",
             "signupPrompt": "Enter your details to register.",
             "signupUsernameLabel": "Username",
@@ -157,13 +165,8 @@ const I18N = (() => {
             "settingsSerialSend": "Send",
             "settingsSerialPlaceholder": "Type a command...",
             "settingsSerialConsoleLabel": "Communication console",
-            "logoutButton": "Log Out",
-            "reconocimiento_no_disponible": "Voice recognition is not available on this browser."
-        },
-        "pt": {},
-        "gl": {},
-        "eu": {},
-        "ca": {}
+            "logoutButton": "Log Out"
+        }
     };
 
     let currentLang = getSavedLang() || 'es';
@@ -197,17 +200,14 @@ const I18N = (() => {
             element.setAttribute('aria-label', t(key));
         });
 
-        // Translate page title based on body's data-i18n-title attribute
         const titleKey = document.body.getAttribute('data-i18n-title');
         if (titleKey) {
             document.title = t(titleKey);
         }
     }
 
-    // Init
-    // Set the current language from local storage, or default to 'es'
+    // Initialize on script load
     currentLang = getSavedLang() || 'es';
-
 
     // Public API
     return {
@@ -221,5 +221,7 @@ const I18N = (() => {
 
 document.addEventListener('DOMContentLoaded', () => {
     // This will set the initial language and translate the page
-    I18N.applyToDOM();
+    if (I18N) {
+        I18N.applyToDOM();
+    }
 });
