@@ -12,18 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('theme', theme);
         }
 
-        // The configuration page, identified by the 'configuracion' ID, should not be themed.
-        const onConfigPage = document.getElementById('configuracion') !== null;
-
-        // Only apply the theme to the body if we are NOT on the configuration page.
-        if (!onConfigPage) {
-            if (theme === 'dark-mode') {
-                document.body.classList.add('dark-mode');
-            } else {
-                document.body.classList.remove('dark-mode');
-            }
+        // Apply the theme to the body.
+        if (theme === 'dark-mode') {
+            document.body.classList.add('dark-mode');
         } else {
-            // If we are on the config page, ensure the theme is always reset to the default (light) by removing the class.
             document.body.classList.remove('dark-mode');
         }
 
