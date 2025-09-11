@@ -1,5 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
+    let voices = [];
 
+    const populateVoiceList = () => {
+        voices = window.speechSynthesis.getVoices();
+    };
+
+    populateVoiceList();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = populateVoiceList;
+    }
     /**
      * Applies the selected theme (light/dark) to the application.
      * It reads the theme from localStorage, applies it to the body, and updates
@@ -53,6 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const amountReceived = parseFloat(document.getElementById('amount-received').value);
             const resultDiv = document.getElementById('result');
             const resultSpinner = document.getElementById('result-spinner');
+            const calculateBtn = document.getElementById('calculate-btn');
+
+            // Disable button to prevent multiple submissions
+            calculateBtn.disabled = true;
 
             // Clear previous result and show spinner
             resultDiv.textContent = '';
@@ -62,12 +75,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isNaN(totalAmount) || isNaN(amountReceived)) {
                 resultDiv.textContent = 'Por favor, introduce importes válidos.';
                 resultSpinner.classList.add('d-none'); // Hide spinner
+                calculateBtn.disabled = false; // Re-enable button
                 return;
             }
 
             if (amountReceived < totalAmount) {
                 resultDiv.textContent = 'El importe recibido es menor que el total a pagar.';
                 resultSpinner.classList.add('d-none'); // Hide spinner
+                calculateBtn.disabled = false; // Re-enable button
                 return;
             }
 
@@ -84,10 +99,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Format for speech using the new helper function
                 const speakableChange = formatChangeForSpeech(change);
-                const changeTextForSpeech = `El cambio a devolver es: ${speakableChange}`;
+                const translations = window.currentTranslations || {};
+                const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
+                const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
                 speak(changeTextForSpeech); // Announce the result
 
                 saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
+                calculateBtn.disabled = false; // Re-enable button
             }, 500); // 0.5 second delay
         });
     }
@@ -243,30 +261,42 @@ document.addEventListener('DOMContentLoaded', () => {
      * @returns {string} - A natural language string (e.g., "dos euros con cincuenta céntimos").
      */
     function formatChangeForSpeech(change) {
+        const translations = window.currentTranslations || {};
         const euros = Math.floor(change);
         const cents = Math.round((change - euros) * 100);
 
+        const euroSingular = translations.speechEuroSingular || 'euro';
+        const euroPlural = translations.speechEuroPlural || 'euros';
+        const centSingular = translations.speechCentSingular || 'céntimo';
+        const centPlural = translations.speechCentPlural || 'céntimos';
+        const con = translations.speechCon || 'con';
+        const cero = translations.speechCero || 'cero';
+        const oneEuro = translations.speechOneEuro || `un ${euroSingular}`;
+        const oneCent = translations.speechOneCent || `un ${centSingular}`;
+
         if (euros === 0 && cents === 0) {
-            return 'cero euros';
+            return `${cero} ${euroPlural}`;
         }
 
         let parts = [];
 
-        if (euros === 1) {
-            parts.push('un euro');
-        } else if (euros > 1) {
-            parts.push(`${euros} euros`);
+        if (euros > 0) {
+            if (euros === 1) {
+                parts.push(oneEuro);
+            } else {
+                parts.push(`${euros} ${euroPlural}`);
+            }
         }
 
         if (cents > 0) {
             if (cents === 1) {
-                parts.push('un céntimo');
+                parts.push(oneCent);
             } else {
-                parts.push(`${cents} céntimos`);
+                parts.push(`${cents} ${centPlural}`);
             }
         }
 
-        return parts.join(' con ');
+        return parts.join(` ${con} `);
     }
 
     /**
@@ -275,8 +305,27 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function speak(text) {
         if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); // Cancel any ongoing speech
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'es-ES';
+            const lang = localStorage.getItem('language') || 'es';
+
+            const langMap = {
+                es: 'es-ES',
+                en: 'en-US',
+                gl: 'gl-ES',
+                ca: 'ca-ES',
+                va: 'ca-ES', // Valencian often uses Catalan voice pack
+                eu: 'eu-ES'
+            };
+
+            const targetLang = langMap[lang] || 'es-ES';
+            utterance.lang = targetLang;
+
+            const voice = voices.find(v => v.lang === targetLang);
+            if (voice) {
+                utterance.voice = voice;
+            }
+
             window.speechSynthesis.speak(utterance);
         }
     }
