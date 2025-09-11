@@ -1,80 +1,5 @@
-const allTranslations = {
-    "es": {
-        "appTitle": "Calculadora de Cambio - ONCE App",
-        "loginPageTitle": "Iniciar Sesión - ONCE App",
-        "historyPageTitle": "Historial de Operaciones - ONCE App",
-        "settingsPageTitle": "Configuración - ONCE App",
-        "navCalculator": "Calculadora",
-        "navHistory": "Historial",
-        "navSettings": "Configuración",
-        "loginTitle": "Iniciar Sesión",
-        "loginUsernameLabel": "Usuario",
-        "loginPasswordLabel": "Contraseña",
-        "loginButton": "Entrar",
-        "loginWelcome": "¡Bienvenido/a!",
-        "loginPrompt": "Por favor, introduce tus credenciales para continuar.",
-        "loginForgotPassword": "¿Olvidaste tu contraseña?",
-        "loginNoAccount": "¿No tienes una cuenta?",
-        "loginSignUp": "Regístrate",
-        "signupTitle": "Crear una Cuenta",
-        "signupPrompt": "Introduce tus datos para registrarte.",
-        "signupUsernameLabel": "Nombre de usuario",
-        "signupPasswordLabel": "Contraseña",
-        "signupConfirmPasswordLabel": "Confirmar Contraseña",
-        "signupButton": "Registrarse",
-        "signupHasAccount": "¿Ya tienes una cuenta?",
-        "signupLoginLink": "Inicia sesión",
-        "signupErrorPasswordsMismatch": "Las contraseñas no coinciden.",
-        "signupErrorUserExists": "El nombre de usuario ya existe. Por favor, elige otro.",
-        "signupErrorRequired": "Por favor, completa todos los campos.",
-        "signupSuccess": "¡Registro completado! Ahora puedes iniciar sesión.",
-        "forgotPasswordTitle": "Recuperar Contraseña",
-        "forgotPasswordPrompt": "Introduce tu nombre de usuario para recibir instrucciones.",
-        "forgotPasswordUsernameLabel": "Nombre de usuario",
-        "forgotPasswordButton": "Enviar Instrucciones",
-        "forgotPasswordConfirmation": "Si existe una cuenta con ese nombre de usuario, se han enviado las instrucciones para recuperar la contraseña a la dirección de correo asociada.",
-        "backToLoginLink": "Volver al inicio de sesión",
-        "loginErrorIncorrect": "Usuario o contraseña incorrectos.",
-        "loginErrorUnexpected": "Ha ocurrido un error inesperado. Por favor, inténtalo más tarde.",
-        "calculatorTitle": "Calculadora de Cambio",
-        "totalToPayLabel": "Total a Pagar (€)",
-        "totalToPayPlaceholder": "Ej: 5.50",
-        "amountReceivedLabel": "Importe Recibido (€)",
-        "amountReceivedPlaceholder": "Ej: 10.00",
-        "calculateButton": "Calcular",
-        "voiceInputButtonLabel": "Usar entrada de voz",
-        "voiceErrorPermission": "Acceso al micrófono denegado. Para usar esta función, por favor, permite el acceso al micrófono en tu navegador.",
-        "voiceErrorNoSpeech": "No se ha detectado ninguna voz. Inténtalo de nuevo hablando cerca del micrófono.",
-        "voiceErrorInfo": "Error de reconocimiento: {error}. Por favor, inténtalo de nuevo.",
-        "voiceErrorTimeout": "El reconocimiento de voz se detuvo por inactividad.",
-        "voiceErrorStart": "No se pudo iniciar el reconocimiento. Asegúrate de que el micrófono esté permitido y no esté en uso.",
-        "voiceErrorUnsupported": "Lo sentimos, tu navegador no es compatible con el reconocimiento de voz.",
-        "changeResultText": "El cambio a devolver es: {change} €",
-        "invalidInputText": "Por favor, introduce importes válidos.",
-        "amountReceivedLowText": "El importe recibido es menor que el total a pagar.",
-        "historyTitle": "Historial de Operaciones",
-        "historyHeaderDate": "Fecha y Hora",
-        "historyHeaderTotal": "Total Pagado",
-        "historyHeaderReceived": "Importe Recibido",
-        "historyHeaderChange": "Cambio Devuelto",
-        "settingsTitle": "Configuración",
-        "settingsDarkModeLabel": "Modo Oscuro",
-        "settingsLanguageLabel": "Idioma",
-        "settingsLangSpanish": "Español",
-        "settingsLangEnglish": "Inglés",
-        "settingsSerialTitle": "Comunicación con Dispositivo Externo",
-        "settingsSerialDescription": "Conecta un dispositivo por USB para enviar y recibir datos.",
-        "settingsMachineModelLabel": "Modelo de Máquina",
-        "settingsMachineModelS": "Modelo S (Básico)",
-        "settingsMachineModelM": "Modelo M (Estándar)",
-        "settingsMachineModelMax": "Modelo MAX (Completo)",
-        "settingsSerialConnect": "Conectar Dispositivo",
-        "settingsSerialSend": "Enviar",
-        "settingsSerialPlaceholder": "Escribe un comando...",
-        "settingsSerialConsoleLabel": "Consola de comunicación",
-        "logoutButton": "Cerrar Sesión"
-    },
-    "en": {
+const I18N = (() => {
+    const en_translations = {
         "appTitle": "Change Calculator - ONCE App",
         "loginPageTitle": "Login - ONCE App",
         "historyPageTitle": "Transaction History - ONCE App",
@@ -109,7 +34,6 @@ const allTranslations = {
         "forgotPasswordButton": "Send Instructions",
         "forgotPasswordConfirmation": "If an account with that username exists, password recovery instructions have been sent to the associated email address.",
         "backToLoginLink": "Back to login",
-
         "loginErrorIncorrect": "Incorrect username or password.",
         "loginErrorUnexpected": "An unexpected error occurred. Please try again later.",
         "calculatorTitle": "Change Calculator",
@@ -138,6 +62,10 @@ const allTranslations = {
         "settingsLanguageLabel": "Language",
         "settingsLangSpanish": "Spanish",
         "settingsLangEnglish": "English",
+        "settingsLangPortuguese": "Portuguese",
+        "settingsLangGalician": "Galician",
+        "settingsLangBasque": "Basque",
+        "settingsLangCatalan": "Catalan",
         "settingsSerialTitle": "External Device Communication",
         "settingsSerialDescription": "Connect a device via USB to send and receive data.",
         "settingsMachineModelLabel": "Machine Model",
@@ -148,104 +76,151 @@ const allTranslations = {
         "settingsSerialSend": "Send",
         "settingsSerialPlaceholder": "Type a command...",
         "settingsSerialConsoleLabel": "Communication console",
-        "logoutButton": "Log Out"
+        "logoutButton": "Log Out",
+        "reconocimiento_no_disponible": "Voice recognition is not available on this browser."
+    };
+
+    const translations = {
+        "es": {
+            "appTitle": "Calculadora de Cambio - ONCE App",
+            "loginPageTitle": "Iniciar Sesión - ONCE App",
+            "historyPageTitle": "Historial de Operaciones - ONCE App",
+            "settingsPageTitle": "Configuración - ONCE App",
+            "navCalculator": "Calculadora",
+            "navHistory": "Historial",
+            "navSettings": "Configuración",
+            "loginTitle": "Iniciar Sesión",
+            "loginUsernameLabel": "Usuario",
+            "loginPasswordLabel": "Contraseña",
+            "loginButton": "Entrar",
+            "loginWelcome": "¡Bienvenido/a!",
+            "loginPrompt": "Por favor, introduce tus credenciales para continuar.",
+            "loginForgotPassword": "¿Olvidaste tu contraseña?",
+            "loginNoAccount": "¿No tienes una cuenta?",
+            "loginSignUp": "Regístrate",
+            "signupTitle": "Crear una Cuenta",
+            "signupPrompt": "Introduce tus datos para registrarte.",
+            "signupUsernameLabel": "Nombre de usuario",
+            "signupPasswordLabel": "Contraseña",
+            "signupConfirmPasswordLabel": "Confirmar Contraseña",
+            "signupButton": "Registrarse",
+            "signupHasAccount": "¿Ya tienes una cuenta?",
+            "signupLoginLink": "Inicia sesión",
+            "signupErrorPasswordsMismatch": "Las contraseñas no coinciden.",
+            "signupErrorUserExists": "El nombre de usuario ya existe. Por favor, elige otro.",
+            "signupErrorRequired": "Por favor, completa todos los campos.",
+            "signupSuccess": "¡Registro completado! Ahora puedes iniciar sesión.",
+            "forgotPasswordTitle": "Recuperar Contraseña",
+            "forgotPasswordPrompt": "Introduce tu nombre de usuario para recibir instrucciones.",
+            "forgotPasswordUsernameLabel": "Nombre de usuario",
+            "forgotPasswordButton": "Enviar Instrucciones",
+            "forgotPasswordConfirmation": "Si existe una cuenta con ese nombre de usuario, se han enviado las instrucciones para recuperar la contraseña a la dirección de correo asociada.",
+            "backToLoginLink": "Volver al inicio de sesión",
+            "loginErrorIncorrect": "Usuario o contraseña incorrectos.",
+            "loginErrorUnexpected": "Ha ocurrido un error inesperado. Por favor, inténtalo más tarde.",
+            "calculatorTitle": "Calculadora de Cambio",
+            "totalToPayLabel": "Total a Pagar (€)",
+            "totalToPayPlaceholder": "Ej: 5.50",
+            "amountReceivedLabel": "Importe Recibido (€)",
+            "amountReceivedPlaceholder": "Ej: 10.00",
+            "calculateButton": "Calcular",
+            "voiceInputButtonLabel": "Usar entrada de voz",
+            "voiceErrorPermission": "Acceso al micrófono denegado. Para usar esta función, por favor, permite el acceso al micrófono en tu navegador.",
+            "voiceErrorNoSpeech": "No se ha detectado ninguna voz. Inténtalo de nuevo hablando cerca del micrófono.",
+            "voiceErrorInfo": "Error de reconocimiento: {error}. Por favor, inténtalo de nuevo.",
+            "voiceErrorTimeout": "El reconocimiento de voz se detuvo por inactividad.",
+            "voiceErrorStart": "No se pudo iniciar el reconocimiento. Asegúrate de que el micrófono esté permitido y no esté en uso.",
+            "voiceErrorUnsupported": "Lo sentimos, tu navegador no es compatible con el reconocimiento de voz.",
+            "changeResultText": "El cambio a devolver es: {change} €",
+            "invalidInputText": "Por favor, introduce importes válidos.",
+            "amountReceivedLowText": "El importe recibido es menor que el total a pagar.",
+            "historyTitle": "Historial de Operaciones",
+            "historyHeaderDate": "Fecha y Hora",
+            "historyHeaderTotal": "Total Pagado",
+            "historyHeaderReceived": "Importe Recibido",
+            "historyHeaderChange": "Cambio Devuelto",
+            "settingsTitle": "Configuración",
+            "settingsDarkModeLabel": "Modo Oscuro",
+            "settingsLanguageLabel": "Idioma",
+            "settingsLangSpanish": "Español",
+            "settingsLangEnglish": "Inglés",
+            "settingsLangPortuguese": "Portugués",
+            "settingsLangGalician": "Gallego",
+            "settingsLangBasque": "Euskera",
+            "settingsLangCatalan": "Catalán",
+            "settingsSerialTitle": "Comunicación con Dispositivo Externo",
+            "settingsSerialDescription": "Conecta un dispositivo por USB para enviar y recibir datos.",
+            "settingsMachineModelLabel": "Modelo de Máquina",
+            "settingsMachineModelS": "Modelo S (Básico)",
+            "settingsMachineModelM": "Modelo M (Estándar)",
+            "settingsMachineModelMax": "Modelo MAX (Completo)",
+            "settingsSerialConnect": "Conectar Dispositivo",
+            "settingsSerialSend": "Enviar",
+            "settingsSerialPlaceholder": "Escribe un comando...",
+            "settingsSerialConsoleLabel": "Consola de comunicación",
+            "logoutButton": "Cerrar Sesión",
+            "reconocimiento_no_disponible": "Reconocimiento de voz no disponible en este navegador."
+        },
+        "en": en_translations,
+        "pt": en_translations,
+        "gl": en_translations,
+        "eu": en_translations,
+        "ca": en_translations
+    };
+
+    let currentLang = getSavedLang() || 'es';
+
+    function getSavedLang() {
+        return localStorage.getItem('once_lang');
     }
-};
 
-/**
- * @type {Object.<string, string>}
- * @description Holds the translations for the currently selected language.
- */
-let currentTranslations = {};
-
-/**
- * Retrieves the current language from localStorage or defaults to Spanish ('es').
- * @returns {string} The current language code (e.g., 'es', 'en').
- */
-const getCurrentLanguage = () => {
-    return localStorage.getItem('language') || 'es';
-};
-
-/**
- * Loads the translation dictionary for a given language.
- * Falls back to Spanish if the specified language is not found.
- * @param {string} lang - The language code to load (e.g., 'es').
- */
-const loadTranslations = (lang) => {
-    currentTranslations = allTranslations[lang] || allTranslations['es'];
-};
-
-/**
- * Traverses the DOM and replaces the content of elements with i18n keys
- * with the corresponding translations from the loaded dictionary.
- */
-const translatePage = () => {
-    // Translate text content
-    document.querySelectorAll('[data-i18n-key]').forEach(element => {
-        const key = element.getAttribute('data-i18n-key');
-        element.textContent = currentTranslations[key] || key;
-    });
-    // Translate placeholder attributes
-    document.querySelectorAll('[data-i18n-placeholder-key]').forEach(element => {
-        const key = element.getAttribute('data-i18n-placeholder-key');
-        element.placeholder = currentTranslations[key] || key;
-    });
-    // Translate ARIA labels for accessibility
-    document.querySelectorAll('[data-i18n-aria-key]').forEach(element => {
-        const key = element.getAttribute('data-i18n-aria-key');
-        element.setAttribute('aria-label', currentTranslations[key] || key);
-    });
-    // Translate the page title
-    const pageKey = document.body.dataset.pageKey;
-    if (pageKey && currentTranslations[pageKey]) {
-        document.title = currentTranslations[pageKey];
+    function saveLang(lang) {
+        currentLang = lang;
+        localStorage.setItem('once_lang', lang);
     }
-};
 
-/**
- * Initializes the internationalization process on page load.
- * It identifies the current language, loads the translations, and translates the page.
- */
-const initializeI18n = () => {
-    const lang = getCurrentLanguage();
-    loadTranslations(lang);
-    translatePage();
-};
-
-/**
- * Identifies the current HTML page and sets a data attribute on the body
- * with a corresponding key for title translation.
- */
-const identifyPage = () => {
-    const path = window.location.pathname.split("/").pop();
-    let pageKey = '';
-    if (path.includes('index.html') || path === '') {
-        pageKey = 'appTitle';
-    } else if (path.includes('login.html')) {
-        pageKey = 'loginPageTitle';
-    } else if (path.includes('history.html')) {
-        pageKey = 'historyPageTitle';
-    } else if (path.includes('configuracion.html')) {
-        pageKey = 'settingsPageTitle';
+    function t(key) {
+        return translations[currentLang]?.[key] || translations['es']?.[key] || key;
     }
-    document.body.dataset.pageKey = pageKey;
-};
 
+    function applyToDOM() {
+        // Translate text content
+        document.querySelectorAll('[data-i18n-key]').forEach(element => {
+            const key = element.getAttribute('data-i18n-key');
+            element.textContent = t(key) || key;
+        });
+        // Translate placeholder attributes
+        document.querySelectorAll('[data-i18n-placeholder-key]').forEach(element => {
+            const key = element.getAttribute('data-i18n-placeholder-key');
+            element.placeholder = t(key) || key;
+        });
+        // Translate ARIA labels for accessibility
+        document.querySelectorAll('[data-i18n-aria-key]').forEach(element => {
+            const key = element.getAttribute('data-i18n-aria-key');
+            element.setAttribute('aria-label', t(key) || key);
+        });
+        // Translate the page title
+        const pageKey = document.body.dataset.pageKey;
+        if (pageKey && t(pageKey)) {
+            document.title = t(pageKey);
+        }
+    }
 
-// --- Initialization ---
+    // Init
+    currentLang = getSavedLang() || 'es';
+
+    // Public API
+    return {
+        translations,
+        getSavedLang,
+        saveLang,
+        t,
+        applyToDOM,
+    };
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
-    identifyPage();
-    initializeI18n();
+    if (I18N) {
+        I18N.applyToDOM();
+    }
 });
-
-/**
- * Sets the application's language, stores it in localStorage, and re-initializes
- * the internationalization process to apply the new language.
- * This function is exposed globally so it can be called from other scripts.
- * @param {string} lang - The language code to set (e.g., 'en').
- * @returns {Promise<void>} A promise that resolves when the language is set and applied.
- */
-window.setLanguage = async (lang) => {
-    localStorage.setItem('language', lang);
-    initializeI18n();
-};
