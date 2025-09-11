@@ -67,6 +67,10 @@ const I18N = (() => {
             "settingsLanguageLabel": "Idioma",
             "settingsLangSpanish": "Español",
             "settingsLangEnglish": "Inglés",
+            "settingsLangPortuguese": "Portugués",
+            "settingsLangGalician": "Gallego",
+            "settingsLangBasque": "Euskera",
+            "settingsLangCatalan": "Catalán",
             "settingsSerialTitle": "Comunicación con Dispositivo Externo",
             "settingsSerialDescription": "Conecta un dispositivo por USB para enviar y recibir datos.",
             "settingsMachineModelLabel": "Modelo de Máquina",
@@ -77,7 +81,8 @@ const I18N = (() => {
             "settingsSerialSend": "Enviar",
             "settingsSerialPlaceholder": "Escribe un comando...",
             "settingsSerialConsoleLabel": "Consola de comunicación",
-            "logoutButton": "Cerrar Sesión"
+            "logoutButton": "Cerrar Sesión",
+            "reconocimiento_no_disponible": "Reconocimiento de voz no disponible en este navegador."
         },
         "en": {
             "appTitle": "Change Calculator - ONCE App",
@@ -146,6 +151,10 @@ const I18N = (() => {
             "settingsLanguageLabel": "Language",
             "settingsLangSpanish": "Spanish",
             "settingsLangEnglish": "English",
+            "settingsLangPortuguese": "Portuguese",
+            "settingsLangGalician": "Galician",
+            "settingsLangBasque": "Basque",
+            "settingsLangCatalan": "Catalan",
             "settingsSerialTitle": "External Device Communication",
             "settingsSerialDescription": "Connect a device via USB to send and receive data.",
             "settingsMachineModelLabel": "Machine Model",
@@ -176,25 +185,21 @@ const I18N = (() => {
     }
 
     function applyToDOM() {
-        // Translate text content
         document.querySelectorAll('[data-i18n]').forEach(element => {
             const key = element.getAttribute('data-i18n');
             element.textContent = t(key);
         });
 
-        // Translate placeholder attributes
         document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
             const key = element.getAttribute('data-i18n-placeholder');
             element.placeholder = t(key);
         });
 
-        // Translate ARIA labels for accessibility
         document.querySelectorAll('[data-i18n-aria]').forEach(element => {
             const key = element.getAttribute('data-i18n-aria');
             element.setAttribute('aria-label', t(key));
         });
 
-        // Translate the page title
         const titleKey = document.body.getAttribute('data-i18n-title');
         if (titleKey) {
             document.title = t(titleKey);

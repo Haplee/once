@@ -58,6 +58,32 @@ También puedes registrar nuevos usuarios.
 
 ---
 
+## Cómo probar
+
+Para probar las nuevas funcionalidades, sigue estos pasos:
+
+1.  **Lanzar el servidor local**: Esta es una aplicación estática, por lo que no necesitas un servidor Python como `flask run`. Simplemente abre el archivo `login.html` en tu navegador.
+2.  **Probar Internacionalización (i18n)**:
+    - Ve a la página de **Configuración**.
+    - Usa el selector de "Idioma" para cambiar entre `es`, `en`, `pt`, `gl`, `eu` y `ca`.
+    - Verifica que los textos de la interfaz (títulos, etiquetas, botones) se actualizan al cambiar de idioma.
+    - Recarga la página y comprueba que el último idioma seleccionado persiste.
+3.  **Probar Modo Oscuro**:
+    - En la página de **Configuración**, activa el interruptor de "Modo Oscuro".
+    - Verifica que los colores de la aplicación cambian a un tema oscuro. Los fondos deben ser oscuros y el texto claro.
+    - Navega a otras páginas (Calculadora, Historial) para asegurarte de que el tema se aplica en toda la web.
+    - Recarga la página y comprueba que el modo oscuro persiste.
+4.  **Probar Reconocimiento de Voz**:
+    - Ve a la página principal de la **Calculadora**.
+    - Asegúrate de que el idioma de la UI (por ejemplo, Español) esté seleccionado en la configuración.
+    - Haz clic en el botón del micrófono. El navegador te pedirá permiso para usarlo. Concédelo.
+    - Di en voz alta dos números, por ejemplo: "Total 25 con 50, me pagan con 30".
+    - Verifica que los campos "Total a Pagar" y "Importe Recibido" se rellenan con `25.50` y `30` respectivamente.
+    - Cambia el idioma de la UI en la configuración (por ejemplo, a Inglés) y repite el proceso. El reconocimiento de voz debería ahora esperar comandos en inglés.
+    - Si tu navegador no es compatible, debería aparecer un mensaje indicando que la función no está disponible.
+
+---
+
 ## Comunicación con Arduino (Web Serial API)
 
 Se ha añadido una nueva funcionalidad en la página de **Configuración** para comunicarse con un dispositivo externo (como un Arduino) a través del puerto USB, utilizando la Web Serial API.

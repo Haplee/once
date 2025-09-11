@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="static/css/style.css">
     <script src="static/js/auth.js"></script>
 </head>
-<body>
+<body data-i18n-title="settingsPageTitle">
     <div class="container">
         <header>
             <div class="logo">
@@ -21,55 +21,59 @@
                 <img src="static/img/logo-dark.png" alt="Logotipo de la ONCE" class="logo-dark">
             </div>
             <nav>
-                <a href="index.html" data-i18n-key="navCalculator"></a>
-                <a href="history.html" data-i18n-key="navHistory"></a>
-                <a href="configuracion.html" data-i18n-key="navSettings"></a>
+                <a href="index.html" data-i18n="navCalculator">Calculadora</a>
+                <a href="history.html" data-i18n="navHistory">Historial</a>
+                <a href="configuracion.html" data-i18n="navSettings">Configuración</a>
             </nav>
         </header>
         <main>
             <div id="configuracion" class="card">
                 <div class="card-body">
-                    <h1 class="card-title" data-i18n-key="settingsTitle"></h1>
+                    <h1 class="card-title" data-i18n="settingsTitle">Configuración</h1>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <label for="theme-toggle" data-i18n-key="settingsDarkModeLabel"></label>
+                            <label for="theme-toggle" data-i18n="settingsDarkModeLabel">Modo Oscuro</label>
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="theme-toggle" role="switch">
+                                <input class="form-check-input" type="checkbox" id="theme-toggle" role="switch" aria-labelledby="settingsDarkModeLabel">
                             </div>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <h2 class="h5 mb-0" data-i18n-key="settingsLanguageLabel"></h2>
-                            <div id="language-selector" class="d-flex gap-2">
-                                <button class="btn btn-secondary lang-btn" data-lang="es" data-i18n-key="settingsLangSpanish"></button>
-                                <button class="btn btn-secondary lang-btn" data-lang="en" data-i18n-key="settingsLangEnglish"></button>
-                            </div>
+                            <label for="languageSelect" class="h5 mb-0" data-i18n="settingsLanguageLabel">Idioma</label>
+                            <select class="form-select w-50" id="languageSelect">
+                                <option value="es" data-i18n="settingsLangSpanish">Español</option>
+                                <option value="en" data-i18n="settingsLangEnglish">Inglés</option>
+                                <option value="pt" data-i18n="settingsLangPortuguese">Portugués</option>
+                                <option value="gl" data-i18n="settingsLangGalician">Gallego</option>
+                                <option value="eu" data-i18n="settingsLangBasque">Euskera</option>
+                                <option value="ca" data-i18n="settingsLangCatalan">Catalán</option>
+                            </select>
                         </li>
                     </ul>
 
                     <hr>
 
                     <div id="serial-communication" class="mt-4">
-                        <h2 class="h5" data-i18n-key="settingsSerialTitle">Comunicación con Dispositivo Externo</h2>
-                        <p class="text-muted" data-i18n-key="settingsSerialDescription">Conecta un dispositivo por USB para enviar y recibir datos.</p>
+                        <h2 class="h5" data-i18n="settingsSerialTitle">Comunicación con Dispositivo Externo</h2>
+                        <p class="text-muted" data-i18n="settingsSerialDescription">Conecta un dispositivo por USB para enviar y recibir datos.</p>
 
                         <div class="mb-3">
-                            <label for="machineModelSelect" class="form-label" data-i18n-key="settingsMachineModelLabel">Modelo de Máquina:</label>
+                            <label for="machineModelSelect" class="form-label" data-i18n="settingsMachineModelLabel">Modelo de Máquina:</label>
                             <select class="form-select" id="machineModelSelect">
-                                <option value="S" data-i18n-key="settingsMachineModelS">Modelo S (Básico)</option>
-                                <option value="M" selected data-i18n-key="settingsMachineModelM">Modelo M (Estándar)</option>
-                                <option value="MAX" data-i18n-key="settingsMachineModelMax">Modelo MAX (Completo)</option>
+                                <option value="S" data-i18n="settingsMachineModelS">Modelo S (Básico)</option>
+                                <option value="M" selected data-i18n="settingsMachineModelM">Modelo M (Estándar)</option>
+                                <option value="MAX" data-i18n="settingsMachineModelMax">Modelo MAX (Completo)</option>
                             </select>
                         </div>
 
-                        <button class="btn btn-primary" id="connectSerialButton" data-i18n-key="settingsSerialConnect">Conectar Dispositivo</button>
+                        <button class="btn btn-primary" id="connectSerialButton" data-i18n="settingsSerialConnect">Conectar Dispositivo</button>
 
                         <div id="serial-controls" class="mt-3" style="display: none;">
                             <div class="input-group mb-3">
-                                <input type="text" id="serialCommandInput" class="form-control" data-i18n-key="settingsSerialPlaceholder" placeholder="Escribe un comando...">
-                                <button class="btn btn-outline-secondary" id="sendSerialButton" data-i18n-key="settingsSerialSend">Enviar</button>
+                                <input type="text" id="serialCommandInput" class="form-control" data-i18n-placeholder="settingsSerialPlaceholder" placeholder="Escribe un comando...">
+                                <button class="btn btn-outline-secondary" id="sendSerialButton" data-i18n="settingsSerialSend">Enviar</button>
                             </div>
 
-                            <label for="serialConsole" class="form-label" data-i18n-key="settingsSerialConsoleLabel">Consola:</label>
+                            <label for="serialConsole" class="form-label" data-i18n="settingsSerialConsoleLabel">Consola:</label>
                             <pre id="serialConsole" class="form-control" style="height: 150px; background-color: #f8f9fa;"></pre>
                         </div>
                     </div>
@@ -79,6 +83,7 @@
         </main>
     </div>
     <script src="static/js/i18n.js"></script>
+    <script src="static/js/voice-control.js"></script>
     <script src="static/js/main.js"></script>
     <script src="static/js/serial.js"></script>
     <!-- Bootstrap JS Bundle with Popper -->

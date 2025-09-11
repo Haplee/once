@@ -32,7 +32,7 @@
     --primary-text-color: var(--primary-text-light);
 }
 
-body.dark-mode {
+html[data-theme="dark"] {
     --bg-color: var(--bg-dark);
     --text-color: var(--text-dark);
     --card-bg-color: var(--card-bg-dark);
@@ -95,7 +95,7 @@ nav a:hover {
     color: var(--text-color) !important;
 }
 
-body.dark-mode .table {
+html[data-theme="dark"] .table {
     color: var(--text-color) !important;
 }
 
@@ -104,7 +104,7 @@ body.dark-mode .table {
     border-color: #ccc;
 }
 
-body.dark-mode .form-switch .form-check-input {
+html[data-theme="dark"] .form-switch .form-check-input {
     background-color: rgba(255, 255, 255, 0.25) !important;
     border-color: rgba(255, 255, 255, 0.25) !important;
 }
@@ -128,12 +128,12 @@ body.dark-mode .form-switch .form-check-input {
     box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--primary-color) 25%, transparent) !important;
 }
 
-body.dark-mode .btn-outline-secondary {
+html[data-theme="dark"] .btn-outline-secondary {
     color: var(--text-color) !important;
     border-color: var(--border-color) !important;
 }
 
-body.dark-mode .btn-outline-secondary:hover {
+html[data-theme="dark"] .btn-outline-secondary:hover {
     background-color: var(--primary-color) !important;
     color: var(--primary-text-color) !important;
 }
@@ -217,7 +217,7 @@ h1 {
     height: 24px;
 }
 
-body.dark-mode .btn-secondary img {
+html[data-theme="dark"] .btn-secondary img {
     filter: invert(1);
 }
 
@@ -272,11 +272,11 @@ body.dark-mode .btn-secondary img {
     display: none;
 }
 
-body.dark-mode .logo .logo-light {
+html[data-theme="dark"] .logo .logo-light {
     display: none;
 }
 
-body.dark-mode .logo .logo-dark {
+html[data-theme="dark"] .logo .logo-dark {
     display: block;
 }
 
