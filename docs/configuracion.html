@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración - ONCE App</title>
+    <link rel="icon" href="assets/img/logo.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="assets/js/auth.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="assets/img/logo.png" alt="Logotipo de la ONCE" class="logo-light">
+                <img src="assets/img/logo-dark.png" alt="Logotipo de la ONCE" class="logo-dark">
+            </div>
+            <nav>
+                <a href="index.html" data-i18n-key="navCalculator"></a>
+                <a href="history.html" data-i18n-key="navHistory"></a>
+                <a href="configuracion.html" data-i18n-key="navSettings"></a>
+            </nav>
+        </header>
+        <main>
+            <div id="configuracion" class="card">
+                <div class="card-body">
+                    <h1 class="card-title" data-i18n-key="settingsTitle"></h1>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <label for="theme-toggle" data-i18n-key="settingsDarkModeLabel"></label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="theme-toggle" role="switch">
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <h2 class="h5 mb-0" data-i18n-key="settingsLanguageLabel"></h2>
+                            <div id="language-selector" class="d-flex gap-2">
+                                <button class="btn btn-secondary lang-btn" data-lang="es" data-i18n-key="settingsLangSpanish"></button>
+                                <button class="btn btn-secondary lang-btn" data-lang="en" data-i18n-key="settingsLangEnglish"></button>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <hr>
+
+                    <div id="serial-communication" class="mt-4">
+                        <h2 class="h5" data-i18n-key="settingsSerialTitle">Comunicación con Dispositivo Externo</h2>
+                        <p class="text-muted" data-i18n-key="settingsSerialDescription">Conecta un dispositivo por USB para enviar y recibir datos.</p>
+
+                        <div class="mb-3">
+                            <label for="machineModelSelect" class="form-label" data-i18n-key="settingsMachineModelLabel">Modelo de Máquina:</label>
+                            <select class="form-select" id="machineModelSelect">
+                                <option value="S" data-i18n-key="settingsMachineModelS">Modelo S (Básico)</option>
+                                <option value="M" selected data-i18n-key="settingsMachineModelM">Modelo M (Estándar)</option>
+                                <option value="MAX" data-i18n-key="settingsMachineModelMax">Modelo MAX (Completo)</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-primary" id="connectSerialButton" data-i18n-key="settingsSerialConnect">Conectar Dispositivo</button>
+
+                        <div id="serial-controls" class="mt-3" style="display: none;">
+                            <div class="input-group mb-3">
+                                <input type="text" id="serialCommandInput" class="form-control" data-i18n-key="settingsSerialPlaceholder" placeholder="Escribe un comando...">
+                                <button class="btn btn-outline-secondary" id="sendSerialButton" data-i18n-key="settingsSerialSend">Enviar</button>
+                            </div>
+
+                            <label for="serialConsole" class="form-label" data-i18n-key="settingsSerialConsoleLabel">Consola:</label>
+                            <pre id="serialConsole" class="form-control" style="height: 150px; background-color: #f8f9fa;"></pre>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="assets/js/i18n.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/serial.js"></script>
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+</body>
+</html>

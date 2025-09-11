@@ -58,32 +58,6 @@ También puedes registrar nuevos usuarios.
 
 ---
 
-## Cómo probar
-
-Para probar las nuevas funcionalidades, sigue estos pasos:
-
-1.  **Lanzar el servidor local**: Esta es una aplicación estática, por lo que no necesitas un servidor Python como `flask run`. Simplemente abre el archivo `login.html` en tu navegador.
-2.  **Probar Internacionalización (i18n)**:
-    - Ve a la página de **Configuración**.
-    - Usa el selector de "Idioma" para cambiar entre `es`, `en`, `pt`, `gl`, `eu` y `ca`.
-    - Verifica que los textos de la interfaz (títulos, etiquetas, botones) se actualizan al cambiar de idioma.
-    - Recarga la página y comprueba que el último idioma seleccionado persiste.
-3.  **Probar Modo Oscuro**:
-    - En la página de **Configuración**, activa el interruptor de "Modo Oscuro".
-    - Verifica que los colores de la aplicación cambian a un tema oscuro. Los fondos deben ser oscuros y el texto claro.
-    - Navega a otras páginas (Calculadora, Historial) para asegurarte de que el tema se aplica en toda la web.
-    - Recarga la página y comprueba que el modo oscuro persiste.
-4.  **Probar Reconocimiento de Voz**:
-    - Ve a la página principal de la **Calculadora**.
-    - Asegúrate de que el idioma de la UI (por ejemplo, Español) esté seleccionado en la configuración.
-    - Haz clic en el botón del micrófono. El navegador te pedirá permiso para usarlo. Concédelo.
-    - Di en voz alta dos números, por ejemplo: "Total 25 con 50, me pagan con 30".
-    - Verifica que los campos "Total a Pagar" y "Importe Recibido" se rellenan con `25.50` y `30` respectivamente.
-    - Cambia el idioma de la UI en la configuración (por ejemplo, a Inglés) y repite el proceso. El reconocimiento de voz debería ahora esperar comandos en inglés.
-    - Si tu navegador no es compatible, debería aparecer un mensaje indicando que la función no está disponible.
-
----
-
 ## Comunicación con Arduino (Web Serial API)
 
 Se ha añadido una nueva funcionalidad en la página de **Configuración** para comunicarse con un dispositivo externo (como un Arduino) a través del puerto USB, utilizando la Web Serial API.
@@ -219,27 +193,3 @@ void dispenseCoin(int coinIndex) {
     - Escribe cualquier texto en el campo de comando (ej. "dame una moneda") y presiona **"Enviar"**. Esto simulará la dispensación de una moneda aleatoria permitida por el modelo actual.
     - Todos los eventos (configuración, monedas dispensadas) se mostrarán en la consola de la página.
 7.  **Desconecta**: Cuando termines, haz clic en **"Desconectar"**.
-
----
-
-# Cómo probar el login responsive
-
-## 1) Preparar y arrancar el servidor
-1. Clona el repo y cambia a la rama `feature/responsive-login`.
-2. Esta es una aplicación estática, por lo que no se requiere un servidor. Simplemente abre `login.html` en tu navegador.
-
-## 2) Probar la vista de escritorio
-1. Abre la página de login en una ventana del navegador con un ancho de 881px o más.
-2. Deberías ver una tarjeta grande dividida en dos paneles: una ilustración a la izquierda y el formulario de inicio de sesión a la derecha.
-3. Comprueba que todos los elementos son visibles y están bien alineados.
-
-## 3) Probar la vista móvil
-1. Reduce el ancho de la ventana del navegador a 880px o menos, o usa las herramientas de desarrollador de tu navegador para simular un dispositivo móvil.
-2. La vista de escritorio debería desaparecer y en su lugar deberían aparecer dos tarjetas apiladas más pequeñas.
-3. La primera tarjeta contiene el formulario de inicio de sesión y la segunda un enlace para registrarse.
-
-## 4) Probar la funcionalidad
-1. Tanto en la vista de escritorio como en la móvil, intenta iniciar sesión con credenciales válidas (ej. `test`/`123`) e inválidas.
-2. Comprueba que los mensajes de error aparecen correctamente.
-3. Asegúrate de que el botón para mostrar/ocultar la contraseña funciona en la vista de escritorio.
-4. Verifica que el modo oscuro funciona correctamente en ambas vistas.
