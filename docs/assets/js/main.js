@@ -1,5 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
+    let voices = [];
 
+    const populateVoiceList = () => {
+        voices = window.speechSynthesis.getVoices();
+    };
+
+    populateVoiceList();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = populateVoiceList;
+    }
     /**
      * Applies the selected theme (light/dark) to the application.
      * It reads the theme from localStorage, applies it to the body, and updates
@@ -289,6 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function speak(text) {
         if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); // Cancel any ongoing speech
             const utterance = new SpeechSynthesisUtterance(text);
             const lang = localStorage.getItem('language') || 'es';
 
@@ -301,7 +311,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 eu: 'eu-ES'
             };
 
-            utterance.lang = langMap[lang] || 'es-ES';
+            const targetLang = langMap[lang] || 'es-ES';
+            utterance.lang = targetLang;
+
+            const voice = voices.find(v => v.lang === targetLang);
+            if (voice) {
+                utterance.voice = voice;
+            }
+
             window.speechSynthesis.speak(utterance);
         }
     }
