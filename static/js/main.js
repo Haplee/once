@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const applyTheme = (theme) => {
         document.documentElement.setAttribute('data-bs-theme', theme);
+
         const themeToggleButton = document.getElementById('theme-toggle');
         if (themeToggleButton) {
             themeToggleButton.checked = theme === 'dark';
