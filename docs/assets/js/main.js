@@ -1,27 +1,52 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Theme Management ---
-    const getSavedTheme = () => localStorage.getItem('once_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
-    const applyTheme = (theme) => {
-        document.documentElement.setAttribute('data-bs-theme', theme);
+    /**
+     * Applies the selected theme (light/dark) to the application.
+     * It reads the theme from localStorage, applies it to the body, and updates
+     * the theme toggle switch. It specifically avoids theming the configuration page.
+     */
+    const applyTheme = () => {
+        let theme = localStorage.getItem('theme');
+        if (!theme) {
+            theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-mode' : 'light-mode';
+            localStorage.setItem('theme', theme);
+        }
 
+        // The configuration page, identified by the 'configuracion' ID, should not be themed.
+        const onConfigPage = document.getElementById('configuracion') !== null;
+
+        // Only apply the theme to the body if we are NOT on the configuration page.
+        if (!onConfigPage) {
+            if (theme === 'dark-mode') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        } else {
+            // If we are on the config page, ensure the theme is always reset to the default (light) by removing the class.
+            document.body.classList.remove('dark-mode');
+        }
+
+        // Update the toggle state on the config page if it exists.
         const themeToggleButton = document.getElementById('theme-toggle');
         if (themeToggleButton) {
-            themeToggleButton.checked = theme === 'dark';
+            themeToggleButton.checked = theme === 'dark-mode';
         }
     };
 
+    // Apply theme on initial load
+    applyTheme();
+
+    // Add event listener for the toggle on the config page
     const themeToggleButton = document.getElementById('theme-toggle');
     if (themeToggleButton) {
         themeToggleButton.addEventListener('change', function() {
-            const newTheme = this.checked ? 'dark' : 'light';
-            localStorage.setItem('once_theme', newTheme);
-            applyTheme(newTheme);
+            const newTheme = this.checked ? 'dark-mode' : 'light-mode';
+            localStorage.setItem('theme', newTheme);
+            // Re-apply theme to respect the "don't theme config page" rule
+            applyTheme();
         });
     }
-
-    // Apply theme on initial load
-    applyTheme(getSavedTheme());
 
     /**
      * Handles the main calculator form submission.
@@ -76,65 +101,90 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Handles the voice input button click, using the VoiceControl module.
+     * Handles the voice input button click, checking for compatibility first.
      */
     const voiceInputBtn = document.getElementById('voice-input-btn');
     if (voiceInputBtn) {
         const voiceMessageContainer = document.getElementById('voice-message-container');
         const voiceSpinner = document.getElementById('voice-spinner');
 
-        // Initial setup based on availability
-        if (!VoiceControl.isAvailable()) {
-            voiceInputBtn.disabled = true;
-            if (voiceMessageContainer) {
-                voiceMessageContainer.textContent = I18N.t('reconocimiento_no_disponible');
-                voiceMessageContainer.style.display = 'block';
-            }
-        }
-
         voiceInputBtn.addEventListener('click', () => {
-            // Disable button and show spinner
-            voiceInputBtn.disabled = true;
-            voiceSpinner.classList.remove('d-none');
+            // Reset message container and hide spinner on new attempt
             if (voiceMessageContainer) {
                 voiceMessageContainer.style.display = 'none';
+                voiceMessageContainer.textContent = ''; // Clear previous messages
             }
+            voiceSpinner.classList.add('d-none');
 
-            VoiceControl.start(({ transcript, error }) => {
-                // Re-enable button and hide spinner
-                voiceInputBtn.disabled = false;
-                voiceSpinner.classList.add('d-none');
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-                if (error) {
-                    let errorKey;
-                    switch (error) {
-                        case 'not-allowed':
-                        case 'aborted':
-                            errorKey = 'voiceErrorPermission';
-                            break;
-                        case 'no-speech':
-                            errorKey = 'voiceErrorNoSpeech';
-                            break;
-                        case 'network':
-                            errorKey = 'voiceErrorNetwork'; // You may want to add this key to i18n
-                            break;
-                        case 'start-failed':
-                            errorKey = 'voiceErrorStart';
-                            break;
-                        default:
-                            errorKey = 'voiceErrorInfo';
+            if (SpeechRecognition) {
+                // --- API is supported, proceed with recognition ---
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'es-ES';
+                recognition.interimResults = false;
+                let recognitionTimeout;
+
+                const stopRecognition = () => {
+                    clearTimeout(recognitionTimeout);
+                    voiceSpinner.classList.add('d-none');
+                };
+
+                recognition.onresult = (event) => {
+                    stopRecognition();
+                    const command = event.results[event.results.length - 1][0].transcript;
+                    processVoiceCommand(command);
+                };
+
+                recognition.onerror = (event) => {
+                    stopRecognition();
+                    let errorMessage = '';
+                    if (event.error === 'not-allowed' || event.error === 'aborted') {
+                        errorMessage = 'Acceso al micrófono denegado. Para usar esta función, por favor, permite el acceso al micrófono en tu navegador.';
+                    } else if (event.error === 'no-speech') {
+                        errorMessage = 'No se ha detectado ninguna voz. Inténtalo de nuevo hablando cerca del micrófono.';
+                    } else {
+                        errorMessage = `Error de reconocimiento: ${event.error}. Por favor, inténtalo de nuevo.`;
                     }
                     if (voiceMessageContainer) {
-                        voiceMessageContainer.textContent = I18N.t(errorKey).replace('{error}', error);
+                        voiceMessageContainer.textContent = errorMessage;
                         voiceMessageContainer.style.display = 'block';
                     }
-                    return;
+                };
+
+                recognition.onstart = () => {
+                    // Show spinner and hide any previous messages
+                    voiceSpinner.classList.remove('d-none');
+                    if (voiceMessageContainer) {
+                        voiceMessageContainer.style.display = 'none';
+                    }
+                    recognitionTimeout = setTimeout(() => {
+                        recognition.stop();
+                        if (voiceMessageContainer) {
+                            voiceMessageContainer.textContent = "El reconocimiento de voz se detuvo por inactividad.";
+                            voiceMessageContainer.style.display = 'block';
+                        }
+                        stopRecognition(); // Also hide spinner on timeout
+                    }, 10000); // 10-second timeout for silent failures
+                };
+
+                try {
+                    recognition.start();
+                } catch (e) {
+                    voiceSpinner.classList.add('d-none'); // Hide spinner on failure to start
+                    if (voiceMessageContainer) {
+                        voiceMessageContainer.textContent = "No se pudo iniciar el reconocimiento. Asegúrate de que el micrófono esté permitido y no esté en uso.";
+                        voiceMessageContainer.style.display = 'block';
+                    }
                 }
 
-                if (transcript) {
-                    processVoiceCommand(transcript);
+            } else {
+                // --- API is not supported, show an alert ---
+                if (voiceMessageContainer) {
+                    voiceMessageContainer.textContent = "Lo sentimos, tu navegador no es compatible con el reconocimiento de voz.";
+                    voiceMessageContainer.style.display = 'block';
                 }
-            });
+            }
         });
     }
 
@@ -258,25 +308,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Handles language selection from the dropdown on the settings page.
+     * Handles language selection buttons on the settings page.
      */
-    const languageSelect = document.getElementById('languageSelect');
-    if (languageSelect) {
-        // Set initial value from localStorage
-        const savedLang = I18N.getSavedLang();
-        if (savedLang) {
-            languageSelect.value = savedLang;
-        }
+    const languageSelector = document.getElementById('language-selector');
+    if (languageSelector) {
+        const langButtons = languageSelector.querySelectorAll('.lang-btn');
 
-        languageSelect.addEventListener('change', () => {
-            const newLang = languageSelect.value;
-            I18N.saveLang(newLang);
-            I18N.applyToDOM();
-            // Also update voice recognition language if the module is available
-            if (window.VoiceControl && typeof VoiceControl.setLanguageForRecognition === 'function') {
-                VoiceControl.setLanguageForRecognition(newLang);
-            }
+        const setActiveButton = () => {
+            const currentLang = localStorage.getItem('language') || 'es';
+            langButtons.forEach(btn => {
+                if (btn.dataset.lang === currentLang) {
+                    btn.classList.add('btn-primary');
+                    btn.classList.remove('btn-secondary');
+                } else {
+                    btn.classList.add('btn-secondary');
+                    btn.classList.remove('btn-primary');
+                }
+            });
+        };
+
+        langButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const lang = e.currentTarget.dataset.lang;
+                // window.setLanguage is exposed by i18n.js
+                if (window.setLanguage) {
+                    window.setLanguage(lang).then(setActiveButton);
+                }
+            });
         });
+
+        // Set initial state
+        setActiveButton();
     }
 
     /**

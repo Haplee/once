@@ -32,7 +32,7 @@
     --primary-text-color: var(--primary-text-light);
 }
 
-html[data-bs-theme="dark"] {
+body.dark-mode {
     --bg-color: var(--bg-dark);
     --text-color: var(--text-dark);
     --card-bg-color: var(--card-bg-dark);
@@ -95,8 +95,7 @@ nav a:hover {
     color: var(--text-color) !important;
 }
 
-html[data-bs-theme="dark"] .table {
-
+body.dark-mode .table {
     color: var(--text-color) !important;
 }
 
@@ -105,9 +104,7 @@ html[data-bs-theme="dark"] .table {
     border-color: #ccc;
 }
 
-
-html[data-bs-theme="dark"] .form-switch .form-check-input {
-
+body.dark-mode .form-switch .form-check-input {
     background-color: rgba(255, 255, 255, 0.25) !important;
     border-color: rgba(255, 255, 255, 0.25) !important;
 }
@@ -131,16 +128,12 @@ html[data-bs-theme="dark"] .form-switch .form-check-input {
     box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--primary-color) 25%, transparent) !important;
 }
 
-
-html[data-bs-theme="dark"] .btn-outline-secondary {
-
+body.dark-mode .btn-outline-secondary {
     color: var(--text-color) !important;
     border-color: var(--border-color) !important;
 }
 
-
-html[data-bs-theme="dark"] .btn-outline-secondary:hover {
-
+body.dark-mode .btn-outline-secondary:hover {
     background-color: var(--primary-color) !important;
     color: var(--primary-text-color) !important;
 }
@@ -224,7 +217,7 @@ h1 {
     height: 24px;
 }
 
-html[data-bs-theme="dark"] .btn-secondary img {
+body.dark-mode .btn-secondary img {
     filter: invert(1);
 }
 
@@ -279,11 +272,11 @@ html[data-bs-theme="dark"] .btn-secondary img {
     display: none;
 }
 
-html[data-bs-theme="dark"] .logo .logo-light {
+body.dark-mode .logo .logo-light {
     display: none;
 }
 
-html[data-bs-theme="dark"] .logo .logo-dark {
+body.dark-mode .logo .logo-dark {
     display: block;
 }
 
