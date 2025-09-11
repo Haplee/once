@@ -3,7 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const getSavedTheme = () => localStorage.getItem('once_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
     const applyTheme = (theme) => {
-        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.setAttribute('data-bs-theme', theme);
+
         const themeToggleButton = document.getElementById('theme-toggle');
         if (themeToggleButton) {
             themeToggleButton.checked = theme === 'dark';

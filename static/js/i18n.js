@@ -1,4 +1,85 @@
 const I18N = (() => {
+    const en_translations = {
+        "appTitle": "Change Calculator - ONCE App",
+        "loginPageTitle": "Login - ONCE App",
+        "historyPageTitle": "Transaction History - ONCE App",
+        "settingsPageTitle": "Settings - ONCE App",
+        "navCalculator": "Calculator",
+        "navHistory": "History",
+        "navSettings": "Settings",
+        "loginTitle": "Login",
+        "loginUsernameLabel": "Username",
+        "loginPasswordLabel": "Password",
+        "loginButton": "Sign In",
+        "loginWelcome": "Welcome!",
+        "loginPrompt": "Please enter your credentials to continue.",
+        "loginForgotPassword": "Forgot your password?",
+        "loginNoAccount": "Don't have an account?",
+        "loginSignUp": "Sign Up",
+        "signupTitle": "Create an Account",
+        "signupPrompt": "Enter your details to register.",
+        "signupUsernameLabel": "Username",
+        "signupPasswordLabel": "Password",
+        "signupConfirmPasswordLabel": "Confirm Password",
+        "signupButton": "Sign Up",
+        "signupHasAccount": "Already have an account?",
+        "signupLoginLink": "Log in",
+        "signupErrorPasswordsMismatch": "Passwords do not match.",
+        "signupErrorUserExists": "Username already exists. Please choose another one.",
+        "signupErrorRequired": "Please fill in all fields.",
+        "signupSuccess": "Registration successful! You can now log in.",
+        "forgotPasswordTitle": "Recover Password",
+        "forgotPasswordPrompt": "Enter your username to receive instructions.",
+        "forgotPasswordUsernameLabel": "Username",
+        "forgotPasswordButton": "Send Instructions",
+        "forgotPasswordConfirmation": "If an account with that username exists, password recovery instructions have been sent to the associated email address.",
+        "backToLoginLink": "Back to login",
+        "loginErrorIncorrect": "Incorrect username or password.",
+        "loginErrorUnexpected": "An unexpected error occurred. Please try again later.",
+        "calculatorTitle": "Change Calculator",
+        "totalToPayLabel": "Total to Pay (€)",
+        "totalToPayPlaceholder": "e.g., 5.50",
+        "amountReceivedLabel": "Amount Received (€)",
+        "amountReceivedPlaceholder": "e.g., 10.00",
+        "calculateButton": "Calculate",
+        "voiceInputButtonLabel": "Use voice input",
+        "voiceErrorPermission": "Microphone access denied. To use this feature, please allow microphone access in your browser.",
+        "voiceErrorNoSpeech": "No speech was detected. Try again, speaking clearly near the microphone.",
+        "voiceErrorInfo": "Recognition error: {error}. Please try again.",
+        "voiceErrorTimeout": "Voice recognition timed out due to inactivity.",
+        "voiceErrorStart": "Could not start recognition. Make sure the microphone is allowed and not in use.",
+        "voiceErrorUnsupported": "Sorry, your browser does not support voice recognition.",
+        "changeResultText": "The change to return is: {change} €",
+        "invalidInputText": "Please enter valid amounts.",
+        "amountReceivedLowText": "The amount received is less than the total to pay.",
+        "historyTitle": "Transaction History",
+        "historyHeaderDate": "Date and Time",
+        "historyHeaderTotal": "Total Paid",
+        "historyHeaderReceived": "Amount Received",
+        "historyHeaderChange": "Change Returned",
+        "settingsTitle": "Settings",
+        "settingsDarkModeLabel": "Dark Mode",
+        "settingsLanguageLabel": "Language",
+        "settingsLangSpanish": "Spanish",
+        "settingsLangEnglish": "English",
+        "settingsLangPortuguese": "Portuguese",
+        "settingsLangGalician": "Galician",
+        "settingsLangBasque": "Basque",
+        "settingsLangCatalan": "Catalan",
+        "settingsSerialTitle": "External Device Communication",
+        "settingsSerialDescription": "Connect a device via USB to send and receive data.",
+        "settingsMachineModelLabel": "Machine Model",
+        "settingsMachineModelS": "Model S (Basic)",
+        "settingsMachineModelM": "Model M (Standard)",
+        "settingsMachineModelMax": "Model MAX (Complete)",
+        "settingsSerialConnect": "Connect Device",
+        "settingsSerialSend": "Send",
+        "settingsSerialPlaceholder": "Type a command...",
+        "settingsSerialConsoleLabel": "Communication console",
+        "logoutButton": "Log Out",
+        "reconocimiento_no_disponible": "Voice recognition is not available on this browser."
+    };
+
     const translations = {
         "es": {
             "appTitle": "Calculadora de Cambio - ONCE App",
@@ -17,10 +98,6 @@ const I18N = (() => {
             "loginForgotPassword": "¿Olvidaste tu contraseña?",
             "loginNoAccount": "¿No tienes una cuenta?",
             "loginSignUp": "Regístrate",
-            "illustrationTitle": "Bienvenido a la plataforma",
-            "illustrationSubtitle": "Accesibilidad e innovación a tu alcance.",
-            "loginRememberMe": "Recordarme",
-            "loginSocialPrompt": "O inicia sesión con",
             "signupTitle": "Crear una Cuenta",
             "signupPrompt": "Introduce tus datos para registrarte.",
             "signupUsernameLabel": "Nombre de usuario",
@@ -84,89 +161,11 @@ const I18N = (() => {
             "logoutButton": "Cerrar Sesión",
             "reconocimiento_no_disponible": "Reconocimiento de voz no disponible en este navegador."
         },
-        "en": {
-            "appTitle": "Change Calculator - ONCE App",
-            "loginPageTitle": "Login - ONCE App",
-            "historyPageTitle": "Transaction History - ONCE App",
-            "settingsPageTitle": "Settings - ONCE App",
-            "navCalculator": "Calculator",
-            "navHistory": "History",
-            "navSettings": "Settings",
-            "loginTitle": "Login",
-            "loginUsernameLabel": "Username",
-            "loginPasswordLabel": "Password",
-            "loginButton": "Sign In",
-            "loginWelcome": "Welcome!",
-            "loginPrompt": "Please enter your credentials to continue.",
-            "loginForgotPassword": "Forgot your password?",
-            "loginNoAccount": "Don't have an account?",
-            "loginSignUp": "Sign Up",
-            "illustrationTitle": "Welcome to the platform",
-            "illustrationSubtitle": "Accessibility and innovation at your fingertips.",
-            "loginRememberMe": "Remember me",
-            "loginSocialPrompt": "Or sign in with",
-            "signupTitle": "Create an Account",
-            "signupPrompt": "Enter your details to register.",
-            "signupUsernameLabel": "Username",
-            "signupPasswordLabel": "Password",
-            "signupConfirmPasswordLabel": "Confirm Password",
-            "signupButton": "Sign Up",
-            "signupHasAccount": "Already have an account?",
-            "signupLoginLink": "Log in",
-            "signupErrorPasswordsMismatch": "Passwords do not match.",
-            "signupErrorUserExists": "Username already exists. Please choose another one.",
-            "signupErrorRequired": "Please fill in all fields.",
-            "signupSuccess": "Registration successful! You can now log in.",
-            "forgotPasswordTitle": "Recover Password",
-            "forgotPasswordPrompt": "Enter your username to receive instructions.",
-            "forgotPasswordUsernameLabel": "Username",
-            "forgotPasswordButton": "Send Instructions",
-            "forgotPasswordConfirmation": "If an account with that username exists, password recovery instructions have been sent to the associated email address.",
-            "backToLoginLink": "Back to login",
-            "loginErrorIncorrect": "Incorrect username or password.",
-            "loginErrorUnexpected": "An unexpected error occurred. Please try again later.",
-            "calculatorTitle": "Change Calculator",
-            "totalToPayLabel": "Total to Pay (€)",
-            "totalToPayPlaceholder": "e.g., 5.50",
-            "amountReceivedLabel": "Amount Received (€)",
-            "amountReceivedPlaceholder": "e.g., 10.00",
-            "calculateButton": "Calculate",
-            "voiceInputButtonLabel": "Use voice input",
-            "voiceErrorPermission": "Microphone access denied. To use this feature, please allow microphone access in your browser.",
-            "voiceErrorNoSpeech": "No speech was detected. Try again, speaking clearly near the microphone.",
-            "voiceErrorInfo": "Recognition error: {error}. Please try again.",
-            "voiceErrorTimeout": "Voice recognition timed out due to inactivity.",
-            "voiceErrorStart": "Could not start recognition. Make sure the microphone is allowed and not in use.",
-            "voiceErrorUnsupported": "Sorry, your browser does not support voice recognition.",
-            "changeResultText": "The change to return is: {change} €",
-            "invalidInputText": "Please enter valid amounts.",
-            "amountReceivedLowText": "The amount received is less than the total to pay.",
-            "historyTitle": "Transaction History",
-            "historyHeaderDate": "Date and Time",
-            "historyHeaderTotal": "Total Paid",
-            "historyHeaderReceived": "Amount Received",
-            "historyHeaderChange": "Change Returned",
-            "settingsTitle": "Settings",
-            "settingsDarkModeLabel": "Dark Mode",
-            "settingsLanguageLabel": "Language",
-            "settingsLangSpanish": "Spanish",
-            "settingsLangEnglish": "English",
-            "settingsLangPortuguese": "Portuguese",
-            "settingsLangGalician": "Galician",
-            "settingsLangBasque": "Basque",
-            "settingsLangCatalan": "Catalan",
-            "settingsSerialTitle": "External Device Communication",
-            "settingsSerialDescription": "Connect a device via USB to send and receive data.",
-            "settingsMachineModelLabel": "Machine Model",
-            "settingsMachineModelS": "Model S (Basic)",
-            "settingsMachineModelM": "Model M (Standard)",
-            "settingsMachineModelMax": "Model MAX (Complete)",
-            "settingsSerialConnect": "Connect Device",
-            "settingsSerialSend": "Send",
-            "settingsSerialPlaceholder": "Type a command...",
-            "settingsSerialConsoleLabel": "Communication console",
-            "logoutButton": "Log Out"
-        }
+        "en": en_translations,
+        "pt": en_translations,
+        "gl": en_translations,
+        "eu": en_translations,
+        "ca": en_translations
     };
 
     let currentLang = getSavedLang() || 'es';
@@ -185,28 +184,29 @@ const I18N = (() => {
     }
 
     function applyToDOM() {
-        document.querySelectorAll('[data-i18n]').forEach(element => {
-            const key = element.getAttribute('data-i18n');
-            element.textContent = t(key);
+        // Translate text content
+        document.querySelectorAll('[data-i18n-key]').forEach(element => {
+            const key = element.getAttribute('data-i18n-key');
+            element.textContent = t(key) || key;
         });
-
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
-            const key = element.getAttribute('data-i18n-placeholder');
-            element.placeholder = t(key);
+        // Translate placeholder attributes
+        document.querySelectorAll('[data-i18n-placeholder-key]').forEach(element => {
+            const key = element.getAttribute('data-i18n-placeholder-key');
+            element.placeholder = t(key) || key;
         });
-
-        document.querySelectorAll('[data-i18n-aria]').forEach(element => {
-            const key = element.getAttribute('data-i18n-aria');
-            element.setAttribute('aria-label', t(key));
+        // Translate ARIA labels for accessibility
+        document.querySelectorAll('[data-i18n-aria-key]').forEach(element => {
+            const key = element.getAttribute('data-i18n-aria-key');
+            element.setAttribute('aria-label', t(key) || key);
         });
-
-        const titleKey = document.body.getAttribute('data-i18n-title');
-        if (titleKey) {
-            document.title = t(titleKey);
+        // Translate the page title
+        const pageKey = document.body.dataset.pageKey;
+        if (pageKey && t(pageKey)) {
+            document.title = t(pageKey);
         }
     }
 
-    // Initialize on script load
+    // Init
     currentLang = getSavedLang() || 'es';
 
     // Public API
@@ -220,7 +220,6 @@ const I18N = (() => {
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
-    // This will set the initial language and translate the page
     if (I18N) {
         I18N.applyToDOM();
     }
