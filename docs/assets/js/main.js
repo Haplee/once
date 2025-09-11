@@ -88,25 +88,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const change = amountReceived - totalAmount;
 
-            // --- Simulate a short delay for showing the spinner ---
-            setTimeout(() => {
-                // Hide spinner
-                resultSpinner.classList.add('d-none');
+            // Hide spinner
+            resultSpinner.classList.add('d-none');
 
-                // Format for display
-                const changeTextForDisplay = `El cambio a devolver es: ${change.toFixed(2)} €`;
-                resultDiv.textContent = changeTextForDisplay;
+            // Format for display
+            const changeTextForDisplay = `El cambio a devolver es: ${change.toFixed(2)} €`;
+            resultDiv.textContent = changeTextForDisplay;
 
-                // Format for speech using the new helper function
-                const speakableChange = formatChangeForSpeech(change);
-                const translations = window.currentTranslations || {};
-                const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
-                const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
-                speak(changeTextForSpeech); // Announce the result
+            // Format for speech using the new helper function
+            const speakableChange = formatChangeForSpeech(change);
+            const translations = window.currentTranslations || {};
+            const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
+            const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
+            speak(changeTextForSpeech); // Announce the result
 
-                saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
-                calculateBtn.disabled = false; // Re-enable button
-            }, 500); // 0.5 second delay
+            saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
+            calculateBtn.disabled = false; // Re-enable button
         });
     }
 
