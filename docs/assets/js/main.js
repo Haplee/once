@@ -243,30 +243,42 @@ document.addEventListener('DOMContentLoaded', () => {
      * @returns {string} - A natural language string (e.g., "dos euros con cincuenta céntimos").
      */
     function formatChangeForSpeech(change) {
+        const translations = window.currentTranslations || {};
         const euros = Math.floor(change);
         const cents = Math.round((change - euros) * 100);
 
+        const euroSingular = translations.speechEuroSingular || 'euro';
+        const euroPlural = translations.speechEuroPlural || 'euros';
+        const centSingular = translations.speechCentSingular || 'céntimo';
+        const centPlural = translations.speechCentPlural || 'céntimos';
+        const con = translations.speechCon || 'con';
+        const cero = translations.speechCero || 'cero';
+        const oneEuro = translations.speechOneEuro || `un ${euroSingular}`;
+        const oneCent = translations.speechOneCent || `un ${centSingular}`;
+
         if (euros === 0 && cents === 0) {
-            return 'cero euros';
+            return `${cero} ${euroPlural}`;
         }
 
         let parts = [];
 
-        if (euros === 1) {
-            parts.push('un euro');
-        } else if (euros > 1) {
-            parts.push(`${euros} euros`);
+        if (euros > 0) {
+            if (euros === 1) {
+                parts.push(oneEuro);
+            } else {
+                parts.push(`${euros} ${euroPlural}`);
+            }
         }
 
         if (cents > 0) {
             if (cents === 1) {
-                parts.push('un céntimo');
+                parts.push(oneCent);
             } else {
-                parts.push(`${cents} céntimos`);
+                parts.push(`${cents} ${centPlural}`);
             }
         }
 
-        return parts.join(' con ');
+        return parts.join(` ${con} `);
     }
 
     /**
@@ -276,7 +288,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function speak(text) {
         if ('speechSynthesis' in window) {
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'es-ES';
+            const lang = localStorage.getItem('language') || 'es';
+
+            const langMap = {
+                es: 'es-ES',
+                en: 'en-US',
+                gl: 'gl-ES',
+                ca: 'ca-ES',
+                va: 'ca-ES', // Valencian often uses Catalan voice pack
+                eu: 'eu-ES'
+            };
+
+            utterance.lang = langMap[lang] || 'es-ES';
             window.speechSynthesis.speak(utterance);
         }
     }
