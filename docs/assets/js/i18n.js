@@ -84,7 +84,8 @@ const allTranslations = {
         "speechCon": "con",
         "speechCero": "cero",
         "speechOneEuro": "un euro",
-        "speechOneCent": "un céntimo"
+        "speechOneCent": "un céntimo",
+        "speechChangeResultText": "El cambio a devolver es:"
     },
     "en": {
         "appTitle": "Change Calculator - ONCE App",
@@ -171,7 +172,8 @@ const allTranslations = {
         "speechCon": "with",
         "speechCero": "zero",
         "speechOneEuro": "one euro",
-        "speechOneCent": "one cent"
+        "speechOneCent": "one cent",
+        "speechChangeResultText": "The change to return is:"
     },
     "gl": {
         "appTitle": "Calculadora de Troco - ONCE App",
@@ -258,7 +260,8 @@ const allTranslations = {
         "speechCon": "con",
         "speechCero": "cero",
         "speechOneEuro": "un euro",
-        "speechOneCent": "un céntimo"
+        "speechOneCent": "un céntimo",
+        "speechChangeResultText": "O troco a devolver é:"
     },
     "ca": {
         "appTitle": "Calculadora de Canvi - ONCE App",
@@ -345,7 +348,8 @@ const allTranslations = {
         "speechCon": "amb",
         "speechCero": "zero",
         "speechOneEuro": "un euro",
-        "speechOneCent": "un cèntim"
+        "speechOneCent": "un cèntim",
+        "speechChangeResultText": "El canvi a tornar és:"
     },
     "va": {
         "appTitle": "Calculadora de Canvi - ONCE App",
@@ -432,7 +436,8 @@ const allTranslations = {
         "speechCon": "amb",
         "speechCero": "zero",
         "speechOneEuro": "un euro",
-        "speechOneCent": "un cèntim"
+        "speechOneCent": "un cèntim",
+        "speechChangeResultText": "El canvi a tornar és:"
     },
     "eu": {
         "appTitle": "Aldaketa Kalkulagailua - ONCE App",
@@ -519,7 +524,8 @@ const allTranslations = {
         "speechCon": "eta",
         "speechCero": "zero",
         "speechOneEuro": "euro bat",
-        "speechOneCent": "zentimo bat"
+        "speechOneCent": "zentimo bat",
+        "speechChangeResultText": "Itzuli beharreko aldaketa hau da:"
     }
 };
 

@@ -84,7 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Format for speech using the new helper function
                 const speakableChange = formatChangeForSpeech(change);
-                const changeTextForSpeech = `El cambio a devolver es: ${speakableChange}`;
+                const translations = window.currentTranslations || {};
+                const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
+                const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
                 speak(changeTextForSpeech); // Announce the result
 
                 saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
