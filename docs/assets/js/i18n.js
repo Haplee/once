@@ -1,4 +1,4 @@
-const allTranslations = {
+window.allTranslations = {
     "es": {
         "appTitle": "Calculadora de Cambio - ONCE App",
         "loginPageTitle": "Iniciar Sesión - ONCE App",

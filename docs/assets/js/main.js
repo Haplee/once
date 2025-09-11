@@ -92,12 +92,14 @@ document.addEventListener('DOMContentLoaded', () => {
             resultSpinner.classList.add('d-none');
 
             // Format for display
-            const changeTextForDisplay = `El cambio a devolver es: ${change.toFixed(2)} €`;
+            const lang = localStorage.getItem('language') || 'es';
+            const translations = window.currentTranslations || (window.allTranslations ? window.allTranslations[lang] : null) || {};
+            const changeTextForDisplayTemplate = translations.changeResultText || 'El cambio a devolver es: {change} €';
+            const changeTextForDisplay = changeTextForDisplayTemplate.replace('{change}', change.toFixed(2));
             resultDiv.textContent = changeTextForDisplay;
 
             // Format for speech using the new helper function
             const speakableChange = formatChangeForSpeech(change);
-            const translations = window.currentTranslations || {};
             const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
             const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
             speak(changeTextForSpeech); // Announce the result
