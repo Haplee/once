@@ -337,6 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 utterance.voice = voice;
             }
 
+
             // Set the callback for when the speech ends
             utterance.onend = onEndCallback;
 
