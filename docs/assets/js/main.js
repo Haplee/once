@@ -103,7 +103,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const speakableChange = formatChangeForSpeech(change);
                 const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
                 const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
-                speak(changeTextForSpeech); // Announce the result
+
+                // Announce the result and re-enable the button only when speech is done
+                speak(changeTextForSpeech, () => {
+                    calculateBtn.disabled = false;
+                });
 
                 saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
             } catch (error) {
@@ -111,9 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error en el cálculo:', error);
                 resultDiv.textContent = 'Ha ocurrido un error durante el cálculo. Por favor, inténtalo de nuevo.';
                 resultSpinner.classList.add('d-none'); // Hide spinner
-            } finally {
-                // Always re-enable the button, regardless of success or failure
-                calculateBtn.disabled = false; // Re-enable button
+                calculateBtn.disabled = false; // Re-enable button immediately on error
             }
         });
     }
@@ -310,8 +312,9 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Uses the SpeechSynthesis API to read text aloud.
      * @param {string} text - The text to be spoken.
+     * @param {function} onEndCallback - A function to call when speech is finished.
      */
-    function speak(text) {
+    function speak(text, onEndCallback) {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel(); // Cancel any ongoing speech
             const utterance = new SpeechSynthesisUtterance(text);
@@ -334,7 +337,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 utterance.voice = voice;
             }
 
+
+            // Set the callback for when the speech ends
+            utterance.onend = onEndCallback;
+
+            // Handle cases where onend might not fire (e.g., if there's an error)
+            utterance.onerror = (event) => {
+                console.error('SpeechSynthesis Error:', event.error);
+                if (typeof onEndCallback === 'function') {
+                    onEndCallback(); // Ensure callback runs even on error
+                }
+            };
+
             window.speechSynthesis.speak(utterance);
+        } else {
+            // If speech synthesis is not supported, run the callback immediately
+            if (typeof onEndCallback === 'function') {
+                onEndCallback();
+            }
         }
     }
 
