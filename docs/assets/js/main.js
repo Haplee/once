@@ -86,26 +86,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const change = amountReceived - totalAmount;
+            try {
+                const change = amountReceived - totalAmount;
 
-            // Hide spinner
-            resultSpinner.classList.add('d-none');
+                // Hide spinner
+                resultSpinner.classList.add('d-none');
 
-            // Format for display
-            const lang = localStorage.getItem('language') || 'es';
-            const translations = window.currentTranslations || (window.allTranslations ? window.allTranslations[lang] : null) || {};
-            const changeTextForDisplayTemplate = translations.changeResultText || 'El cambio a devolver es: {change} €';
-            const changeTextForDisplay = changeTextForDisplayTemplate.replace('{change}', change.toFixed(2));
-            resultDiv.textContent = changeTextForDisplay;
+                // Format for display
+                const lang = localStorage.getItem('language') || 'es';
+                const translations = window.currentTranslations || (window.allTranslations ? window.allTranslations[lang] : null) || {};
+                const changeTextForDisplayTemplate = translations.changeResultText || 'El cambio a devolver es: {change} €';
+                const changeTextForDisplay = changeTextForDisplayTemplate.replace('{change}', change.toFixed(2));
+                resultDiv.textContent = changeTextForDisplay;
 
-            // Format for speech using the new helper function
-            const speakableChange = formatChangeForSpeech(change);
-            const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
-            const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
-            speak(changeTextForSpeech); // Announce the result
+                // Format for speech using the new helper function
+                const speakableChange = formatChangeForSpeech(change);
+                const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
+                const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
+                speak(changeTextForSpeech); // Announce the result
 
-            saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
-            calculateBtn.disabled = false; // Re-enable button
+                saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
+            } catch (error) {
+                // Handle any errors that might occur during calculation
+                console.error('Error en el cálculo:', error);
+                resultDiv.textContent = 'Ha ocurrido un error durante el cálculo. Por favor, inténtalo de nuevo.';
+                resultSpinner.classList.add('d-none'); // Hide spinner
+            } finally {
+                // Always re-enable the button, regardless of success or failure
+                calculateBtn.disabled = false; // Re-enable button
+            }
         });
     }
 
