@@ -1,5 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
+    let voices = [];
 
+    const populateVoiceList = () => {
+        voices = window.speechSynthesis.getVoices();
+    };
+
+    populateVoiceList();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = populateVoiceList;
+    }
     /**
      * Applies the selected theme (light/dark) to the application.
      * It reads the theme from localStorage, applies it to the body, and updates
@@ -53,6 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const amountReceived = parseFloat(document.getElementById('amount-received').value);
             const resultDiv = document.getElementById('result');
             const resultSpinner = document.getElementById('result-spinner');
+            const calculateBtn = document.getElementById('calculate-btn');
+
+            // Disable button to prevent multiple submissions
+            calculateBtn.disabled = true;
 
             // Clear previous result and show spinner
             resultDiv.textContent = '';
@@ -62,33 +75,48 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isNaN(totalAmount) || isNaN(amountReceived)) {
                 resultDiv.textContent = 'Por favor, introduce importes válidos.';
                 resultSpinner.classList.add('d-none'); // Hide spinner
+                calculateBtn.disabled = false; // Re-enable button
                 return;
             }
 
             if (amountReceived < totalAmount) {
                 resultDiv.textContent = 'El importe recibido es menor que el total a pagar.';
                 resultSpinner.classList.add('d-none'); // Hide spinner
+                calculateBtn.disabled = false; // Re-enable button
                 return;
             }
 
-            const change = amountReceived - totalAmount;
+            try {
+                const change = amountReceived - totalAmount;
 
-            // --- Simulate a short delay for showing the spinner ---
-            setTimeout(() => {
                 // Hide spinner
                 resultSpinner.classList.add('d-none');
 
                 // Format for display
-                const changeTextForDisplay = `El cambio a devolver es: ${change.toFixed(2)} €`;
+                const lang = localStorage.getItem('language') || 'es';
+                const translations = window.currentTranslations || (window.allTranslations ? window.allTranslations[lang] : null) || {};
+                const changeTextForDisplayTemplate = translations.changeResultText || 'El cambio a devolver es: {change} €';
+                const changeTextForDisplay = changeTextForDisplayTemplate.replace('{change}', change.toFixed(2));
                 resultDiv.textContent = changeTextForDisplay;
 
                 // Format for speech using the new helper function
                 const speakableChange = formatChangeForSpeech(change);
-                const changeTextForSpeech = `El cambio a devolver es: ${speakableChange}`;
-                speak(changeTextForSpeech); // Announce the result
+                const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
+                const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
+
+                // Announce the result and re-enable the button only when speech is done
+                speak(changeTextForSpeech, () => {
+                    calculateBtn.disabled = false;
+                });
 
                 saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
-            }, 500); // 0.5 second delay
+            } catch (error) {
+                // Handle any errors that might occur during calculation
+                console.error('Error en el cálculo:', error);
+                resultDiv.textContent = 'Ha ocurrido un error durante el cálculo. Por favor, inténtalo de nuevo.';
+                resultSpinner.classList.add('d-none'); // Hide spinner
+                calculateBtn.disabled = false; // Re-enable button immediately on error
+            }
         });
     }
 
@@ -243,41 +271,89 @@ document.addEventListener('DOMContentLoaded', () => {
      * @returns {string} - A natural language string (e.g., "dos euros con cincuenta céntimos").
      */
     function formatChangeForSpeech(change) {
+        const translations = window.currentTranslations || {};
         const euros = Math.floor(change);
         const cents = Math.round((change - euros) * 100);
 
+        const euroSingular = translations.speechEuroSingular || 'euro';
+        const euroPlural = translations.speechEuroPlural || 'euros';
+        const centSingular = translations.speechCentSingular || 'céntimo';
+        const centPlural = translations.speechCentPlural || 'céntimos';
+        const con = translations.speechCon || 'con';
+        const cero = translations.speechCero || 'cero';
+        const oneEuro = translations.speechOneEuro || `un ${euroSingular}`;
+        const oneCent = translations.speechOneCent || `un ${centSingular}`;
+
         if (euros === 0 && cents === 0) {
-            return 'cero euros';
+            return `${cero} ${euroPlural}`;
         }
 
         let parts = [];
 
-        if (euros === 1) {
-            parts.push('un euro');
-        } else if (euros > 1) {
-            parts.push(`${euros} euros`);
+        if (euros > 0) {
+            if (euros === 1) {
+                parts.push(oneEuro);
+            } else {
+                parts.push(`${euros} ${euroPlural}`);
+            }
         }
 
         if (cents > 0) {
             if (cents === 1) {
-                parts.push('un céntimo');
+                parts.push(oneCent);
             } else {
-                parts.push(`${cents} céntimos`);
+                parts.push(`${cents} ${centPlural}`);
             }
         }
 
-        return parts.join(' con ');
+        return parts.join(` ${con} `);
     }
 
     /**
      * Uses the SpeechSynthesis API to read text aloud.
      * @param {string} text - The text to be spoken.
+     * @param {function} onEndCallback - A function to call when speech is finished.
      */
-    function speak(text) {
+    function speak(text, onEndCallback) {
         if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); // Cancel any ongoing speech
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'es-ES';
+            const lang = localStorage.getItem('language') || 'es';
+
+            const langMap = {
+                es: 'es-ES',
+                en: 'en-US',
+                gl: 'gl-ES',
+                ca: 'ca-ES',
+                va: 'ca-ES', // Valencian often uses Catalan voice pack
+                eu: 'eu-ES'
+            };
+
+            const targetLang = langMap[lang] || 'es-ES';
+            utterance.lang = targetLang;
+
+            const voice = voices.find(v => v.lang === targetLang);
+            if (voice) {
+                utterance.voice = voice;
+            }
+
+            // Set the callback for when the speech ends
+            utterance.onend = onEndCallback;
+
+            // Handle cases where onend might not fire (e.g., if there's an error)
+            utterance.onerror = (event) => {
+                console.error('SpeechSynthesis Error:', event.error);
+                if (typeof onEndCallback === 'function') {
+                    onEndCallback(); // Ensure callback runs even on error
+                }
+            };
+
             window.speechSynthesis.speak(utterance);
+        } else {
+            // If speech synthesis is not supported, run the callback immediately
+            if (typeof onEndCallback === 'function') {
+                onEndCallback();
+            }
         }
     }
 
