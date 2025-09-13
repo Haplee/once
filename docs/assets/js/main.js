@@ -359,21 +359,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Saves the transaction data to the browser's localStorage.
+     * Saves the transaction data asynchronously using a Web Worker.
      * @param {object} data - The transaction data.
      */
     function saveToHistory(data) {
-        // Get existing history or initialize a new array
-        const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
+        if (window.Worker) {
+            const historyWorker = new Worker('assets/js/historyWorker.js');
 
-        // Add a timestamp
-        data.timestamp = new Date().toLocaleString('es-ES');
+            historyWorker.onmessage = (e) => {
+                if (e.data.status === 'error') {
+                    console.error('Error saving history in worker:', e.data.error);
+                }
+                historyWorker.terminate(); // Clean up the worker
+            };
 
-        // Add the new transaction to the beginning of the array
-        history.unshift(data);
+            historyWorker.onerror = (e) => {
+                console.error(`Error in historyWorker: ${e.message}`, e);
+                historyWorker.terminate(); // Clean up the worker
+            };
 
-        // Save back to localStorage
-        localStorage.setItem('transactionHistory', JSON.stringify(history));
+            // The worker adds the timestamp, so we don't do it here.
+            historyWorker.postMessage({ action: 'save', payload: data });
+        } else {
+            // Fallback for older browsers that don't support Web Workers.
+            // This is the original synchronous code.
+            try {
+                const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
+                data.timestamp = new Date().toLocaleString('es-ES');
+                history.unshift(data);
+                localStorage.setItem('transactionHistory', JSON.stringify(history));
+            } catch (error) {
+                console.error('Error saving history without worker:', error);
+            }
+        }
     }
 
     /**
