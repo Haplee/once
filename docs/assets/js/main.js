@@ -120,10 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Attach speech recognition to the new buttons
-    if (window.onceSpeech && window.onceSpeech.attachSpeechToInput) {
-        window.onceSpeech.attachSpeechToInput('#mic-total-amount', '#total-amount', '#mic-status-total-amount');
-        window.onceSpeech.attachSpeechToInput('#mic-amount-received', '#amount-received', '#mic-status-amount-received');
+    // Initialize the new single-button speech recognition
+    if (window.initializeSpeechRecognition) {
+        window.initializeSpeechRecognition();
     }
 
     /**
@@ -311,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// --- BEGIN: Refactored Speech Recognition Module ---
+// --- BEGIN: Single Button Speech Recognition Module ---
 
 // Helper functions for parsing Spanish numbers from text
 const SMALL_WORDS = {
@@ -355,44 +354,73 @@ function wordsToNumber(text) {
 
 function parseSpanishAmount(text) {
     if (!text) return null;
-    text = text.toLowerCase().trim();
-    text = text.replace(/€/g, ' euros ').replace(/centimo[s]?/g, ' centimos ').replace(/\s+/g, ' ');
 
-    const numMatch = text.match(/-?\d+[.,]?\d*/);
+    let normalizedText = text.toLowerCase().trim();
+    // Normalize currency symbols and common words
+    normalizedText = normalizedText.replace(/€/g, ' euros ');
+    normalizedText = normalizedText.replace(/centimo[s]?/g, ' centimos ');
+    normalizedText = normalizedText.replace(/\s+y\s+/g, ' con '); // "y" -> "con"
+    normalizedText = normalizedText.replace(/\s+/g, ' '); // Collapse multiple spaces
+
+    // 1. Direct number match (e.g., "2,50", "2.50", "25")
+    // This is the most reliable, so we check it first.
+    const numMatch = normalizedText.match(/-?\d+([.,]\d*)?/);
     if (numMatch) {
-        let numStr = numMatch[0].replace(',', '.');
+        const numStr = numMatch[0].replace(',', '.');
         const val = parseFloat(numStr);
         if (!isNaN(val)) return parseFloat(val.toFixed(2));
     }
 
-    const eurosConMatch = text.match(/([\w\s-]+?)\s*(?:euros|euro)\s*(?:con\s*)?([\w\s-]+?)\s*(?:centimos|centimo)?$/);
+    // 2. "X [euros] con Y [centimos]" (flexible)
+    // This now handles "dos con cincuenta", "dos euros cincuenta", "dos euros con cincuenta"
+    const eurosConMatch = normalizedText.match(/([\w\s-]+?)\s*(?:euros|euro)?\s*con\s*([\w\s-]+?)\s*(?:centimos)?$/);
     if (eurosConMatch) {
-        const euros = wordsToNumber(esToDigits(eurosConMatch[1].trim()));
-        const cents = wordsToNumber(esToDigits(eurosConMatch[2].trim()));
-        if (euros != null && cents != null) return parseFloat((euros + (cents / 100)).toFixed(2));
+        const eurosPart = eurosConMatch[1].trim();
+        const centsPart = eurosConMatch[2].trim();
+        const euros = wordsToNumber(esToDigits(eurosPart));
+        const cents = wordsToNumber(esToDigits(centsPart));
+        if (euros != null && cents != null) {
+            return parseFloat((euros + (cents / 100)).toFixed(2));
+        }
     }
 
-    const commaPointMatch = text.match(/([\w\s-]+)\s*(?:coma|punto)\s*([\w\s-]+)/);
+    // 3. "X coma/punto Y"
+    const commaPointMatch = normalizedText.match(/([\w\s-]+)\s*(?:coma|punto)\s*([\w\s-]+)/);
     if (commaPointMatch) {
         const left = wordsToNumber(esToDigits(commaPointMatch[1].trim()));
         const right = wordsToNumber(esToDigits(commaPointMatch[2].trim()));
         if (left != null && right != null) {
-            const finalVal = parseFloat(`${left}.${right.toString().padStart(2, '0')}`);
+            const rightStr = right.toString().padStart(2, '0');
+            const finalVal = parseFloat(`${left}.${rightStr}`);
             return parseFloat(finalVal.toFixed(2));
         }
     }
 
-    const onlyWords = wordsToNumber(esToDigits(text));
+    // 4. "X euros"
+    const eurosOnlyMatch = normalizedText.match(/([\w\s-]+?)\s*(?:euros|euro)$/);
+    if (eurosOnlyMatch) {
+        const euros = wordsToNumber(esToDigits(eurosOnlyMatch[1].trim()));
+        if (euros != null) return parseFloat(euros.toFixed(2));
+    }
+
+    // 5. "Y centimos"
+    const centsOnlyMatch = normalizedText.match(/([\w\s-]+?)\s*centimos$/);
+    if (centsOnlyMatch) {
+        const cents = wordsToNumber(esToDigits(centsOnlyMatch[1].trim()));
+        if (cents != null) return parseFloat((cents / 100).toFixed(2));
+    }
+
+    // 6. Just a number word (e.g., "veinticinco")
+    const onlyWords = wordsToNumber(esToDigits(normalizedText));
     if (onlyWords != null) return parseFloat(onlyWords.toFixed(2));
 
-    return null;
+    return null; // Return null if no pattern matches
 }
 
 
 // --- Single, shared speech recognition instance ---
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
-let activeSpeechContext = { input: null, status: null };
 
 if (SpeechRecognition) {
     recognition = new SpeechRecognition();
@@ -400,72 +428,88 @@ if (SpeechRecognition) {
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     recognition.continuous = false;
+}
+
+// --- Public API to initialize speech recognition ---
+function initializeSpeechRecognition() {
+    const micBtn = document.querySelector('#mic-btn');
+    const statusSpan = document.querySelector('#mic-status');
+    const totalAmountInput = document.querySelector('#total-amount');
+    const amountReceivedInput = document.querySelector('#amount-received');
+
+    if (!recognition) {
+        if (micBtn) micBtn.disabled = true;
+        if (statusSpan) statusSpan.textContent = 'Reconocimiento de voz no soportado.';
+        return;
+    }
 
     recognition.onstart = () => {
-        console.log('[speech] Recognition started.');
-        if (activeSpeechContext.status) activeSpeechContext.status.textContent = 'Escuchando...';
+        if (statusSpan) statusSpan.textContent = 'Escuchando...';
     };
 
     recognition.onend = () => {
-        console.log('[speech] Recognition ended.');
-        if (activeSpeechContext.status) activeSpeechContext.status.textContent = ''; // Clear status
+        if (statusSpan) statusSpan.textContent = ''; // Clear status
     };
 
     recognition.onerror = (event) => {
         console.error('[speech] Recognition error:', event.error);
-        if (activeSpeechContext.status) {
-            activeSpeechContext.status.textContent = `Error: ${event.error}`;
-        }
+        if (statusSpan) statusSpan.textContent = `Error: ${event.error}`;
     };
 
     recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript.trim();
         console.log('[speech] Transcript:', transcript);
 
-        if (activeSpeechContext.input && activeSpeechContext.status) {
-            activeSpeechContext.status.textContent = 'Procesando...';
+        const activeInput = document.activeElement;
+        if (activeInput && (activeInput === totalAmountInput || activeInput === amountReceivedInput)) {
+            if (statusSpan) statusSpan.textContent = 'Procesando...';
             const parsed = parseSpanishAmount(transcript);
             if (parsed != null) {
-                activeSpeechContext.input.value = parsed.toFixed(2);
-                activeSpeechContext.status.textContent = 'Valor reconocido';
+                activeInput.value = parsed.toFixed(2);
+                if (statusSpan) statusSpan.textContent = 'Valor reconocido';
             } else {
-                activeSpeechContext.status.textContent = 'No se pudo interpretar.';
+                if (statusSpan) statusSpan.textContent = 'No se pudo interpretar.';
             }
             setTimeout(() => {
-                if (activeSpeechContext.status) activeSpeechContext.status.textContent = '';
+                if (statusSpan) statusSpan.textContent = '';
+            }, 2500);
+        } else {
+            // This case should ideally not happen if the button is clicked after focusing an input,
+            // but it's good to handle it.
+            if (statusSpan) statusSpan.textContent = 'Por favor, selecciona un campo primero.';
+             setTimeout(() => {
+                if (statusSpan) statusSpan.textContent = '';
             }, 2500);
         }
     };
-}
-
-// --- Public API to attach speech recognition to UI elements ---
-function attachSpeechToInput(micBtnSelector, inputSelector, statusSelector) {
-    const micBtn = document.querySelector(micBtnSelector);
-    const input = document.querySelector(inputSelector);
-    const status = document.querySelector(statusSelector);
-
-    if (!recognition) {
-        if (micBtn) micBtn.disabled = true;
-        if (status) status.textContent = 'Reconocimiento de voz no soportado.';
-        return;
-    }
 
     micBtn.addEventListener('click', () => {
-        // Stop any ongoing recognition before starting a new one
-        try { recognition.stop(); } catch (e) { /* ignore */ }
+        const activeInput = document.activeElement;
 
-        activeSpeechContext = { input, status };
+        if (activeInput !== totalAmountInput && activeInput !== amountReceivedInput) {
+            if (statusSpan) statusSpan.textContent = 'Por favor, selecciona un campo de texto para rellenar.';
+            setTimeout(() => {
+                if (statusSpan) statusSpan.textContent = '';
+            }, 2500);
+            return;
+        }
+
+        try {
+            recognition.stop();
+        } catch (e) { /* ignore if not running */ }
+
         try {
             console.log('[speech] Calling recognition.start()');
             recognition.start();
         } catch (err) {
             console.error('[speech] Error calling recognition.start():', err);
-            if (status) status.textContent = 'Error al iniciar.';
+            if (statusSpan) statusSpan.textContent = 'Error al iniciar.';
+
         }
     });
 }
 
 // Expose the function to the global scope for the existing UI code
-window.onceSpeech = { attachSpeechToInput };
+window.initializeSpeechRecognition = initializeSpeechRecognition;
 
-// --- END: Refactored Speech Recognition Module ---
+// --- END: Single Button Speech Recognition Module ---
