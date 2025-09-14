@@ -504,6 +504,7 @@ function initializeSpeechRecognition() {
         } catch (err) {
             console.error('[speech] Error calling recognition.start():', err);
             if (statusSpan) statusSpan.textContent = 'Error al iniciar.';
+
         }
     });
 }
