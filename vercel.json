@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "outputDirectory": "docs",
+  "rewrites": [
+    { "source": "/configuracion", "destination": "/configuracion.html" },
+    { "source": "/forgot_password", "destination": "/forgot_password.html" },
+    { "source": "/history", "destination": "/history.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/signup", "destination": "/signup.html" },
+    { "source": "/", "destination": "/index.html" }
+  ]
+}

@@ -172,47 +172,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Uses the SpeechSynthesis API to read text aloud.
+     * This version includes a safety timeout to prevent the UI from freezing
+     * if the `onend` event never fires.
      * @param {string} text - The text to be spoken.
      * @param {function} onEndCallback - A function to call when speech is finished.
      */
     function speak(text, onEndCallback) {
-        if ('speechSynthesis' in window) {
+        if ('speechSynthesis' in window && text) {
             window.speechSynthesis.cancel(); // Cancel any ongoing speech
+
             const utterance = new SpeechSynthesisUtterance(text);
             const lang = localStorage.getItem('language') || 'es';
-
             const langMap = {
-                es: 'es-ES',
-                en: 'en-US',
-                gl: 'gl-ES',
-                ca: 'ca-ES',
-                va: 'ca-ES', // Valencian often uses Catalan voice pack
-                eu: 'eu-ES'
+                es: 'es-ES', en: 'en-US', gl: 'gl-ES',
+                ca: 'ca-ES', va: 'ca-ES', eu: 'eu-ES'
             };
+            utterance.lang = langMap[lang] || 'es-ES';
 
-            const targetLang = langMap[lang] || 'es-ES';
-            utterance.lang = targetLang;
-
-            const voice = voices.find(v => v.lang === targetLang);
+            const voice = voices.find(v => v.lang === utterance.lang);
             if (voice) {
                 utterance.voice = voice;
             }
 
-
-            // Set the callback for when the speech ends
-            utterance.onend = onEndCallback;
-
-            // Handle cases where onend might not fire (e.g., if there's an error)
-            utterance.onerror = (event) => {
-                console.error('SpeechSynthesis Error:', event.error);
+            let spoken = false;
+            const onEnd = () => {
+                if (spoken) return; // Ensure the callback is only called once
+                spoken = true;
                 if (typeof onEndCallback === 'function') {
-                    onEndCallback(); // Ensure callback runs even on error
+                    onEndCallback();
                 }
             };
 
+            utterance.onend = onEnd;
+            utterance.onerror = (event) => {
+                console.error('SpeechSynthesis Error:', event.error);
+                onEnd(); // Ensure callback runs even on error
+            };
+
+            // Safety timeout: if speech doesn't end after 10 seconds, fire callback anyway
+            setTimeout(onEnd, 10000);
+
             window.speechSynthesis.speak(utterance);
         } else {
-            // If speech synthesis is not supported, run the callback immediately
+            // If speech synthesis is not supported or text is empty, run the callback immediately
             if (typeof onEndCallback === 'function') {
                 onEndCallback();
             }
