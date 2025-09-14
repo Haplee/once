@@ -1,7 +1,13 @@
 {
   "version": 2,
   "public": "docs",
-  "builds": [
-    { "src": "/*", "use": "@vercel/static" }
+  "routes": [
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/configuracion", "dest": "/configuracion.html" },
+    { "src": "/forgot_password", "dest": "/forgot_password.html" },
+    { "src": "/history", "dest": "/history.html" },
+    { "src": "/login", "dest": "/login.html" },
+    { "src": "/signup", "dest": "/signup.html" },
+    { "src": "/", "dest": "/index.html" }
   ]
 }
