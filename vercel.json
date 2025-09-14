@@ -1,13 +1,12 @@
 {
   "version": 2,
-  "public": "docs",
-  "routes": [
-    { "src": "/assets/(.*)", "dest": "/assets/$1" },
-    { "src": "/configuracion", "dest": "/configuracion.html" },
-    { "src": "/forgot_password", "dest": "/forgot_password.html" },
-    { "src": "/history", "dest": "/history.html" },
-    { "src": "/login", "dest": "/login.html" },
-    { "src": "/signup", "dest": "/signup.html" },
-    { "src": "/", "dest": "/index.html" }
+  "outputDirectory": "docs",
+  "rewrites": [
+    { "source": "/configuracion", "destination": "/configuracion.html" },
+    { "source": "/forgot_password", "destination": "/forgot_password.html" },
+    { "source": "/history", "destination": "/history.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/signup", "destination": "/signup.html" },
+    { "source": "/", "destination": "/index.html" }
   ]
 }
