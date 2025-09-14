@@ -120,149 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /**
-     * Handles the voice input button click, checking for compatibility first.
-     */
-    const voiceInputBtn = document.getElementById('voice-input-btn');
-    if (voiceInputBtn) {
-        const voiceMessageContainer = document.getElementById('voice-message-container');
-        const voiceSpinner = document.getElementById('voice-spinner');
-
-        voiceInputBtn.addEventListener('click', () => {
-            // Reset message container and hide spinner on new attempt
-            if (voiceMessageContainer) {
-                voiceMessageContainer.style.display = 'none';
-                voiceMessageContainer.textContent = ''; // Clear previous messages
-            }
-            voiceSpinner.classList.add('d-none');
-
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-            if (SpeechRecognition) {
-                // --- API is supported, proceed with recognition ---
-                const recognition = new SpeechRecognition();
-                recognition.lang = 'es-ES';
-                recognition.interimResults = false;
-                let recognitionTimeout;
-
-                const stopRecognition = () => {
-                    clearTimeout(recognitionTimeout);
-                    voiceSpinner.classList.add('d-none');
-                };
-
-                recognition.onresult = (event) => {
-                    stopRecognition();
-                    const command = event.results[event.results.length - 1][0].transcript;
-                    processVoiceCommand(command);
-                };
-
-                recognition.onerror = (event) => {
-                    stopRecognition();
-                    let errorMessage = '';
-                    if (event.error === 'not-allowed' || event.error === 'aborted') {
-                        errorMessage = 'Acceso al micrófono denegado. Para usar esta función, por favor, permite el acceso al micrófono en tu navegador.';
-                    } else if (event.error === 'no-speech') {
-                        errorMessage = 'No se ha detectado ninguna voz. Inténtalo de nuevo hablando cerca del micrófono.';
-                    } else {
-                        errorMessage = `Error de reconocimiento: ${event.error}. Por favor, inténtalo de nuevo.`;
-                    }
-                    if (voiceMessageContainer) {
-                        voiceMessageContainer.textContent = errorMessage;
-                        voiceMessageContainer.style.display = 'block';
-                    }
-                };
-
-                recognition.onstart = () => {
-                    // Show spinner and hide any previous messages
-                    voiceSpinner.classList.remove('d-none');
-                    if (voiceMessageContainer) {
-                        voiceMessageContainer.style.display = 'none';
-                    }
-                    recognitionTimeout = setTimeout(() => {
-                        recognition.stop();
-                        if (voiceMessageContainer) {
-                            voiceMessageContainer.textContent = "El reconocimiento de voz se detuvo por inactividad.";
-                            voiceMessageContainer.style.display = 'block';
-                        }
-                        stopRecognition(); // Also hide spinner on timeout
-                    }, 10000); // 10-second timeout for silent failures
-                };
-
-                try {
-                    recognition.start();
-                } catch (e) {
-                    voiceSpinner.classList.add('d-none'); // Hide spinner on failure to start
-                    if (voiceMessageContainer) {
-                        voiceMessageContainer.textContent = "No se pudo iniciar el reconocimiento. Asegúrate de que el micrófono esté permitido y no esté en uso.";
-                        voiceMessageContainer.style.display = 'block';
-                    }
-                }
-
-            } else {
-                // --- API is not supported, show an alert ---
-                if (voiceMessageContainer) {
-                    voiceMessageContainer.textContent = "Lo sentimos, tu navegador no es compatible con el reconocimiento de voz.";
-                    voiceMessageContainer.style.display = 'block';
-                }
-            }
-        });
-    }
-
-    /**
-     * Processes the transcribed voice command to fill form fields using more natural language.
-     * @param {string} command - The voice command transcribed by the SpeechRecognition API.
-     */
-    function processVoiceCommand(command) {
-        const totalAmountInput = document.getElementById('total-amount');
-        const amountReceivedInput = document.getElementById('amount-received');
-        const commandLower = command.toLowerCase();
-
-        // Regular expression to find all numbers (including decimals with comma or dot)
-        const numberRegex = /(\d+([,.]\d+)?)/g;
-        const matches = commandLower.match(numberRegex);
-
-        if (!matches) {
-            // No numbers detected in the voice command.
-            return;
-        }
-
-        const numbers = matches.map(n => parseFloat(n.replace(',', '.')));
-
-        // If two or more numbers are detected, the user's primary request is to use positional assignment.
-        // First number is total, second is amount received. This overwrites existing values.
-        if (numbers.length >= 2) {
-            totalAmountInput.value = numbers[0];
-            amountReceivedInput.value = numbers[1];
-        }
-        // If only one number is detected, we use keywords to determine its destination to avoid ambiguity.
-        else if (numbers.length === 1) {
-            const number = numbers[0];
-
-            // Refined keyword lists to be more specific and avoid overlap.
-            const totalKeywords = ['total', 'cuenta', 'cobrar', 'es']; // 'pagar' was too ambiguous
-            const receivedKeywords = ['recibido', 'entregado', 'paga con', 'me da'];
-
-            const isForTotal = totalKeywords.some(k => commandLower.includes(k));
-            const isForReceived = receivedKeywords.some(k => commandLower.includes(k));
-
-            // Assign to the field explicitly mentioned.
-            if (isForTotal && !isForReceived) {
-                totalAmountInput.value = number;
-            } else if (isForReceived && !isForTotal) {
-                amountReceivedInput.value = number;
-            } else {
-                // If keywords are ambiguous (e.g., none, or for both), fall back to a simple rule:
-                // fill the first empty field, starting with 'total'.
-                if (totalAmountInput.value === '') {
-                    totalAmountInput.value = number;
-                } else if (amountReceivedInput.value === '') {
-                    amountReceivedInput.value = number;
-                } else {
-                    // If both fields are already filled, update the amount received as it's the most likely to be said last.
-                    amountReceivedInput.value = number;
-                }
-            }
-        }
+    // Attach speech recognition to the new buttons
+    if (window.onceSpeech && window.onceSpeech.attachSpeechToInput) {
+        window.onceSpeech.attachSpeechToInput('#mic-total-amount', '#total-amount', '#mic-status-total-amount');
+        window.onceSpeech.attachSpeechToInput('#mic-amount-received', '#amount-received', '#mic-status-amount-received');
     }
 
     /**
@@ -311,47 +172,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Uses the SpeechSynthesis API to read text aloud.
+     * This version includes a safety timeout to prevent the UI from freezing
+     * if the `onend` event never fires.
      * @param {string} text - The text to be spoken.
      * @param {function} onEndCallback - A function to call when speech is finished.
      */
     function speak(text, onEndCallback) {
-        if ('speechSynthesis' in window) {
+        if ('speechSynthesis' in window && text) {
             window.speechSynthesis.cancel(); // Cancel any ongoing speech
+
             const utterance = new SpeechSynthesisUtterance(text);
             const lang = localStorage.getItem('language') || 'es';
-
             const langMap = {
-                es: 'es-ES',
-                en: 'en-US',
-                gl: 'gl-ES',
-                ca: 'ca-ES',
-                va: 'ca-ES', // Valencian often uses Catalan voice pack
-                eu: 'eu-ES'
+                es: 'es-ES', en: 'en-US', gl: 'gl-ES',
+                ca: 'ca-ES', va: 'ca-ES', eu: 'eu-ES'
             };
+            utterance.lang = langMap[lang] || 'es-ES';
 
-            const targetLang = langMap[lang] || 'es-ES';
-            utterance.lang = targetLang;
-
-            const voice = voices.find(v => v.lang === targetLang);
+            const voice = voices.find(v => v.lang === utterance.lang);
             if (voice) {
                 utterance.voice = voice;
             }
 
-
-            // Set the callback for when the speech ends
-            utterance.onend = onEndCallback;
-
-            // Handle cases where onend might not fire (e.g., if there's an error)
-            utterance.onerror = (event) => {
-                console.error('SpeechSynthesis Error:', event.error);
+            let spoken = false;
+            const onEnd = () => {
+                if (spoken) return; // Ensure the callback is only called once
+                spoken = true;
                 if (typeof onEndCallback === 'function') {
-                    onEndCallback(); // Ensure callback runs even on error
+                    onEndCallback();
                 }
             };
 
+            utterance.onend = onEnd;
+            utterance.onerror = (event) => {
+                console.error('SpeechSynthesis Error:', event.error);
+                onEnd(); // Ensure callback runs even on error
+            };
+
+            // Safety timeout: if speech doesn't end after 10 seconds, fire callback anyway
+            setTimeout(onEnd, 10000);
+
             window.speechSynthesis.speak(utterance);
         } else {
-            // If speech synthesis is not supported, run the callback immediately
+            // If speech synthesis is not supported or text is empty, run the callback immediately
             if (typeof onEndCallback === 'function') {
                 onEndCallback();
             }
@@ -447,3 +310,162 @@ document.addEventListener('DOMContentLoaded', () => {
         // });
     }
 });
+
+// --- BEGIN: Módulo de reconocimiento de voz (añadido por fix/speech-recognition)
+;(function(window){
+  'use strict';
+
+  function createRecognition(onResultText) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return null;
+
+    const r = new SpeechRecognition();
+    r.lang = 'es-ES';
+    r.interimResults = false;
+    r.maxAlternatives = 1;
+    r.continuous = false;
+
+    r.onstart = () => console.log('[speech] started');
+    r.onend = () => console.log('[speech] ended');
+    r.onerror = (e) => console.error('[speech] error', e);
+    r.onresult = (ev) => {
+      const transcript = Array.from(ev.results)
+        .map(res => res[0].transcript)
+        .join(' ')
+        .trim();
+      console.log('[speech] transcript:', transcript);
+      onResultText(transcript);
+    };
+
+    return r;
+  }
+
+  // Normalización básica de frases en español a número (float euros)
+  function parseSpanishAmount(text) {
+    if (!text) return null;
+    text = text.toLowerCase().trim();
+
+    // Reemplazos rápidos comunes
+    text = text.replace(/€/g, ' euros ');
+    text = text.replace(/centimo[s]?/g, ' centimos ');
+    text = text.replace(/\s+/g, ' ');
+
+    // Si contiene formato numérico con coma o punto: extraer primer número válido
+    const numMatch = text.match(/-?\d+[.,]?\d*/);
+    if (numMatch) {
+      let numStr = numMatch[0].replace(',', '.');
+      const val = parseFloat(numStr);
+      if (!isNaN(val)) return parseFloat(val.toFixed(2));
+    }
+
+    // "X euros con Y" o "X euros Y centimos"
+    const eurosConMatch = text.match(/([\w\s-]+?)\s*(?:euros|euro)\s*(?:con\s*)?([\w\s-]+?)\s*(?:centimos|centimo)?$/);
+    if (eurosConMatch) {
+      const eurosText = eurosConMatch[1].trim();
+      const centsText = eurosConMatch[2].trim();
+      const euros = wordsToNumber(esToDigits(eurosText));
+      const cents = wordsToNumber(esToDigits(centsText));
+      if (euros != null && cents != null) {
+        return parseFloat((euros + (cents / 100)).toFixed(2));
+      }
+    }
+
+    // "X coma Y" o "X punto Y"
+    const commaPointMatch = text.match(/([\w\s-]+)\s*(?:coma|punto)\s*([\w\s-]+)/);
+    if (commaPointMatch) {
+      const left = wordsToNumber(esToDigits(commaPointMatch[1].trim()));
+      const right = wordsToNumber(esToDigits(commaPointMatch[2].trim()));
+      if (left != null && right != null) {
+        const rightStr = right.toString().padStart(2, '0');
+        const finalVal = parseFloat(`${left}.${rightStr}`);
+        return parseFloat(finalVal.toFixed(2));
+      }
+    }
+
+    // Intentar convertir frase completa (ej: "veinticinco")
+    const onlyWords = wordsToNumber(esToDigits(text));
+    if (onlyWords != null) return parseFloat(onlyWords.toFixed(2));
+
+    return null;
+  }
+
+  // ---------- util: conversión básica de palabras españolas a número
+  const SMALL = {
+    'cero':0,'uno':1,'dos':2,'tres':3,'cuatro':4,'cinco':5,'seis':6,'siete':7,'ocho':8,'nueve':9,
+    'diez':10,'once':11,'doce':12,'trece':13,'catorce':14,'quince':15,'dieciseis':16,'dieciséis':16,
+    'diecisiete':17,'dieciocho':18,'diecinueve':19,'veinte':20,'veintiuno':21,'veintidos':22,'veintidós':22,
+    'treinta':30,'cuarenta':40,'cincuenta':50,'sesenta':60,'setenta':70,'ochenta':80,'noventa':90,
+    'cien':100,'ciento':100,'doscientos':200,'trescientos':300,'cuatrocientos':400,'quinientos':500,
+    'seiscientos':600,'setecientos':700,'ochocientos':800,'novecientos':900,'mil':1000
+  };
+
+  function esToDigits(text) {
+    return text.replace(/[^a-z0-9áéíóúñ\s-]/gi, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function wordsToNumber(text) {
+    if (!text) return null;
+    text = text.trim().toLowerCase();
+    if (/^-?\d+([.,]\d+)?$/.test(text)) return parseFloat(text.replace(',', '.'));
+    const tokens = text.split(/[\s-]+/);
+    let total = 0;
+    let current = 0;
+    for (let t of tokens) {
+      if (SMALL.hasOwnProperty(t)) {
+        const val = SMALL[t];
+        if (val === 1000) {
+          current = (current || 1) * 1000;
+          total += current;
+          current = 0;
+        } else if (val >= 100) {
+          current = (current || 1) * val;
+        } else {
+          current += val;
+        }
+      } else {
+        return null;
+      }
+    }
+    return total + current;
+  }
+
+  // API pública: atacha reconocimiento a botones/inputs
+  function attachSpeechToInput(micBtnSelector, inputSelector, statusSelector) {
+    const micBtn = document.querySelector(micBtnSelector);
+    const input = document.querySelector(inputSelector);
+    const status = document.querySelector(statusSelector);
+    const r = createRecognition(async (transcript) => {
+      if (status) status.textContent = 'Procesando...';
+      const parsed = parseSpanishAmount(transcript);
+      if (parsed != null) {
+        if (input) input.value = parsed.toFixed(2);
+        if (status) status.textContent = 'Valor reconocido';
+      } else {
+        if (status) status.textContent = 'No se pudo interpretar: ' + transcript;
+      }
+      setTimeout(()=> { if (status) status.textContent = ''; }, 2200);
+    });
+
+    if (!r) {
+      if (micBtn) micBtn.disabled = true;
+      if (status) status.textContent = 'Reconocimiento por voz no disponible en este navegador.';
+      return;
+    }
+
+    micBtn && micBtn.addEventListener('click', async () => {
+      try {
+        if (status) status.textContent = 'Hablando...';
+        r.start();
+      } catch (err) {
+        console.error('Could not start recognition', err);
+        if (status) status.textContent = 'Error al iniciar micrófono';
+      }
+    });
+  }
+
+  // Exponer util en namespace global para que la UI existente lo invoque
+  window.onceSpeech = window.onceSpeech || {};
+  window.onceSpeech.attachSpeechToInput = attachSpeechToInput;
+
+})(window);
+// --- END: Módulo de reconocimiento de voz

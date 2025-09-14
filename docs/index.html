@@ -35,26 +35,28 @@
                     <form id="change-form">
                         <div class="form-group">
                             <label for="total-amount" data-i18n-key="totalToPayLabel"></label>
-                            <input type="number" id="total-amount" data-i18n-placeholder-key="totalToPayPlaceholder" step="0.10" required>
+                            <div class="input-group">
+                                <input type="number" id="total-amount" class="form-control" data-i18n-placeholder-key="totalToPayPlaceholder" step="0.10" required>
+                                <button type="button" id="mic-total-amount" class="btn btn-secondary" aria-label="Grabar importe total" title="Grabar importe total">
+                                    <img src="assets/img/microphone.svg" alt="Icono de micrófono" class="icon-mic">
+                                </button>
+                            </div>
+                            <span id="mic-status-total-amount" class="form-text text-muted" role="status" aria-live="polite"></span>
                         </div>
                         <div class="form-group">
                             <label for="amount-received" data-i18n-key="amountReceivedLabel"></label>
-                            <input type="number" id="amount-received" data-i18n-placeholder-key="amountReceivedPlaceholder" step="0.10" required>
+                            <div class="input-group">
+                                <input type="number" id="amount-received" class="form-control" data-i18n-placeholder-key="amountReceivedPlaceholder" step="0.10" required>
+                                <button type="button" id="mic-amount-received" class="btn btn-secondary" aria-label="Grabar importe recibido" title="Grabar importe recibido">
+                                    <img src="assets/img/microphone.svg" alt="Icono de micrófono" class="icon-mic">
+                                </button>
+                            </div>
+                            <span id="mic-status-amount-received" class="form-text text-muted" role="status" aria-live="polite"></span>
                         </div>
                         <div class="form-actions">
-                            <button type="submit" id="calculate-btn" class="btn btn-primary" data-i18n-key="calculateButton"></button>
-                            <button type="button" id="voice-input-btn" class="btn btn-secondary" data-i18n-aria-key="voiceInputButtonLabel">
-                                <img src="assets/img/microphone.svg" alt="Icono de micrófono" class="icon-mic">
-                            </button>
+                            <button type="submit" id="calculate-btn" class="btn btn-primary w-100" data-i18n-key="calculateButton"></button>
                         </div>
                     </form>
-                    <div id="voice-message-container" aria-live="assertive">
-                        <div id="voice-spinner" class="d-none">
-                            <div class="spinner-grow text-secondary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                        </div>
-                    </div>
                     <div id="result" class="result-container" aria-live="polite">
                         <div id="result-spinner" class="d-none">
                             <div class="spinner-grow text-success" role="status">
