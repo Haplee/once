@@ -120,10 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Attach speech recognition to the new buttons
-    if (window.onceSpeech && window.onceSpeech.attachSpeechToInput) {
-        window.onceSpeech.attachSpeechToInput('#mic-total-amount', '#total-amount', '#mic-status-total-amount');
-        window.onceSpeech.attachSpeechToInput('#mic-amount-received', '#amount-received', '#mic-status-amount-received');
+    // Initialize the new single-button speech recognition
+    if (window.initializeSpeechRecognition) {
+        window.initializeSpeechRecognition();
     }
 
     /**
@@ -311,99 +310,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// --- BEGIN: Módulo de reconocimiento de voz (añadido por fix/speech-recognition)
-;(function(window){
-  'use strict';
+// --- BEGIN: Single Button Speech Recognition Module ---
 
-  function createRecognition(onResultText) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return null;
-
-    const r = new SpeechRecognition();
-    r.lang = 'es-ES';
-    r.interimResults = false;
-    r.maxAlternatives = 1;
-    r.continuous = false;
-
-    r.onstart = () => console.log('[speech] started');
-    r.onend = () => console.log('[speech] ended');
-    r.onerror = (e) => console.error('[speech] error', e);
-    r.onresult = (ev) => {
-      const transcript = Array.from(ev.results)
-        .map(res => res[0].transcript)
-        .join(' ')
-        .trim();
-      console.log('[speech] transcript:', transcript);
-      onResultText(transcript);
-    };
-
-    return r;
-  }
-
-  // Normalización básica de frases en español a número (float euros)
-  function parseSpanishAmount(text) {
-    if (!text) return null;
-    text = text.toLowerCase().trim();
-
-    // Reemplazos rápidos comunes
-    text = text.replace(/€/g, ' euros ');
-    text = text.replace(/centimo[s]?/g, ' centimos ');
-    text = text.replace(/\s+/g, ' ');
-
-    // Si contiene formato numérico con coma o punto: extraer primer número válido
-    const numMatch = text.match(/-?\d+[.,]?\d*/);
-    if (numMatch) {
-      let numStr = numMatch[0].replace(',', '.');
-      const val = parseFloat(numStr);
-      if (!isNaN(val)) return parseFloat(val.toFixed(2));
-    }
-
-    // "X euros con Y" o "X euros Y centimos"
-    const eurosConMatch = text.match(/([\w\s-]+?)\s*(?:euros|euro)\s*(?:con\s*)?([\w\s-]+?)\s*(?:centimos|centimo)?$/);
-    if (eurosConMatch) {
-      const eurosText = eurosConMatch[1].trim();
-      const centsText = eurosConMatch[2].trim();
-      const euros = wordsToNumber(esToDigits(eurosText));
-      const cents = wordsToNumber(esToDigits(centsText));
-      if (euros != null && cents != null) {
-        return parseFloat((euros + (cents / 100)).toFixed(2));
-      }
-    }
-
-    // "X coma Y" o "X punto Y"
-    const commaPointMatch = text.match(/([\w\s-]+)\s*(?:coma|punto)\s*([\w\s-]+)/);
-    if (commaPointMatch) {
-      const left = wordsToNumber(esToDigits(commaPointMatch[1].trim()));
-      const right = wordsToNumber(esToDigits(commaPointMatch[2].trim()));
-      if (left != null && right != null) {
-        const rightStr = right.toString().padStart(2, '0');
-        const finalVal = parseFloat(`${left}.${rightStr}`);
-        return parseFloat(finalVal.toFixed(2));
-      }
-    }
-
-    // Intentar convertir frase completa (ej: "veinticinco")
-    const onlyWords = wordsToNumber(esToDigits(text));
-    if (onlyWords != null) return parseFloat(onlyWords.toFixed(2));
-
-    return null;
-  }
-
-  // ---------- util: conversión básica de palabras españolas a número
-  const SMALL = {
+// Helper functions for parsing Spanish numbers from text
+const SMALL_WORDS = {
     'cero':0,'uno':1,'dos':2,'tres':3,'cuatro':4,'cinco':5,'seis':6,'siete':7,'ocho':8,'nueve':9,
     'diez':10,'once':11,'doce':12,'trece':13,'catorce':14,'quince':15,'dieciseis':16,'dieciséis':16,
     'diecisiete':17,'dieciocho':18,'diecinueve':19,'veinte':20,'veintiuno':21,'veintidos':22,'veintidós':22,
     'treinta':30,'cuarenta':40,'cincuenta':50,'sesenta':60,'setenta':70,'ochenta':80,'noventa':90,
     'cien':100,'ciento':100,'doscientos':200,'trescientos':300,'cuatrocientos':400,'quinientos':500,
     'seiscientos':600,'setecientos':700,'ochocientos':800,'novecientos':900,'mil':1000
-  };
+};
 
-  function esToDigits(text) {
+function esToDigits(text) {
     return text.replace(/[^a-z0-9áéíóúñ\s-]/gi, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  }
+}
 
-  function wordsToNumber(text) {
+function wordsToNumber(text) {
     if (!text) return null;
     text = text.trim().toLowerCase();
     if (/^-?\d+([.,]\d+)?$/.test(text)) return parseFloat(text.replace(',', '.'));
@@ -411,61 +334,181 @@ document.addEventListener('DOMContentLoaded', () => {
     let total = 0;
     let current = 0;
     for (let t of tokens) {
-      if (SMALL.hasOwnProperty(t)) {
-        const val = SMALL[t];
-        if (val === 1000) {
-          current = (current || 1) * 1000;
-          total += current;
-          current = 0;
-        } else if (val >= 100) {
-          current = (current || 1) * val;
+        if (SMALL_WORDS.hasOwnProperty(t)) {
+            const val = SMALL_WORDS[t];
+            if (val === 1000) {
+                current = (current || 1) * 1000;
+                total += current;
+                current = 0;
+            } else if (val >= 100) {
+                current = (current || 1) * val;
+            } else {
+                current += val;
+            }
         } else {
-          current += val;
+            return null;
         }
-      } else {
-        return null;
-      }
     }
     return total + current;
-  }
+}
 
-  // API pública: atacha reconocimiento a botones/inputs
-  function attachSpeechToInput(micBtnSelector, inputSelector, statusSelector) {
-    const micBtn = document.querySelector(micBtnSelector);
-    const input = document.querySelector(inputSelector);
-    const status = document.querySelector(statusSelector);
-    const r = createRecognition(async (transcript) => {
-      if (status) status.textContent = 'Procesando...';
-      const parsed = parseSpanishAmount(transcript);
-      if (parsed != null) {
-        if (input) input.value = parsed.toFixed(2);
-        if (status) status.textContent = 'Valor reconocido';
-      } else {
-        if (status) status.textContent = 'No se pudo interpretar: ' + transcript;
-      }
-      setTimeout(()=> { if (status) status.textContent = ''; }, 2200);
-    });
+function parseSpanishAmount(text) {
+    if (!text) return null;
 
-    if (!r) {
-      if (micBtn) micBtn.disabled = true;
-      if (status) status.textContent = 'Reconocimiento por voz no disponible en este navegador.';
-      return;
+    let normalizedText = text.toLowerCase().trim();
+    // Normalize currency symbols and common words
+    normalizedText = normalizedText.replace(/€/g, ' euros ');
+    normalizedText = normalizedText.replace(/centimo[s]?/g, ' centimos ');
+    normalizedText = normalizedText.replace(/\s+y\s+/g, ' con '); // "y" -> "con"
+    normalizedText = normalizedText.replace(/\s+/g, ' '); // Collapse multiple spaces
+
+    // 1. Direct number match (e.g., "2,50", "2.50", "25")
+    // This is the most reliable, so we check it first.
+    const numMatch = normalizedText.match(/-?\d+([.,]\d*)?/);
+    if (numMatch) {
+        const numStr = numMatch[0].replace(',', '.');
+        const val = parseFloat(numStr);
+        if (!isNaN(val)) return parseFloat(val.toFixed(2));
     }
 
-    micBtn && micBtn.addEventListener('click', async () => {
-      try {
-        if (status) status.textContent = 'Hablando...';
-        r.start();
-      } catch (err) {
-        console.error('Could not start recognition', err);
-        if (status) status.textContent = 'Error al iniciar micrófono';
-      }
+    // 2. "X [euros] con Y [centimos]" (flexible)
+    // This now handles "dos con cincuenta", "dos euros cincuenta", "dos euros con cincuenta"
+    const eurosConMatch = normalizedText.match(/([\w\s-]+?)\s*(?:euros|euro)?\s*con\s*([\w\s-]+?)\s*(?:centimos)?$/);
+    if (eurosConMatch) {
+        const eurosPart = eurosConMatch[1].trim();
+        const centsPart = eurosConMatch[2].trim();
+        const euros = wordsToNumber(esToDigits(eurosPart));
+        const cents = wordsToNumber(esToDigits(centsPart));
+        if (euros != null && cents != null) {
+            return parseFloat((euros + (cents / 100)).toFixed(2));
+        }
+    }
+
+    // 3. "X coma/punto Y"
+    const commaPointMatch = normalizedText.match(/([\w\s-]+)\s*(?:coma|punto)\s*([\w\s-]+)/);
+    if (commaPointMatch) {
+        const left = wordsToNumber(esToDigits(commaPointMatch[1].trim()));
+        const right = wordsToNumber(esToDigits(commaPointMatch[2].trim()));
+        if (left != null && right != null) {
+            const rightStr = right.toString().padStart(2, '0');
+            const finalVal = parseFloat(`${left}.${rightStr}`);
+            return parseFloat(finalVal.toFixed(2));
+        }
+    }
+
+    // 4. "X euros"
+    const eurosOnlyMatch = normalizedText.match(/([\w\s-]+?)\s*(?:euros|euro)$/);
+    if (eurosOnlyMatch) {
+        const euros = wordsToNumber(esToDigits(eurosOnlyMatch[1].trim()));
+        if (euros != null) return parseFloat(euros.toFixed(2));
+    }
+
+    // 5. "Y centimos"
+    const centsOnlyMatch = normalizedText.match(/([\w\s-]+?)\s*centimos$/);
+    if (centsOnlyMatch) {
+        const cents = wordsToNumber(esToDigits(centsOnlyMatch[1].trim()));
+        if (cents != null) return parseFloat((cents / 100).toFixed(2));
+    }
+
+    // 6. Just a number word (e.g., "veinticinco")
+    const onlyWords = wordsToNumber(esToDigits(normalizedText));
+    if (onlyWords != null) return parseFloat(onlyWords.toFixed(2));
+
+    return null; // Return null if no pattern matches
+}
+
+
+// --- Single, shared speech recognition instance ---
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false;
+}
+
+// --- Public API to initialize speech recognition ---
+function initializeSpeechRecognition() {
+    const micBtn = document.querySelector('#mic-btn');
+    const statusSpan = document.querySelector('#mic-status');
+    const totalAmountInput = document.querySelector('#total-amount');
+    const amountReceivedInput = document.querySelector('#amount-received');
+
+    if (!recognition) {
+        if (micBtn) micBtn.disabled = true;
+        if (statusSpan) statusSpan.textContent = 'Reconocimiento de voz no soportado.';
+        return;
+    }
+
+    recognition.onstart = () => {
+        if (statusSpan) statusSpan.textContent = 'Escuchando...';
+    };
+
+    recognition.onend = () => {
+        if (statusSpan) statusSpan.textContent = ''; // Clear status
+    };
+
+    recognition.onerror = (event) => {
+        console.error('[speech] Recognition error:', event.error);
+        if (statusSpan) statusSpan.textContent = `Error: ${event.error}`;
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.trim();
+        console.log('[speech] Transcript:', transcript);
+
+        const activeInput = document.activeElement;
+        if (activeInput && (activeInput === totalAmountInput || activeInput === amountReceivedInput)) {
+            if (statusSpan) statusSpan.textContent = 'Procesando...';
+            const parsed = parseSpanishAmount(transcript);
+            if (parsed != null) {
+                activeInput.value = parsed.toFixed(2);
+                if (statusSpan) statusSpan.textContent = 'Valor reconocido';
+            } else {
+                if (statusSpan) statusSpan.textContent = 'No se pudo interpretar.';
+            }
+            setTimeout(() => {
+                if (statusSpan) statusSpan.textContent = '';
+            }, 2500);
+        } else {
+            // This case should ideally not happen if the button is clicked after focusing an input,
+            // but it's good to handle it.
+            if (statusSpan) statusSpan.textContent = 'Por favor, selecciona un campo primero.';
+             setTimeout(() => {
+                if (statusSpan) statusSpan.textContent = '';
+            }, 2500);
+        }
+    };
+
+    micBtn.addEventListener('click', () => {
+        const activeInput = document.activeElement;
+
+        if (activeInput !== totalAmountInput && activeInput !== amountReceivedInput) {
+            if (statusSpan) statusSpan.textContent = 'Por favor, selecciona un campo de texto para rellenar.';
+            setTimeout(() => {
+                if (statusSpan) statusSpan.textContent = '';
+            }, 2500);
+            return;
+        }
+
+        try {
+            recognition.stop();
+        } catch (e) { /* ignore if not running */ }
+
+        try {
+            console.log('[speech] Calling recognition.start()');
+            recognition.start();
+        } catch (err) {
+            console.error('[speech] Error calling recognition.start():', err);
+            if (statusSpan) statusSpan.textContent = 'Error al iniciar.';
+        }
     });
-  }
+}
 
-  // Exponer util en namespace global para que la UI existente lo invoque
-  window.onceSpeech = window.onceSpeech || {};
-  window.onceSpeech.attachSpeechToInput = attachSpeechToInput;
+// Expose the function to the global scope for the existing UI code
+window.initializeSpeechRecognition = initializeSpeechRecognition;
 
-})(window);
-// --- END: Módulo de reconocimiento de voz
+// --- END: Single Button Speech Recognition Module ---
