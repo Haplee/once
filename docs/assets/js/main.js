@@ -88,19 +88,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if(calculateBtn) calculateBtn.disabled = true;
 
             // Clear previous result and show spinner
+
             if(resultDiv) resultDiv.textContent = '';
+
             if (resultSpinner) resultSpinner.classList.remove('d-none');
 
             // --- Basic Validation ---
             if (isNaN(totalAmount) || isNaN(amountReceived)) {
+
                 if(resultDiv) resultDiv.textContent = 'Por favor, introduce importes válidos.';
+
                 if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
                 if (calculateBtn) calculateBtn.disabled = false; // Re-enable button
                 return;
             }
 
             if (amountReceived < totalAmount) {
+
                 if(resultDiv) resultDiv.textContent = 'El importe recibido es menor que el total a pagar.';
+
                 if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
                 if (calculateBtn) calculateBtn.disabled = false; // Re-enable button
                 return;
@@ -140,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Handle any errors that might occur during calculation
                 console.error('Error en el cálculo:', error);
                 if(resultDiv) resultDiv.textContent = 'Ha ocurrido un error durante el cálculo. Por favor, inténtalo de nuevo.';
+
                 if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
                 if (calculateBtn) calculateBtn.disabled = false; // Re-enable button immediately on error
             }
@@ -516,6 +523,7 @@ function initializeSpeechRecognition() {
     const totalAmountInput = getEl('#total-amount', { type: 'id', silent: true });
     const amountReceivedInput = getEl('#amount-received', { type: 'id', silent: true });
 
+
     if (!recognition || isMobileSafari()) {
         if (micBtn) {
             micBtn.disabled = true;
@@ -524,6 +532,15 @@ function initializeSpeechRecognition() {
         if (statusSpan) {
             statusSpan.textContent = 'Reconocimiento de voz no disponible en este navegador.';
         }
+        return;
+    }
+
+
+    if (!micBtn || !statusSpan || !totalAmountInput || !amountReceivedInput) {
+        console.warn('Elementos UI de micrófono faltan; deshabilitando reconocimiento de voz.', {
+            micBtn, statusSpan, totalAmountInput, amountReceivedInput
+        });
+        if (micBtn) micBtn.disabled = true;
         return;
     }
 
