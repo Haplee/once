@@ -85,22 +85,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const amountReceived = parseFloat(amountReceivedInput.value);
 
             // Disable button to prevent multiple submissions
-            calculateBtn.disabled = true;
+            if(calculateBtn) calculateBtn.disabled = true;
 
             // Clear previous result and show spinner
-            resultDiv.textContent = '';
+
+            if(resultDiv) resultDiv.textContent = '';
+
             if (resultSpinner) resultSpinner.classList.remove('d-none');
 
             // --- Basic Validation ---
             if (isNaN(totalAmount) || isNaN(amountReceived)) {
-                resultDiv.textContent = 'Por favor, introduce importes válidos.';
+
+                if(resultDiv) resultDiv.textContent = 'Por favor, introduce importes válidos.';
+
                 if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
                 if (calculateBtn) calculateBtn.disabled = false; // Re-enable button
                 return;
             }
 
             if (amountReceived < totalAmount) {
-                resultDiv.textContent = 'El importe recibido es menor que el total a pagar.';
+
+                if(resultDiv) resultDiv.textContent = 'El importe recibido es menor que el total a pagar.';
+
                 if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
                 if (calculateBtn) calculateBtn.disabled = false; // Re-enable button
                 return;
@@ -117,7 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const translations = window.currentTranslations || (window.allTranslations ? window.allTranslations[lang] : null) || {};
                 const changeTextForDisplayTemplate = translations.changeResultText || 'El cambio a devolver es: {change} €';
                 const changeTextForDisplay = changeTextForDisplayTemplate.replace('{change}', change.toFixed(2));
-                resultDiv.textContent = changeTextForDisplay;
+                if(resultDiv) resultDiv.textContent = changeTextForDisplay;
+
+                // Scroll result into view on mobile
+                if (resultDiv && typeof resultDiv.scrollIntoView === 'function') {
+                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
 
                 // Format for speech using the new helper function
                 const speakableChange = formatChangeForSpeech(change);
@@ -134,7 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 // Handle any errors that might occur during calculation
                 console.error('Error en el cálculo:', error);
-                resultDiv.textContent = 'Ha ocurrido un error durante el cálculo. Por favor, inténtalo de nuevo.';
+                if(resultDiv) resultDiv.textContent = 'Ha ocurrido un error durante el cálculo. Por favor, inténtalo de nuevo.';
+
                 if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
                 if (calculateBtn) calculateBtn.disabled = false; // Re-enable button immediately on error
             }
@@ -358,6 +370,30 @@ document.addEventListener('DOMContentLoaded', () => {
         //     console.log('Arduino API response:', result);
         // });
     }
+
+    // --- Mobile & Accessibility Enhancements ---
+
+    /**
+     * Detects if the browser is Mobile Safari.
+     * @returns {boolean} True if Mobile Safari, false otherwise.
+     */
+    function isMobileSafari() {
+        return /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && /iP(hone|od|ad)/i.test(navigator.userAgent);
+    }
+
+    // Add a passive listener for better scroll performance on touch devices.
+    window.addEventListener('touchstart', () => {}, { passive: true });
+
+    // Stop speech recognition if the page becomes hidden.
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && recognition) {
+            try {
+                recognition.stop();
+            } catch (e) {
+                // Ignore errors if recognition wasn't active.
+            }
+        }
+    });
 });
 
 // --- BEGIN: Single Button Speech Recognition Module ---
@@ -487,9 +523,24 @@ function initializeSpeechRecognition() {
     const totalAmountInput = getEl('#total-amount', { type: 'id', silent: true });
     const amountReceivedInput = getEl('#amount-received', { type: 'id', silent: true });
 
-    if (!recognition) {
+
+    if (!recognition || isMobileSafari()) {
+        if (micBtn) {
+            micBtn.disabled = true;
+            micBtn.style.display = 'none';
+        }
+        if (statusSpan) {
+            statusSpan.textContent = 'Reconocimiento de voz no disponible en este navegador.';
+        }
+        return;
+    }
+
+
+    if (!micBtn || !statusSpan || !totalAmountInput || !amountReceivedInput) {
+        console.warn('Elementos UI de micrófono faltan; deshabilitando reconocimiento de voz.', {
+            micBtn, statusSpan, totalAmountInput, amountReceivedInput
+        });
         if (micBtn) micBtn.disabled = true;
-        if (statusSpan) statusSpan.textContent = 'Reconocimiento de voz no soportado.';
         return;
     }
 
