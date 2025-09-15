@@ -555,6 +555,7 @@ function initializeSpeechRecognition() {
     // Attach dynamic result handler that closes over current inputs/statusSpan
     rec.onresult = (event) => {
         const transcript = event?.results?.[0]?.[0]?.transcript?.trim().toLowerCase() || '';
+
         console.log('[speech] Transcript:', transcript);
 
         if (statusSpan) statusSpan.textContent = 'Procesando...';
@@ -573,6 +574,7 @@ function initializeSpeechRecognition() {
                 separatorIndex = index;
                 break;
             }
+
         }
 
         if (separatorIndex !== -1) {
@@ -597,6 +599,7 @@ function initializeSpeechRecognition() {
             if (statusSpan) statusSpan.textContent = 'Valores reconocidos';
         } else {
             if (statusSpan) statusSpan.textContent = 'No se pudo interpretar.';
+
         }
         setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
     };
@@ -607,6 +610,7 @@ function initializeSpeechRecognition() {
         setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
     };
 
+
     // Manage click handler safely (remove previous if present)
     if (_micHandler && micBtn) {
         try { micBtn.removeEventListener('click', _micHandler); } catch (e) { /* ignore */ }
@@ -614,11 +618,13 @@ function initializeSpeechRecognition() {
     }
 
     _micHandler = () => {
+
         // Toggle behavior: if recognizing, stop
         if (_isRecognizing) {
             try { rec.stop(); } catch (e) { try { rec.abort(); } catch(_){} }
             return;
         }
+
 
         // Try to start
         try {
