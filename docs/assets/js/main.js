@@ -519,8 +519,8 @@ function createRecognitionInstance() {
 function initializeSpeechRecognition() {
     const micBtn = getEl('#mic-btn', { type: 'qs', silent: true });
     const statusSpan = getEl('#mic-status', { type: 'qs', silent: true });
-    const totalAmountInput = getEl('#total-amount', { type: 'id', silent: true });
-    const amountReceivedInput = getEl('#amount-received', { type: 'id', silent: true });
+    const totalAmountInput = getEl('total-amount', { type: 'id', silent: true });
+    const amountReceivedInput = getEl('amount-received', { type: 'id', silent: true });
 
     console.log('[speech] initializeSpeechRecognition called', {
         micBtnExists: !!micBtn, statusSpanExists: !!statusSpan,
