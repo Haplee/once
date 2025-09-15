@@ -1,3 +1,13 @@
+// Helper: get element safely
+function getEl(selector, opts = {}) {
+    // opts.type: 'id'|'qs' for logging clarity
+    const el = opts.type === 'id' ? document.getElementById(selector) : document.querySelector(selector);
+    if (!el && !opts.silent) {
+        console.warn(`[getEl] Elemento no encontrado: ${selector}`, opts);
+    }
+    return el;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     let voices = [];
 
@@ -29,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Update the toggle state on the config page if it exists.
-        const themeToggleButton = document.getElementById('theme-toggle');
+        const themeToggleButton = getEl('theme-toggle', { type: 'id', silent: true });
         if (themeToggleButton) {
             themeToggleButton.checked = theme === 'dark-mode';
         }
@@ -39,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTheme();
 
     // Add event listener for the toggle on the config page
-    const themeToggleButton = document.getElementById('theme-toggle');
+    const themeToggleButton = getEl('theme-toggle', { type: 'id', silent: true });
     if (themeToggleButton) {
         themeToggleButton.addEventListener('change', function() {
             const newTheme = this.checked ? 'dark-mode' : 'light-mode';
@@ -53,36 +63,46 @@ document.addEventListener('DOMContentLoaded', () => {
      * Handles the main calculator form submission.
      * It calculates the change, displays it, speaks it, and saves it to history.
      */
-    const form = document.getElementById('change-form');
+    const form = getEl('change-form', { type: 'id' });
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const totalAmount = parseFloat(document.getElementById('total-amount').value);
-            const amountReceived = parseFloat(document.getElementById('amount-received').value);
-            const resultDiv = document.getElementById('result');
-            const resultSpinner = document.getElementById('result-spinner');
-            const calculateBtn = document.getElementById('calculate-btn');
+            const totalAmountInput = getEl('total-amount', { type: 'id' });
+            const amountReceivedInput = getEl('amount-received', { type: 'id' });
+            const resultDiv = getEl('result', { type: 'id' });
+            const resultSpinner = getEl('result-spinner', { type: 'id', silent: true });
+            const calculateBtn = getEl('calculate-btn', { type: 'id' });
+
+            if (!totalAmountInput || !amountReceivedInput || !resultDiv || !calculateBtn) {
+                console.error('Faltan elementos esenciales del formulario', { totalAmountInput, amountReceivedInput, resultDiv, calculateBtn, resultSpinner });
+                if (resultSpinner) resultSpinner.classList.add('d-none');
+                if (calculateBtn) calculateBtn.disabled = false;
+                return;
+            }
+
+            const totalAmount = parseFloat(totalAmountInput.value);
+            const amountReceived = parseFloat(amountReceivedInput.value);
 
             // Disable button to prevent multiple submissions
-            calculateBtn.disabled = true;
+            if(calculateBtn) calculateBtn.disabled = true;
 
             // Clear previous result and show spinner
-            resultDiv.textContent = '';
-            resultSpinner.classList.remove('d-none');
+            if(resultDiv) resultDiv.textContent = '';
+            if (resultSpinner) resultSpinner.classList.remove('d-none');
 
             // --- Basic Validation ---
             if (isNaN(totalAmount) || isNaN(amountReceived)) {
-                resultDiv.textContent = 'Por favor, introduce importes válidos.';
-                resultSpinner.classList.add('d-none'); // Hide spinner
-                calculateBtn.disabled = false; // Re-enable button
+                if(resultDiv) resultDiv.textContent = 'Por favor, introduce importes válidos.';
+                if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
+                if (calculateBtn) calculateBtn.disabled = false; // Re-enable button
                 return;
             }
 
             if (amountReceived < totalAmount) {
-                resultDiv.textContent = 'El importe recibido es menor que el total a pagar.';
-                resultSpinner.classList.add('d-none'); // Hide spinner
-                calculateBtn.disabled = false; // Re-enable button
+                if(resultDiv) resultDiv.textContent = 'El importe recibido es menor que el total a pagar.';
+                if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
+                if (calculateBtn) calculateBtn.disabled = false; // Re-enable button
                 return;
             }
 
@@ -90,14 +110,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const change = amountReceived - totalAmount;
 
                 // Hide spinner
-                resultSpinner.classList.add('d-none');
+                if (resultSpinner) resultSpinner.classList.add('d-none');
 
                 // Format for display
                 const lang = localStorage.getItem('language') || 'es';
                 const translations = window.currentTranslations || (window.allTranslations ? window.allTranslations[lang] : null) || {};
                 const changeTextForDisplayTemplate = translations.changeResultText || 'El cambio a devolver es: {change} €';
                 const changeTextForDisplay = changeTextForDisplayTemplate.replace('{change}', change.toFixed(2));
-                resultDiv.textContent = changeTextForDisplay;
+                if(resultDiv) resultDiv.textContent = changeTextForDisplay;
 
                 // Format for speech using the new helper function
                 const speakableChange = formatChangeForSpeech(change);
@@ -105,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
 
                 // Re-enable the button immediately after showing the result
-                calculateBtn.disabled = false;
+                if (calculateBtn) calculateBtn.disabled = false;
 
                 // Announce the result without blocking the UI
                 speak(changeTextForSpeech, null); // No callback needed
@@ -114,9 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 // Handle any errors that might occur during calculation
                 console.error('Error en el cálculo:', error);
-                resultDiv.textContent = 'Ha ocurrido un error durante el cálculo. Por favor, inténtalo de nuevo.';
-                resultSpinner.classList.add('d-none'); // Hide spinner
-                calculateBtn.disabled = false; // Re-enable button immediately on error
+                if(resultDiv) resultDiv.textContent = 'Ha ocurrido un error durante el cálculo. Por favor, inténtalo de nuevo.';
+                if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
+                if (calculateBtn) calculateBtn.disabled = false; // Re-enable button immediately on error
             }
         });
 
@@ -269,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Handles language selection buttons on the settings page.
      */
-    const languageSelector = document.getElementById('language-selector');
+    const languageSelector = getEl('language-selector', { type: 'id', silent: true });
     if (languageSelector) {
         const langButtons = languageSelector.querySelectorAll('.lang-btn');
 
@@ -319,8 +339,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // });
     }
 });
-
-// --- BEGIN: Single Button Speech Recognition Module ---
 
 // Helper functions for parsing Spanish numbers from text
 const SMALL_WORDS = {
@@ -427,99 +445,218 @@ function parseSpanishAmount(text) {
     return null; // Return null if no pattern matches
 }
 
+// --- BEGIN: Conservative & Debuggable Speech Recognition Module ---
 
-// --- Single, shared speech recognition instance ---
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
+// Detect variants
+const _SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 
-if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.lang = 'es-ES';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-    recognition.continuous = false;
+// Expose for debugging
+window._SpeechRecognitionAvailable = !!_SpeechRecognition;
+
+console.log('[speech] Feature detect - SpeechRecognition available?', window._SpeechRecognitionAvailable);
+
+// Global recognition instance (conservative: recreate if needed)
+window.recognition = window.recognition || null;
+let _isRecognizing = false;
+let _micHandler = null;
+
+/** Detect iOS Safari (common source of unsupported SpeechRecognition) */
+function isMobileSafari() {
+    try {
+        const ua = navigator.userAgent || '';
+        return /iP(hone|od|ad)/i.test(ua) && /Safari/i.test(ua) && !/CriOS|FxiOS|OPiOS|EdgiOS/i.test(ua);
+    } catch (e) {
+        return false;
+    }
 }
 
-// --- Public API to initialize speech recognition ---
-function initializeSpeechRecognition() {
-    const micBtn = document.querySelector('#mic-btn');
-    const statusSpan = document.querySelector('#mic-status');
-    const totalAmountInput = document.querySelector('#total-amount');
-    const amountReceivedInput = document.querySelector('#amount-received');
+/** Create or reset the global recognition instance */
+function createRecognitionInstance() {
+    if (!_SpeechRecognition) {
+        console.warn('[speech] No SpeechRecognition constructor available.');
+        window.recognition = null;
+        return null;
+    }
 
-    if (!recognition) {
+    try {
+        // Always create fresh instance to avoid stale event handlers
+        const rec = new _SpeechRecognition();
+        rec.lang = 'es-ES';
+        rec.interimResults = false;
+        rec.maxAlternatives = 1;
+        rec.continuous = false;
+
+        // Safe handlers (lightweight)
+        rec.onstart = () => {
+            _isRecognizing = true;
+            console.log('[speech] rec.onstart');
+        };
+        rec.onend = () => {
+            _isRecognizing = false;
+            console.log('[speech] rec.onend');
+        };
+        rec.onerror = (ev) => {
+            _isRecognizing = false;
+            console.error('[speech] rec.onerror', ev && ev.error ? ev.error : ev);
+        };
+        rec.onresult = (ev) => {
+            console.log('[speech] rec.onresult', ev);
+            // result handling will be delegated in initializeSpeechRecognition to capture current UI elements
+        };
+
+        // Expose globally so you can inspect it from console
+        window.recognition = rec;
+        console.log('[speech] recognition instance created and exposed as window.recognition');
+        return rec;
+    } catch (err) {
+        console.error('[speech] Failed to create recognition instance:', err);
+        window.recognition = null;
+        return null;
+    }
+}
+
+/** Main initializer to bind UI and handlers. Safe to call multiple times. */
+function initializeSpeechRecognition() {
+    const micBtn = getEl('#mic-btn', { type: 'qs', silent: true });
+    const statusSpan = getEl('#mic-status', { type: 'qs', silent: true });
+    const totalAmountInput = getEl('total-amount', { type: 'id', silent: true });
+    const amountReceivedInput = getEl('amount-received', { type: 'id', silent: true });
+
+    console.log('[speech] initializeSpeechRecognition called', {
+        micBtnExists: !!micBtn, statusSpanExists: !!statusSpan,
+        totalExists: !!totalAmountInput, receivedExists: !!amountReceivedInput,
+        mobileSafari: isMobileSafari()
+    });
+
+    // If no API support or mobile Safari, disable gracefully
+    if (!_SpeechRecognition || isMobileSafari()) {
         if (micBtn) micBtn.disabled = true;
-        if (statusSpan) statusSpan.textContent = 'Reconocimiento de voz no soportado.';
+        if (statusSpan) statusSpan.textContent = 'Reconocimiento de voz no disponible en este navegador.';
+        console.warn('[speech] SpeechRecognition not supported or running on mobile Safari — mic disabled.');
         return;
     }
 
-    recognition.onstart = () => {
-        if (statusSpan) statusSpan.textContent = 'Escuchando...';
-    };
+    // Require UI elements to operate
+    if (!micBtn || !statusSpan || !totalAmountInput || !amountReceivedInput) {
+        console.warn('[speech] Missing UI elements for mic; disabling mic if present.');
+        if (micBtn) micBtn.disabled = true;
+        return;
+    }
 
-    recognition.onend = () => {
-        if (statusSpan) statusSpan.textContent = ''; // Clear status
-    };
+    // Ensure we have a recognition instance
+    let rec = window.recognition;
+    if (!rec) rec = createRecognitionInstance();
+    if (!rec) {
+        if (micBtn) micBtn.disabled = true;
+        if (statusSpan) statusSpan.textContent = 'No se pudo inicializar el reconocimiento de voz.';
+        return;
+    }
 
-    recognition.onerror = (event) => {
-        console.error('[speech] Recognition error:', event.error);
-        if (statusSpan) statusSpan.textContent = `Error: ${event.error}`;
-    };
-
-    recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript.trim();
+    // Attach dynamic result handler that closes over current inputs/statusSpan
+    rec.onresult = (event) => {
+        const transcript = event?.results?.[0]?.[0]?.transcript?.trim().toLowerCase() || '';
         console.log('[speech] Transcript:', transcript);
 
-        const activeInput = document.activeElement;
-        if (activeInput && (activeInput === totalAmountInput || activeInput === amountReceivedInput)) {
-            if (statusSpan) statusSpan.textContent = 'Procesando...';
-            const parsed = parseSpanishAmount(transcript);
-            if (parsed != null) {
-                activeInput.value = parsed.toFixed(2);
-                if (statusSpan) statusSpan.textContent = 'Valor reconocido';
-            } else {
-                if (statusSpan) statusSpan.textContent = 'No se pudo interpretar.';
+        if (statusSpan) statusSpan.textContent = 'Procesando...';
+
+        let totalStr = '';
+        let receivedStr = '';
+
+        const keywords = ['recibido', 'entrego', 'pagan', 'y'];
+        let separatorKeyword = null;
+        let separatorIndex = -1;
+
+        for (const key of keywords) {
+            const index = transcript.indexOf(key);
+            if (index !== -1) {
+                separatorKeyword = key;
+                separatorIndex = index;
+                break;
             }
-            setTimeout(() => {
-                if (statusSpan) statusSpan.textContent = '';
-            }, 2500);
-        } else {
-            // This case should ideally not happen if the button is clicked after focusing an input,
-            // but it's good to handle it.
-            if (statusSpan) statusSpan.textContent = 'Por favor, selecciona un campo primero.';
-             setTimeout(() => {
-                if (statusSpan) statusSpan.textContent = '';
-            }, 2500);
         }
+
+        if (separatorIndex !== -1) {
+            totalStr = transcript.substring(0, separatorIndex).trim();
+            receivedStr = transcript.substring(separatorIndex + separatorKeyword.length).trim();
+        } else {
+            totalStr = transcript;
+        }
+
+        const totalAmount = parseSpanishAmount(totalStr);
+        const amountReceived = parseSpanishAmount(receivedStr);
+
+        if (totalAmount != null && totalAmountInput) {
+            totalAmountInput.value = totalAmount.toFixed(2);
+        }
+
+        if (amountReceived != null && amountReceivedInput) {
+            amountReceivedInput.value = amountReceived.toFixed(2);
+        }
+
+        if (totalAmount != null || amountReceived != null) {
+            if (statusSpan) statusSpan.textContent = 'Valores reconocidos';
+        } else {
+            if (statusSpan) statusSpan.textContent = 'No se pudo interpretar.';
+        }
+        setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
     };
 
-    micBtn.addEventListener('click', () => {
-        const activeInput = document.activeElement;
+    rec.onerror = (event) => {
+        console.error('[speech] rec.onerror (from initializer):', event);
+        if (statusSpan) statusSpan.textContent = `Error: ${event?.error || 'desconocido'}`;
+        setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
+    };
 
-        if (activeInput !== totalAmountInput && activeInput !== amountReceivedInput) {
-            if (statusSpan) statusSpan.textContent = 'Por favor, selecciona un campo de texto para rellenar.';
-            setTimeout(() => {
-                if (statusSpan) statusSpan.textContent = '';
-            }, 2500);
+    // Manage click handler safely (remove previous if present)
+    if (_micHandler && micBtn) {
+        try { micBtn.removeEventListener('click', _micHandler); } catch (e) { /* ignore */ }
+        _micHandler = null;
+    }
+
+    _micHandler = () => {
+        // Toggle behavior: if recognizing, stop
+        if (_isRecognizing) {
+            try { rec.stop(); } catch (e) { try { rec.abort(); } catch(_){} }
             return;
         }
 
+        // Try to start
         try {
-            recognition.stop();
-        } catch (e) { /* ignore if not running */ }
-
-        try {
-            console.log('[speech] Calling recognition.start()');
-            recognition.start();
+            // ensure fresh instance just before start (some browsers require this after permission changes)
+            if (!window.recognition) {
+                rec = createRecognitionInstance();
+                if (!rec) throw new Error('No recognition instance available');
+            }
+            // reset state and start
+            try { rec.abort(); } catch(e) { /* ignore */ }
+            rec.start();
+            console.log('[speech] recognition.start() called');
         } catch (err) {
-            console.error('[speech] Error calling recognition.start():', err);
-            if (statusSpan) statusSpan.textContent = 'Error al iniciar.';
-
+            console.error('[speech] Error starting recognition:', err);
+            if (statusSpan) statusSpan.textContent = 'Error al iniciar reconocimiento.';
+            setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
         }
-    });
+    };
+
+    // Add the click listener
+    if (micBtn) {
+        micBtn.addEventListener('click', _micHandler);
+        micBtn.disabled = false;
+    }
+
+    // Stop recognition on visibility change (background)
+    document.removeEventListener('visibilitychange', window._speechVisibilityHandler || (() => {}));
+    window._speechVisibilityHandler = () => {
+        if (document.hidden && window.recognition && _isRecognizing) {
+            try { window.recognition.stop(); } catch (e) { try { window.recognition.abort(); } catch(_){} }
+        }
+    };
+    document.addEventListener('visibilitychange', window._speechVisibilityHandler);
+
+    console.log('[speech] initializeSpeechRecognition completed.');
 }
 
-// Expose the function to the global scope for the existing UI code
+// Expose initializer
 window.initializeSpeechRecognition = initializeSpeechRecognition;
 
-// --- END: Single Button Speech Recognition Module ---
+// --- END: Conservative & Debuggable Speech Recognition Module ---
