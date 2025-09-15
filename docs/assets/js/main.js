@@ -104,10 +104,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
                 const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
 
-                // Announce the result and re-enable the button only when speech is done
-                speak(changeTextForSpeech, () => {
-                    calculateBtn.disabled = false;
-                });
+                // Re-enable the button immediately after showing the result
+                calculateBtn.disabled = false;
+
+                // Announce the result without blocking the UI
+                speak(changeTextForSpeech, null); // No callback needed
 
                 saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
             } catch (error) {
@@ -118,11 +119,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 calculateBtn.disabled = false; // Re-enable button immediately on error
             }
         });
-    }
 
-    // Initialize the new single-button speech recognition
-    if (window.initializeSpeechRecognition) {
-        window.initializeSpeechRecognition();
+        // Initialize the new single-button speech recognition, only on the calculator page
+        if (window.initializeSpeechRecognition) {
+            window.initializeSpeechRecognition();
+        }
     }
 
     /**
@@ -229,22 +230,31 @@ document.addEventListener('DOMContentLoaded', () => {
             const historyWorker = new Worker('assets/js/historyWorker.js');
 
             historyWorker.onmessage = (e) => {
-                if (e.data.status === 'error') {
-                    console.error('Error saving history in worker:', e.data.error);
+                if (e.data.status === 'success') {
+                    try {
+                        // The worker has added the timestamp, now we handle localStorage
+                        const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
+                        history.unshift(e.data.payload);
+                        localStorage.setItem('transactionHistory', JSON.stringify(history));
+                    } catch (error) {
+                         console.error('Error saving history after worker processing:', error);
+                    }
+                } else if (e.data.status === 'error') { // This case is now unlikely but good to keep
+                    console.error('Error reported from history worker:', e.data.error);
                 }
                 historyWorker.terminate(); // Clean up the worker
             };
 
             historyWorker.onerror = (e) => {
                 console.error(`Error in historyWorker: ${e.message}`, e);
-                historyWorker.terminate(); // Clean up the worker
+                // Also terminate on error
+                historyWorker.terminate();
             };
 
-            // The worker adds the timestamp, so we don't do it here.
+            // Send the new data to the worker for timestamping
             historyWorker.postMessage({ action: 'save', payload: data });
         } else {
             // Fallback for older browsers that don't support Web Workers.
-            // This is the original synchronous code.
             try {
                 const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
                 data.timestamp = new Date().toLocaleString('es-ES');
