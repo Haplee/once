@@ -104,12 +104,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
                 const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
 
-                // Announce the result and re-enable the button only when speech is done
-                speak(changeTextForSpeech, () => {
-                    calculateBtn.disabled = false;
-                });
+                // Announce the result. This now happens in the background.
+                speak(changeTextForSpeech);
 
-                saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
+                // Save to history
+                saveToHistory({ total: totalAmount, received: amountReceived, change: change });
+
+                // Re-enable the button and clear inputs for the next operation
+                calculateBtn.disabled = false;
+                document.getElementById('total-amount').value = '';
+                document.getElementById('amount-received').value = '';
+                document.getElementById('total-amount').focus(); // Set focus for the next calculation
             } catch (error) {
                 // Handle any errors that might occur during calculation
                 console.error('Error en el cálculo:', error);
