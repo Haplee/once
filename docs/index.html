@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Cambio - ONCE App</title>
     <link rel="icon" href="assets/img/logo.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,18 +35,18 @@
                         <div class="form-group">
                             <label for="total-amount" data-i18n-key="totalToPayLabel"></label>
                             <div class="input-group">
-                                <input id="total-amount" name="total-amount" class="form-control" data-i18n-placeholder-key="totalToPayPlaceholder" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" autocomplete="off" />
+                                <input type="number" id="total-amount" class="form-control" data-i18n-placeholder-key="totalToPayPlaceholder" step="0.10" required>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="amount-received" data-i18n-key="amountReceivedLabel"></label>
                             <div class="input-group">
-                                <input id="amount-received" name="amount-received" class="form-control" data-i18n-placeholder-key="amountReceivedPlaceholder" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" autocomplete="off" />
+                                <input type="number" id="amount-received" class="form-control" data-i18n-placeholder-key="amountReceivedPlaceholder" step="0.10" required>
                             </div>
                         </div>
                         <div class="form-actions d-flex gap-2">
-                            <button type="submit" id="calculate-btn" class="btn btn-primary w-100" data-i18n-key="calculateButton" aria-label="Calcular cambio"></button>
-                            <button type="button" id="mic-btn" class="btn btn-secondary" aria-label="Usar reconocimiento de voz" title="Grabar importe con voz">
+                            <button type="submit" id="calculate-btn" class="btn btn-primary w-100" data-i18n-key="calculateButton"></button>
+                            <button type="button" id="mic-btn" class="btn btn-secondary" aria-label="Grabar importe con voz" title="Grabar importe con voz">
                                 <img src="assets/img/microphone.svg" alt="Icono de micrófono" class="icon-mic">
                             </button>
                         </div>
