@@ -88,25 +88,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if(calculateBtn) calculateBtn.disabled = true;
 
             // Clear previous result and show spinner
-
             if(resultDiv) resultDiv.textContent = '';
-
             if (resultSpinner) resultSpinner.classList.remove('d-none');
 
             // --- Basic Validation ---
             if (isNaN(totalAmount) || isNaN(amountReceived)) {
-
                 if(resultDiv) resultDiv.textContent = 'Por favor, introduce importes válidos.';
-
                 if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
                 if (calculateBtn) calculateBtn.disabled = false; // Re-enable button
                 return;
             }
 
             if (amountReceived < totalAmount) {
-
                 if(resultDiv) resultDiv.textContent = 'El importe recibido es menor que el total a pagar.';
-
                 if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
                 if (calculateBtn) calculateBtn.disabled = false; // Re-enable button
                 return;
@@ -125,11 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const changeTextForDisplay = changeTextForDisplayTemplate.replace('{change}', change.toFixed(2));
                 if(resultDiv) resultDiv.textContent = changeTextForDisplay;
 
-                // Scroll result into view on mobile
-                if (resultDiv && typeof resultDiv.scrollIntoView === 'function') {
-                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-
                 // Format for speech using the new helper function
                 const speakableChange = formatChangeForSpeech(change);
                 const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
@@ -146,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Handle any errors that might occur during calculation
                 console.error('Error en el cálculo:', error);
                 if(resultDiv) resultDiv.textContent = 'Ha ocurrido un error durante el cálculo. Por favor, inténtalo de nuevo.';
-
                 if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
                 if (calculateBtn) calculateBtn.disabled = false; // Re-enable button immediately on error
             }
@@ -259,61 +247,41 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function saveToHistory(data) {
         if (window.Worker) {
-            let historyWorker = null;
-            try {
-                historyWorker = new Worker('assets/js/historyWorker.js');
-            } catch (e) {
-                console.error('No se pudo crear historyWorker, usando fallback:', e);
-            }
-
-            if (!historyWorker) {
-                try {
-                    const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
-                    data.timestamp = new Date().toLocaleString('es-ES');
-                    history.unshift(data);
-                    localStorage.setItem('transactionHistory', JSON.stringify(history));
-                } catch (err) {
-                    console.error('Error guardando historial (fallback):', err);
-                }
-                return;
-            }
+            const historyWorker = new Worker('assets/js/historyWorker.js');
 
             historyWorker.onmessage = (e) => {
-                try {
-                    if (e.data && e.data.status === 'success' && e.data.payload) {
+                if (e.data.status === 'success') {
+                    try {
+                        // The worker has added the timestamp, now we handle localStorage
                         const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
                         history.unshift(e.data.payload);
                         localStorage.setItem('transactionHistory', JSON.stringify(history));
-                    } else if (e.data && e.data.status === 'error') {
-                        console.error('historyWorker reported error:', e.data.error);
+                    } catch (error) {
+                         console.error('Error saving history after worker processing:', error);
                     }
-                } catch (err) {
-                    console.error('Error procesando mensaje del historyWorker:', err);
-                } finally {
-                    historyWorker.terminate();
+                } else if (e.data.status === 'error') { // This case is now unlikely but good to keep
+                    console.error('Error reported from history worker:', e.data.error);
                 }
+                historyWorker.terminate(); // Clean up the worker
             };
 
             historyWorker.onerror = (e) => {
-                console.error('Error in historyWorker:', e);
+                console.error(`Error in historyWorker: ${e.message}`, e);
+                // Also terminate on error
                 historyWorker.terminate();
             };
 
-            try {
-                historyWorker.postMessage({ action: 'save', payload: data });
-            } catch (err) {
-                console.error('Error postMessage to historyWorker:', err);
-                historyWorker.terminate();
-            }
+            // Send the new data to the worker for timestamping
+            historyWorker.postMessage({ action: 'save', payload: data });
         } else {
-            // fallback
+            // Fallback for older browsers that don't support Web Workers.
             try {
                 const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
                 data.timestamp = new Date().toLocaleString('es-ES');
                 history.unshift(data);
                 localStorage.setItem('transactionHistory', JSON.stringify(history));
-            } catch (err) {
-                console.error('Error saving history without worker:', err);
+            } catch (error) {
+                console.error('Error saving history without worker:', error);
             }
         }
     }
@@ -370,33 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
         //     console.log('Arduino API response:', result);
         // });
     }
-
-    // --- Mobile & Accessibility Enhancements ---
-
-    /**
-     * Detects if the browser is Mobile Safari.
-     * @returns {boolean} True if Mobile Safari, false otherwise.
-     */
-    function isMobileSafari() {
-        return /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && /iP(hone|od|ad)/i.test(navigator.userAgent);
-    }
-
-    // Add a passive listener for better scroll performance on touch devices.
-    window.addEventListener('touchstart', () => {}, { passive: true });
-
-    // Stop speech recognition if the page becomes hidden.
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden && recognition) {
-            try {
-                recognition.stop();
-            } catch (e) {
-                // Ignore errors if recognition wasn't active.
-            }
-        }
-    });
 });
-
-// --- BEGIN: Single Button Speech Recognition Module ---
 
 // Helper functions for parsing Spanish numbers from text
 const SMALL_WORDS = {
@@ -503,70 +445,116 @@ function parseSpanishAmount(text) {
     return null; // Return null if no pattern matches
 }
 
+// --- BEGIN: Conservative & Debuggable Speech Recognition Module ---
 
-// --- Single, shared speech recognition instance ---
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
+// Detect variants
+const _SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 
-if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.lang = 'es-ES';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-    recognition.continuous = false;
+// Expose for debugging
+window._SpeechRecognitionAvailable = !!_SpeechRecognition;
+
+console.log('[speech] Feature detect - SpeechRecognition available?', window._SpeechRecognitionAvailable);
+
+// Global recognition instance (conservative: recreate if needed)
+window.recognition = window.recognition || null;
+let _isRecognizing = false;
+let _micHandler = null;
+
+/** Detect iOS Safari (common source of unsupported SpeechRecognition) */
+function isMobileSafari() {
+    try {
+        const ua = navigator.userAgent || '';
+        return /iP(hone|od|ad)/i.test(ua) && /Safari/i.test(ua) && !/CriOS|FxiOS|OPiOS|EdgiOS/i.test(ua);
+    } catch (e) {
+        return false;
+    }
 }
 
-// --- Public API to initialize speech recognition ---
+/** Create or reset the global recognition instance */
+function createRecognitionInstance() {
+    if (!_SpeechRecognition) {
+        console.warn('[speech] No SpeechRecognition constructor available.');
+        window.recognition = null;
+        return null;
+    }
+
+    try {
+        // Always create fresh instance to avoid stale event handlers
+        const rec = new _SpeechRecognition();
+        rec.lang = 'es-ES';
+        rec.interimResults = false;
+        rec.maxAlternatives = 1;
+        rec.continuous = false;
+
+        // Safe handlers (lightweight)
+        rec.onstart = () => {
+            _isRecognizing = true;
+            console.log('[speech] rec.onstart');
+        };
+        rec.onend = () => {
+            _isRecognizing = false;
+            console.log('[speech] rec.onend');
+        };
+        rec.onerror = (ev) => {
+            _isRecognizing = false;
+            console.error('[speech] rec.onerror', ev && ev.error ? ev.error : ev);
+        };
+        rec.onresult = (ev) => {
+            console.log('[speech] rec.onresult', ev);
+            // result handling will be delegated in initializeSpeechRecognition to capture current UI elements
+        };
+
+        // Expose globally so you can inspect it from console
+        window.recognition = rec;
+        console.log('[speech] recognition instance created and exposed as window.recognition');
+        return rec;
+    } catch (err) {
+        console.error('[speech] Failed to create recognition instance:', err);
+        window.recognition = null;
+        return null;
+    }
+}
+
+/** Main initializer to bind UI and handlers. Safe to call multiple times. */
 function initializeSpeechRecognition() {
     const micBtn = getEl('#mic-btn', { type: 'qs', silent: true });
     const statusSpan = getEl('#mic-status', { type: 'qs', silent: true });
     const totalAmountInput = getEl('#total-amount', { type: 'id', silent: true });
     const amountReceivedInput = getEl('#amount-received', { type: 'id', silent: true });
 
+    console.log('[speech] initializeSpeechRecognition called', {
+        micBtnExists: !!micBtn, statusSpanExists: !!statusSpan,
+        totalExists: !!totalAmountInput, receivedExists: !!amountReceivedInput,
+        mobileSafari: isMobileSafari()
+    });
 
-    if (!recognition || isMobileSafari()) {
-        if (micBtn) {
-            micBtn.disabled = true;
-            micBtn.style.display = 'none';
-        }
-        if (statusSpan) {
-            statusSpan.textContent = 'Reconocimiento de voz no disponible en este navegador.';
-        }
+    // If no API support or mobile Safari, disable gracefully
+    if (!_SpeechRecognition || isMobileSafari()) {
+        if (micBtn) micBtn.disabled = true;
+        if (statusSpan) statusSpan.textContent = 'Reconocimiento de voz no disponible en este navegador.';
+        console.warn('[speech] SpeechRecognition not supported or running on mobile Safari — mic disabled.');
         return;
     }
 
-
+    // Require UI elements to operate
     if (!micBtn || !statusSpan || !totalAmountInput || !amountReceivedInput) {
-        console.warn('Elementos UI de micrófono faltan; deshabilitando reconocimiento de voz.', {
-            micBtn, statusSpan, totalAmountInput, amountReceivedInput
-        });
+        console.warn('[speech] Missing UI elements for mic; disabling mic if present.');
         if (micBtn) micBtn.disabled = true;
         return;
     }
 
-    if (!micBtn || !statusSpan || !totalAmountInput || !amountReceivedInput) {
-        console.warn('Elementos UI de micrófono faltan; deshabilitando reconocimiento de voz.', {
-            micBtn, statusSpan, totalAmountInput, amountReceivedInput
-        });
+    // Ensure we have a recognition instance
+    let rec = window.recognition;
+    if (!rec) rec = createRecognitionInstance();
+    if (!rec) {
         if (micBtn) micBtn.disabled = true;
+        if (statusSpan) statusSpan.textContent = 'No se pudo inicializar el reconocimiento de voz.';
         return;
     }
 
-    recognition.onstart = () => {
-        if (statusSpan) statusSpan.textContent = 'Escuchando...';
-    };
-
-    recognition.onend = () => {
-        if (statusSpan) statusSpan.textContent = ''; // Clear status
-    };
-
-    recognition.onerror = (event) => {
-        console.error('[speech] Recognition error:', event.error);
-        if (statusSpan) statusSpan.textContent = `Error: ${event.error}`;
-    };
-
-    recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript.trim();
+    // Attach dynamic result handler that closes over current inputs/statusSpan
+    rec.onresult = (event) => {
+        const transcript = event?.results?.[0]?.[0]?.transcript?.trim() || '';
         console.log('[speech] Transcript:', transcript);
 
         const activeInput = document.activeElement;
@@ -579,47 +567,77 @@ function initializeSpeechRecognition() {
             } else {
                 if (statusSpan) statusSpan.textContent = 'No se pudo interpretar.';
             }
-            setTimeout(() => {
-                if (statusSpan) statusSpan.textContent = '';
-            }, 2500);
+            setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
         } else {
-            // This case should ideally not happen if the button is clicked after focusing an input,
-            // but it's good to handle it.
             if (statusSpan) statusSpan.textContent = 'Por favor, selecciona un campo primero.';
-            setTimeout(() => {
-                if (statusSpan) statusSpan.textContent = '';
-            }, 2500);
+            setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
         }
     };
 
-    if (micBtn) {
-        micBtn.addEventListener('click', () => {
-            const activeInput = document.activeElement;
+    rec.onerror = (event) => {
+        console.error('[speech] rec.onerror (from initializer):', event);
+        if (statusSpan) statusSpan.textContent = `Error: ${event?.error || 'desconocido'}`;
+        setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
+    };
 
-            if (activeInput !== totalAmountInput && activeInput !== amountReceivedInput) {
-                if (statusSpan) statusSpan.textContent = 'Por favor, selecciona un campo de texto para rellenar.';
-                setTimeout(() => {
-                    if (statusSpan) statusSpan.textContent = '';
-                }, 2500);
-                return;
-            }
-
-            try {
-                recognition.stop();
-            } catch (e) { /* ignore if not running */ }
-
-            try {
-                console.log('[speech] Calling recognition.start()');
-                recognition.start();
-            } catch (err) {
-                console.error('[speech] Error calling recognition.start():', err);
-                if (statusSpan) statusSpan.textContent = 'Error al iniciar.';
-            }
-        });
+    // Manage click handler safely (remove previous if present)
+    if (_micHandler && micBtn) {
+        try { micBtn.removeEventListener('click', _micHandler); } catch (e) { /* ignore */ }
+        _micHandler = null;
     }
+
+    _micHandler = () => {
+        // User must have focused input to receive value
+        const activeInput = document.activeElement;
+        if (activeInput !== totalAmountInput && activeInput !== amountReceivedInput) {
+            if (statusSpan) statusSpan.textContent = 'Por favor, selecciona un campo de texto para rellenar.';
+            setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
+            return;
+        }
+
+        // Toggle behavior: if recognizing, stop
+        if (_isRecognizing) {
+            try { rec.stop(); } catch (e) { try { rec.abort(); } catch(_){} }
+            return;
+        }
+
+        // Try to start
+        try {
+            // ensure fresh instance just before start (some browsers require this after permission changes)
+            if (!window.recognition) {
+                rec = createRecognitionInstance();
+                if (!rec) throw new Error('No recognition instance available');
+            }
+            // reset state and start
+            try { rec.abort(); } catch(e) { /* ignore */ }
+            rec.start();
+            console.log('[speech] recognition.start() called');
+        } catch (err) {
+            console.error('[speech] Error starting recognition:', err);
+            if (statusSpan) statusSpan.textContent = 'Error al iniciar reconocimiento.';
+            setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
+        }
+    };
+
+    // Add the click listener
+    if (micBtn) {
+        micBtn.addEventListener('click', _micHandler);
+        micBtn.disabled = false;
+    }
+
+    // Stop recognition on visibility change (background)
+    document.removeEventListener('visibilitychange', window._speechVisibilityHandler || (() => {}));
+    window._speechVisibilityHandler = () => {
+        if (document.hidden && window.recognition && _isRecognizing) {
+            try { window.recognition.stop(); } catch (e) { try { window.recognition.abort(); } catch(_){} }
+        }
+    };
+    document.addEventListener('visibilitychange', window._speechVisibilityHandler);
+
+    console.log('[speech] initializeSpeechRecognition completed.');
 }
 
-// Expose the function to the global scope for the existing UI code
+// Expose initializer
 window.initializeSpeechRecognition = initializeSpeechRecognition;
 
-// --- END: Single Button Speech Recognition Module ---
+// --- END: Conservative & Debuggable Speech Recognition Module ---
