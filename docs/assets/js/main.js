@@ -1,3 +1,13 @@
+// Helper: get element safely
+function getEl(selector, opts = {}) {
+    // opts.type: 'id'|'qs' for logging clarity
+    const el = opts.type === 'id' ? document.getElementById(selector) : document.querySelector(selector);
+    if (!el && !opts.silent) {
+        console.warn(`[getEl] Elemento no encontrado: ${selector}`, opts);
+    }
+    return el;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     let voices = [];
 
@@ -29,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Update the toggle state on the config page if it exists.
-        const themeToggleButton = document.getElementById('theme-toggle');
+        const themeToggleButton = getEl('theme-toggle', { type: 'id', silent: true });
         if (themeToggleButton) {
             themeToggleButton.checked = theme === 'dark-mode';
         }
@@ -39,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTheme();
 
     // Add event listener for the toggle on the config page
-    const themeToggleButton = document.getElementById('theme-toggle');
+    const themeToggleButton = getEl('theme-toggle', { type: 'id', silent: true });
     if (themeToggleButton) {
         themeToggleButton.addEventListener('change', function() {
             const newTheme = this.checked ? 'dark-mode' : 'light-mode';
@@ -53,36 +63,46 @@ document.addEventListener('DOMContentLoaded', () => {
      * Handles the main calculator form submission.
      * It calculates the change, displays it, speaks it, and saves it to history.
      */
-    const form = document.getElementById('change-form');
+    const form = getEl('change-form', { type: 'id' });
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const totalAmount = parseFloat(document.getElementById('total-amount').value);
-            const amountReceived = parseFloat(document.getElementById('amount-received').value);
-            const resultDiv = document.getElementById('result');
-            const resultSpinner = document.getElementById('result-spinner');
-            const calculateBtn = document.getElementById('calculate-btn');
+            const totalAmountInput = getEl('total-amount', { type: 'id' });
+            const amountReceivedInput = getEl('amount-received', { type: 'id' });
+            const resultDiv = getEl('result', { type: 'id' });
+            const resultSpinner = getEl('result-spinner', { type: 'id', silent: true });
+            const calculateBtn = getEl('calculate-btn', { type: 'id' });
+
+            if (!totalAmountInput || !amountReceivedInput || !resultDiv || !calculateBtn) {
+                console.error('Faltan elementos esenciales del formulario', { totalAmountInput, amountReceivedInput, resultDiv, calculateBtn, resultSpinner });
+                if (resultSpinner) resultSpinner.classList.add('d-none');
+                if (calculateBtn) calculateBtn.disabled = false;
+                return;
+            }
+
+            const totalAmount = parseFloat(totalAmountInput.value);
+            const amountReceived = parseFloat(amountReceivedInput.value);
 
             // Disable button to prevent multiple submissions
             calculateBtn.disabled = true;
 
             // Clear previous result and show spinner
             resultDiv.textContent = '';
-            resultSpinner.classList.remove('d-none');
+            if (resultSpinner) resultSpinner.classList.remove('d-none');
 
             // --- Basic Validation ---
             if (isNaN(totalAmount) || isNaN(amountReceived)) {
                 resultDiv.textContent = 'Por favor, introduce importes válidos.';
-                resultSpinner.classList.add('d-none'); // Hide spinner
-                calculateBtn.disabled = false; // Re-enable button
+                if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
+                if (calculateBtn) calculateBtn.disabled = false; // Re-enable button
                 return;
             }
 
             if (amountReceived < totalAmount) {
                 resultDiv.textContent = 'El importe recibido es menor que el total a pagar.';
-                resultSpinner.classList.add('d-none'); // Hide spinner
-                calculateBtn.disabled = false; // Re-enable button
+                if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
+                if (calculateBtn) calculateBtn.disabled = false; // Re-enable button
                 return;
             }
 
@@ -90,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const change = amountReceived - totalAmount;
 
                 // Hide spinner
-                resultSpinner.classList.add('d-none');
+                if (resultSpinner) resultSpinner.classList.add('d-none');
 
                 // Format for display
                 const lang = localStorage.getItem('language') || 'es';
@@ -105,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
 
                 // Re-enable the button immediately after showing the result
-                calculateBtn.disabled = false;
+                if (calculateBtn) calculateBtn.disabled = false;
 
                 // Announce the result without blocking the UI
                 speak(changeTextForSpeech, null); // No callback needed
@@ -115,8 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Handle any errors that might occur during calculation
                 console.error('Error en el cálculo:', error);
                 resultDiv.textContent = 'Ha ocurrido un error durante el cálculo. Por favor, inténtalo de nuevo.';
-                resultSpinner.classList.add('d-none'); // Hide spinner
-                calculateBtn.disabled = false; // Re-enable button immediately on error
+                if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
+                if (calculateBtn) calculateBtn.disabled = false; // Re-enable button immediately on error
             }
         });
 
@@ -227,41 +247,61 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function saveToHistory(data) {
         if (window.Worker) {
-            const historyWorker = new Worker('assets/js/historyWorker.js');
+            let historyWorker = null;
+            try {
+                historyWorker = new Worker('assets/js/historyWorker.js');
+            } catch (e) {
+                console.error('No se pudo crear historyWorker, usando fallback:', e);
+            }
+
+            if (!historyWorker) {
+                try {
+                    const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
+                    data.timestamp = new Date().toLocaleString('es-ES');
+                    history.unshift(data);
+                    localStorage.setItem('transactionHistory', JSON.stringify(history));
+                } catch (err) {
+                    console.error('Error guardando historial (fallback):', err);
+                }
+                return;
+            }
 
             historyWorker.onmessage = (e) => {
-                if (e.data.status === 'success') {
-                    try {
-                        // The worker has added the timestamp, now we handle localStorage
+                try {
+                    if (e.data && e.data.status === 'success' && e.data.payload) {
                         const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
                         history.unshift(e.data.payload);
                         localStorage.setItem('transactionHistory', JSON.stringify(history));
-                    } catch (error) {
-                         console.error('Error saving history after worker processing:', error);
+                    } else if (e.data && e.data.status === 'error') {
+                        console.error('historyWorker reported error:', e.data.error);
                     }
-                } else if (e.data.status === 'error') { // This case is now unlikely but good to keep
-                    console.error('Error reported from history worker:', e.data.error);
+                } catch (err) {
+                    console.error('Error procesando mensaje del historyWorker:', err);
+                } finally {
+                    historyWorker.terminate();
                 }
-                historyWorker.terminate(); // Clean up the worker
             };
 
             historyWorker.onerror = (e) => {
-                console.error(`Error in historyWorker: ${e.message}`, e);
-                // Also terminate on error
+                console.error('Error in historyWorker:', e);
                 historyWorker.terminate();
             };
 
-            // Send the new data to the worker for timestamping
-            historyWorker.postMessage({ action: 'save', payload: data });
+            try {
+                historyWorker.postMessage({ action: 'save', payload: data });
+            } catch (err) {
+                console.error('Error postMessage to historyWorker:', err);
+                historyWorker.terminate();
+            }
         } else {
-            // Fallback for older browsers that don't support Web Workers.
+            // fallback
             try {
                 const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
                 data.timestamp = new Date().toLocaleString('es-ES');
                 history.unshift(data);
                 localStorage.setItem('transactionHistory', JSON.stringify(history));
-            } catch (error) {
-                console.error('Error saving history without worker:', error);
+            } catch (err) {
+                console.error('Error saving history without worker:', err);
             }
         }
     }
@@ -269,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Handles language selection buttons on the settings page.
      */
-    const languageSelector = document.getElementById('language-selector');
+    const languageSelector = getEl('language-selector', { type: 'id', silent: true });
     if (languageSelector) {
         const langButtons = languageSelector.querySelectorAll('.lang-btn');
 
@@ -442,14 +482,22 @@ if (SpeechRecognition) {
 
 // --- Public API to initialize speech recognition ---
 function initializeSpeechRecognition() {
-    const micBtn = document.querySelector('#mic-btn');
-    const statusSpan = document.querySelector('#mic-status');
-    const totalAmountInput = document.querySelector('#total-amount');
-    const amountReceivedInput = document.querySelector('#amount-received');
+    const micBtn = getEl('#mic-btn', { type: 'qs', silent: true });
+    const statusSpan = getEl('#mic-status', { type: 'qs', silent: true });
+    const totalAmountInput = getEl('#total-amount', { type: 'id', silent: true });
+    const amountReceivedInput = getEl('#amount-received', { type: 'id', silent: true });
 
     if (!recognition) {
         if (micBtn) micBtn.disabled = true;
         if (statusSpan) statusSpan.textContent = 'Reconocimiento de voz no soportado.';
+        return;
+    }
+
+    if (!micBtn || !statusSpan || !totalAmountInput || !amountReceivedInput) {
+        console.warn('Elementos UI de micrófono faltan; deshabilitando reconocimiento de voz.', {
+            micBtn, statusSpan, totalAmountInput, amountReceivedInput
+        });
+        if (micBtn) micBtn.disabled = true;
         return;
     }
 
@@ -487,36 +535,37 @@ function initializeSpeechRecognition() {
             // This case should ideally not happen if the button is clicked after focusing an input,
             // but it's good to handle it.
             if (statusSpan) statusSpan.textContent = 'Por favor, selecciona un campo primero.';
-             setTimeout(() => {
+            setTimeout(() => {
                 if (statusSpan) statusSpan.textContent = '';
             }, 2500);
         }
     };
 
-    micBtn.addEventListener('click', () => {
-        const activeInput = document.activeElement;
+    if (micBtn) {
+        micBtn.addEventListener('click', () => {
+            const activeInput = document.activeElement;
 
-        if (activeInput !== totalAmountInput && activeInput !== amountReceivedInput) {
-            if (statusSpan) statusSpan.textContent = 'Por favor, selecciona un campo de texto para rellenar.';
-            setTimeout(() => {
-                if (statusSpan) statusSpan.textContent = '';
-            }, 2500);
-            return;
-        }
+            if (activeInput !== totalAmountInput && activeInput !== amountReceivedInput) {
+                if (statusSpan) statusSpan.textContent = 'Por favor, selecciona un campo de texto para rellenar.';
+                setTimeout(() => {
+                    if (statusSpan) statusSpan.textContent = '';
+                }, 2500);
+                return;
+            }
 
-        try {
-            recognition.stop();
-        } catch (e) { /* ignore if not running */ }
+            try {
+                recognition.stop();
+            } catch (e) { /* ignore if not running */ }
 
-        try {
-            console.log('[speech] Calling recognition.start()');
-            recognition.start();
-        } catch (err) {
-            console.error('[speech] Error calling recognition.start():', err);
-            if (statusSpan) statusSpan.textContent = 'Error al iniciar.';
-
-        }
-    });
+            try {
+                console.log('[speech] Calling recognition.start()');
+                recognition.start();
+            } catch (err) {
+                console.error('[speech] Error calling recognition.start():', err);
+                if (statusSpan) statusSpan.textContent = 'Error al iniciar.';
+            }
+        });
+    }
 }
 
 // Expose the function to the global scope for the existing UI code
