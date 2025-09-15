@@ -104,10 +104,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
                 const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
 
-                // Announce the result and re-enable the button only when speech is done
-                speak(changeTextForSpeech, () => {
-                    calculateBtn.disabled = false;
-                });
+                // Re-enable the button immediately after showing the result
+                calculateBtn.disabled = false;
+
+                // Announce the result without blocking the UI
+                speak(changeTextForSpeech, null); // No callback needed
 
                 saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
             } catch (error) {
