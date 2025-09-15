@@ -554,24 +554,54 @@ function initializeSpeechRecognition() {
 
     // Attach dynamic result handler that closes over current inputs/statusSpan
     rec.onresult = (event) => {
-        const transcript = event?.results?.[0]?.[0]?.transcript?.trim() || '';
+        const transcript = event?.results?.[0]?.[0]?.transcript?.trim().toLowerCase() || '';
+
         console.log('[speech] Transcript:', transcript);
 
-        const activeInput = document.activeElement;
-        if (activeInput && (activeInput === totalAmountInput || activeInput === amountReceivedInput)) {
-            if (statusSpan) statusSpan.textContent = 'Procesando...';
-            const parsed = parseSpanishAmount(transcript);
-            if (parsed != null) {
-                activeInput.value = parsed.toFixed(2);
-                if (statusSpan) statusSpan.textContent = 'Valor reconocido';
-            } else {
-                if (statusSpan) statusSpan.textContent = 'No se pudo interpretar.';
+        if (statusSpan) statusSpan.textContent = 'Procesando...';
+
+        let totalStr = '';
+        let receivedStr = '';
+
+        const keywords = ['recibido', 'entrego', 'pagan', 'y'];
+        let separatorKeyword = null;
+        let separatorIndex = -1;
+
+        for (const key of keywords) {
+            const index = transcript.indexOf(key);
+            if (index !== -1) {
+                separatorKeyword = key;
+                separatorIndex = index;
+                break;
             }
-            setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
-        } else {
-            if (statusSpan) statusSpan.textContent = 'Por favor, selecciona un campo primero.';
-            setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
+
         }
+
+        if (separatorIndex !== -1) {
+            totalStr = transcript.substring(0, separatorIndex).trim();
+            receivedStr = transcript.substring(separatorIndex + separatorKeyword.length).trim();
+        } else {
+            totalStr = transcript;
+        }
+
+        const totalAmount = parseSpanishAmount(totalStr);
+        const amountReceived = parseSpanishAmount(receivedStr);
+
+        if (totalAmount != null && totalAmountInput) {
+            totalAmountInput.value = totalAmount.toFixed(2);
+        }
+
+        if (amountReceived != null && amountReceivedInput) {
+            amountReceivedInput.value = amountReceived.toFixed(2);
+        }
+
+        if (totalAmount != null || amountReceived != null) {
+            if (statusSpan) statusSpan.textContent = 'Valores reconocidos';
+        } else {
+            if (statusSpan) statusSpan.textContent = 'No se pudo interpretar.';
+
+        }
+        setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
     };
 
     rec.onerror = (event) => {
@@ -580,6 +610,7 @@ function initializeSpeechRecognition() {
         setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
     };
 
+
     // Manage click handler safely (remove previous if present)
     if (_micHandler && micBtn) {
         try { micBtn.removeEventListener('click', _micHandler); } catch (e) { /* ignore */ }
@@ -587,19 +618,13 @@ function initializeSpeechRecognition() {
     }
 
     _micHandler = () => {
-        // User must have focused input to receive value
-        const activeInput = document.activeElement;
-        if (activeInput !== totalAmountInput && activeInput !== amountReceivedInput) {
-            if (statusSpan) statusSpan.textContent = 'Por favor, selecciona un campo de texto para rellenar.';
-            setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
-            return;
-        }
 
         // Toggle behavior: if recognizing, stop
         if (_isRecognizing) {
             try { rec.stop(); } catch (e) { try { rec.abort(); } catch(_){} }
             return;
         }
+
 
         // Try to start
         try {
