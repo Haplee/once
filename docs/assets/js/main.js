@@ -483,21 +483,37 @@ function parseSpanishAmount(text) {
         }
     }
 
-    // 5. "X euros"
+    // 5. Heuristic for "X Y" format (e.g., "siete cincuenta" -> 7.50)
+    const parts = normalizedText.split(' ');
+    if (parts.length === 2 && !normalizedText.includes(' y ')) {
+        const eurosPart = parts[0];
+        const centsPart = parts[1];
+        const euros = wordsToNumber(esToDigits(eurosPart));
+        const cents = wordsToNumber(esToDigits(centsPart));
+
+        if (euros != null && cents != null && cents > 0 && cents < 100) {
+            const combined = wordsToNumber(esToDigits(normalizedText));
+            if (combined != null && combined === euros + cents && euros < 20) {
+                return parseFloat((euros + (cents / 100)).toFixed(2));
+            }
+        }
+    }
+
+    // 6. "X euros"
     const eurosOnlyMatch = normalizedText.match(/([\w\s-]+?)\s*(?:euros|euro)$/);
     if (eurosOnlyMatch) {
         const euros = wordsToNumber(esToDigits(eurosOnlyMatch[1].trim()));
         if (euros != null) return parseFloat(euros.toFixed(2));
     }
 
-    // 6. "Y centimos"
+    // 7. "Y centimos"
     const centsOnlyMatch = normalizedText.match(/([\w\s-]+?)\s*centimos$/);
     if (centsOnlyMatch) {
         const cents = wordsToNumber(esToDigits(centsOnlyMatch[1].trim()));
         if (cents != null) return parseFloat((cents / 100).toFixed(2));
     }
 
-    // 7. Just a number word (e.g., "veinticinco")
+    // 8. Just a number word (e.g., "veinticinco")
     const onlyWords = wordsToNumber(esToDigits(normalizedText));
     if (onlyWords != null) return parseFloat(onlyWords.toFixed(2));
 
