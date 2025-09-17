@@ -356,38 +356,86 @@ function esToDigits(text) {
 
 function wordsToNumber(text) {
     if (!text) return null;
-    text = text.trim().toLowerCase();
-    if (/^-?\d+([.,]\d+)?$/.test(text)) return parseFloat(text.replace(',', '.'));
-    const tokens = text.split(/[\s-]+/);
-    let total = 0;
-    let current = 0;
-    for (let t of tokens) {
-        if (SMALL_WORDS.hasOwnProperty(t)) {
-            const val = SMALL_WORDS[t];
-            if (val === 1000) {
-                current = (current || 1) * 1000;
-                total += current;
-                current = 0;
-            } else if (val >= 100) {
-                current = (current || 1) * val;
-            } else {
-                current += val;
-            }
+
+    // Direct match for digits first
+    const numericText = text.trim().toLowerCase();
+    if (/^-?\d+([.,]\d+)?$/.test(numericText)) {
+        return parseFloat(numericText.replace(',', '.'));
+    }
+
+    const tokens = numericText.split(/[\s-]+/);
+    const groups = [];
+
+    // Group numbers by "mil"
+    let currentGroup = [];
+    for (const token of tokens) {
+        if (token === 'mil') {
+            // "mil" acts as a separator
+            groups.push(currentGroup);
+            currentGroup = [];
         } else {
-            return null;
+            currentGroup.push(token);
         }
     }
-    return total + current;
+    groups.push(currentGroup);
+
+    let total = 0;
+    const groupCount = groups.length;
+
+    for (let i = 0; i < groupCount; i++) {
+        let groupValue = 0;
+        let groupTokens = groups[i];
+
+        // Handle "un" before "mil" -> becomes 1 for calculation
+        if (groupTokens.length === 1 && groupTokens[0] === 'un' && groupCount > 1) {
+            groupTokens = ['uno'];
+        }
+
+        let current = 0;
+
+        // Process tokens within each group (e.g., "doscientos treinta y cinco")
+        for (let j = 0; j < groupTokens.length; j++) {
+            const t = groupTokens[j];
+
+            if (t === 'y') continue; // Skip 'y', it's just a connector
+
+            if (SMALL_WORDS.hasOwnProperty(t)) {
+                const val = SMALL_WORDS[t];
+                if (val >= 100) { // Cientos
+                    // Handles "ciento" correctly
+                    groupValue += (current > 0 ? current : 1) * val;
+                    current = 0;
+                } else { // Decenas y unidades
+                    current += val;
+                }
+            } else {
+                // If a word is not a number or connector, parsing fails for this group
+                return null;
+            }
+        }
+        groupValue += current;
+
+        // Apply "mil" multiplier
+        const multiplier = Math.pow(1000, groupCount - 1 - i);
+
+        // Handle cases like "mil" (group is empty but represents 1000)
+        if (groupValue === 0 && multiplier >= 1000) {
+            groupValue = 1;
+        }
+
+        total += groupValue * multiplier;
+    }
+
+    return total;
 }
 
 function parseSpanishAmount(text) {
     if (!text) return null;
 
     let normalizedText = text.toLowerCase().trim();
-    // Normalize currency symbols and common words
+    // Normalize currency symbols and common words, but leave "y" alone for now.
     normalizedText = normalizedText.replace(/€/g, ' euros ');
     normalizedText = normalizedText.replace(/centimo[s]?/g, ' centimos ');
-    normalizedText = normalizedText.replace(/\s+y\s+/g, ' con '); // "y" -> "con"
     normalizedText = normalizedText.replace(/\s+/g, ' '); // Collapse multiple spaces
 
     // 1. Direct number match (e.g., "2,50", "2.50", "25")
@@ -399,8 +447,19 @@ function parseSpanishAmount(text) {
         if (!isNaN(val)) return parseFloat(val.toFixed(2));
     }
 
-    // 2. "X [euros] con Y [centimos]" (flexible)
-    // This now handles "dos con cincuenta", "dos euros cincuenta", "dos euros con cincuenta"
+    // 2. "X euros y Y [centimos]" (e.g., "dos euros y cincuenta")
+    const eurosYMatch = normalizedText.match(/([\w\s-]+?)\s*(?:euros|euro)\s+y\s+([\w\s-]+?)\s*(?:centimos)?$/);
+    if (eurosYMatch) {
+        const eurosPart = eurosYMatch[1].trim();
+        const centsPart = eurosYMatch[2].trim();
+        const euros = wordsToNumber(esToDigits(eurosPart));
+        const cents = wordsToNumber(esToDigits(centsPart));
+        if (euros != null && cents != null) {
+            return parseFloat((euros + (cents / 100)).toFixed(2));
+        }
+    }
+
+    // 3. "X [euros] con Y [centimos]" (flexible)
     const eurosConMatch = normalizedText.match(/([\w\s-]+?)\s*(?:euros|euro)?\s*con\s*([\w\s-]+?)\s*(?:centimos)?$/);
     if (eurosConMatch) {
         const eurosPart = eurosConMatch[1].trim();
@@ -412,7 +471,7 @@ function parseSpanishAmount(text) {
         }
     }
 
-    // 3. "X coma/punto Y"
+    // 4. "X coma/punto Y"
     const commaPointMatch = normalizedText.match(/([\w\s-]+)\s*(?:coma|punto)\s*([\w\s-]+)/);
     if (commaPointMatch) {
         const left = wordsToNumber(esToDigits(commaPointMatch[1].trim()));
@@ -424,21 +483,21 @@ function parseSpanishAmount(text) {
         }
     }
 
-    // 4. "X euros"
+    // 5. "X euros"
     const eurosOnlyMatch = normalizedText.match(/([\w\s-]+?)\s*(?:euros|euro)$/);
     if (eurosOnlyMatch) {
         const euros = wordsToNumber(esToDigits(eurosOnlyMatch[1].trim()));
         if (euros != null) return parseFloat(euros.toFixed(2));
     }
 
-    // 5. "Y centimos"
+    // 6. "Y centimos"
     const centsOnlyMatch = normalizedText.match(/([\w\s-]+?)\s*centimos$/);
     if (centsOnlyMatch) {
         const cents = wordsToNumber(esToDigits(centsOnlyMatch[1].trim()));
         if (cents != null) return parseFloat((cents / 100).toFixed(2));
     }
 
-    // 6. Just a number word (e.g., "veinticinco")
+    // 7. Just a number word (e.g., "veinticinco")
     const onlyWords = wordsToNumber(esToDigits(normalizedText));
     if (onlyWords != null) return parseFloat(onlyWords.toFixed(2));
 
@@ -563,7 +622,8 @@ function initializeSpeechRecognition() {
         let totalStr = '';
         let receivedStr = '';
 
-        const keywords = ['recibido', 'entrego', 'pagan', 'y'];
+        // Keywords ordered by specificity to avoid ambiguity
+        const keywords = ['paga con', 'me da', 'le doy', 'recibido', 'entrego', 'pagan'];
         let separatorKeyword = null;
         let separatorIndex = -1;
 
@@ -574,7 +634,6 @@ function initializeSpeechRecognition() {
                 separatorIndex = index;
                 break;
             }
-
         }
 
         if (separatorIndex !== -1) {
