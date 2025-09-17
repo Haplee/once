@@ -433,6 +433,16 @@ function parseSpanishAmount(text) {
     if (!text) return null;
 
     let normalizedText = text.toLowerCase().trim();
+
+    // Handle time-like format from speech recognition e.g., "5:50"
+    const timeMatch = normalizedText.match(/(\d{1,2}):(\d{2})/);
+    if (timeMatch) {
+        const potentialNumber = timeMatch[0].replace(':', '.');
+        const val = parseFloat(potentialNumber);
+        if (!isNaN(val)) {
+            return parseFloat(val.toFixed(2));
+        }
+    }
     // Normalize currency symbols and common words, but leave "y" alone for now.
     normalizedText = normalizedText.replace(/€/g, ' euros ');
     normalizedText = normalizedText.replace(/centimo[s]?/g, ' centimos ');
