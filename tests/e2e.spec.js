@@ -11,7 +11,12 @@ test.describe('Once App E2E Tests', () => {
     // Listen for all console events and capture errors
     page.on('console', msg => {
       if (msg.type() === 'error') {
-        consoleErrors.push(msg.text());
+        const errorText = msg.text();
+        // Ignore specific, known errors that can occur in a headless CI environment
+        if (errorText.includes('synthesis-failed')) {
+          return;
+        }
+        consoleErrors.push(errorText);
       }
     });
 
