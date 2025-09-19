@@ -1,195 +1,107 @@
-# Aplicación Web Accesible para la ONCE
+# Aplicación Web Accesible para la ONCE (Versión Python)
 
-Esta es una aplicación web estática, diseñada para ser una herramienta interna para la ONCE. La aplicación es completamente accesible y cuenta con funcionalidades como una calculadora de cambio con entrada por voz y un historial de operaciones que se guarda localmente en el navegador.
+Esta es la versión refactorizada de la aplicación web de la Calculadora de Cambio, ahora impulsada por un backend de Python usando el framework Flask. La aplicación mantiene toda la funcionalidad original, incluyendo la alta accesibilidad, pero ahora con una arquitectura más robusta y modular.
 
 ## Características
 
-- **Calculadora de Cambio**: Calcula el cambio para clientes de forma rápida y precisa.
-- **Entrada por Voz**: Permite introducir los importes mediante comandos de voz.
-- **Lectura de Resultados**: Anuncia el cambio calculado en voz alta.
-- **Historial de Operaciones**: Guarda un registro de todas las transacciones en el `localStorage` del navegador.
-- **Modo Día/Noche**: Tema visual adaptable para diferentes condiciones de iluminación.
-- **Diseño Accesible**: Contraste alto, botones grandes y compatibilidad con lectores de pantalla.
+- **Backend en Python (Flask)**: La lógica de negocio, el enrutamiento y la gestión de datos ahora se manejan en el servidor.
+- **Calculadora de Cambio**: Calcula el cambio de forma rápida y precisa a través de una API interna.
+- **Entrada y Salida de Voz**: Utiliza las APIs del navegador para la entrada de voz y para anunciar los resultados en voz alta.
+- **Historial de Operaciones Persistente**: Guarda un registro de todas las transacciones en una base de datos SQLite en el servidor.
+- **Internacionalización (I18N)**: Soporte para múltiples idiomas (Español, Inglés, Gallego, Catalán, Valenciano, Euskera) gestionado por Flask-Babel.
+- **Modo Día/Noche**: Tema visual adaptable.
+- **Comunicación con Hardware**: Mantiene la capacidad de comunicarse con dispositivos externos (como Arduino) a través de la Web Serial API.
 
-## Estructura del Proyecto
+## Requisitos
 
-El proyecto se organiza de la siguiente manera:
-
-```
-.
-├── index.html              # Página principal de la calculadora (requiere login)
-├── history.html            # Página del historial de operaciones
-├── configuracion.html      # Página de configuración (tema, idioma, serial)
-├── login.html              # Página de inicio de sesión
-├── signup.html             # Página de registro de usuarios
-├── forgot_password.html    # Página de recuperación de contraseña
-├── static/
-│   ├── css/style.css       # Estilos principales de la aplicación
-│   ├── js/
-│   │   ├── main.js         # Lógica principal de la calculadora
-│   │   ├── history.js      # Lógica de la página de historial
-│   │   ├── auth.js         # Gestiona la autenticación y sesión de usuario
-│   │   ├── serial.js       # Lógica para la comunicación con Web Serial API
-│   │   ├── i18n.js         # Gestor de internacionalización
-│   │   └── ...             # Otros scripts para login, registro, etc.
-│   └── img/                # Logotipos e iconos
-├── scripts/
-│   └── translate.js        # Script de Node.js para gestionar claves de traducción
-└── README.md               # Este archivo
-```
+- Python 3.8+
+- pip (gestor de paquetes de Python)
 
 ## Cómo Empezar
 
-Simplemente abre el archivo `login.html` en tu navegador web. No se requiere instalación ni servidor.
+Sigue estos pasos para configurar y ejecutar la aplicación en tu máquina local.
 
-### Autenticación
+### 1. Clonar el Repositorio
 
-La aplicación cuenta con un sistema de registro e inicio de sesión. Para fines de demostración, puedes usar los siguientes usuarios pre-cargados que se encuentran en `static/users.json`:
-- **Usuario:** `admin`, **Contraseña:** `admin123`
-- **Usuario:** `user`, **Contraseña:** `user123`
-
-También puedes registrar nuevos usuarios.
-
-## Despliegue en GitHub Pages
-
-1.  Asegúrate de que tu repositorio tenga una rama llamada `gh-pages`, o configura GitHub Pages para que se despliegue desde la rama `main` en la configuración de tu repositorio.
-2.  Sube todos los archivos del proyecto a esa rama.
-3.  GitHub Pages desplegará automáticamente el sitio y te proporcionará una URL.
-
----
-
-## Comunicación con Arduino (Web Serial API)
-
-Se ha añadido una nueva funcionalidad en la página de **Configuración** para comunicarse con un dispositivo externo (como un Arduino) a través del puerto USB, utilizando la Web Serial API.
-
-### Requisitos Previos
-
-- Un navegador compatible con la Web Serial API (Google Chrome, Microsoft Edge, Opera).
-- Un microcontrolador tipo Arduino.
-- El IDE de Arduino para cargar el código en la placa.
-
-### Código para Arduino
-
-Copia y pega el siguiente código en tu IDE de Arduino y súbelo a tu placa. Este sketch simula una máquina dispensadora de monedas con diferentes modelos (S, M, MAX).
-
-**Funcionalidades del Sketch:**
-- Recibe un comando de configuración (`CONFIG:S`, `CONFIG:M`, `CONFIG:MAX`) desde la web.
-- Configura los "pulsadores" (simulados en el código) según el modelo.
-- Al recibir cualquier otro texto (ej. "dispensar"), simula la pulsación de uno de los botones disponibles para el modelo actual.
-- Envía notificaciones a la web sobre la configuración y las monedas dispensadas.
-
-```cpp
-// arduino_coin_dispenser.ino
-
-// Define los pines para los pulsadores (simulados).
-// En un caso real, estos serían los pines de entrada para los botones físicos.
-const int BUTTON_PINS[] = {2, 3, 4, 5, 6, 7, 8, 9};
-const int NUM_BUTTONS = sizeof(BUTTON_PINS) / sizeof(BUTTON_PINS[0]);
-
-// Define las monedas que cada pulsador dispensa.
-const char* COIN_VALUES[] = {
-  "1 centimo", "2 centimos", "5 centimos", "10 centimos",
-  "20 centimos", "50 centimos", "1 euro", "2 euros"
-};
-
-// Enum para los modelos de máquina.
-enum MachineModel { MODEL_S, MODEL_M, MODEL_MAX };
-MachineModel currentModel = MODEL_M; // Modelo por defecto.
-
-// Arrays que definen qué monedas están disponibles para cada modelo.
-// Los valores son índices del array COIN_VALUES.
-const int MODEL_S_COINS[] = {3, 4, 5, 6}; // 10c, 20c, 50c, 1€
-const int MODEL_M_COINS[] = {2, 3, 4, 5, 6, 7}; // 5c, 10c, 20c, 50c, 1€, 2€
-const int MODEL_MAX_COINS[] = {0, 1, 2, 3, 4, 5, 6, 7}; // Todas
-
-void setup() {
-  Serial.begin(9600);
-  while (!Serial) { ; }
-
-  // Configura los pines de los botones como entrada.
-  for (int i = 0; i < NUM_BUTTONS; i++) {
-    pinMode(BUTTON_PINS[i], INPUT_PULLUP);
-  }
-
-  randomSeed(analogRead(0)); // Semilla para el generador de números aleatorios.
-  Serial.println("EVENTO: Arduino listo. Esperando configuración de modelo...");
-}
-
-void loop() {
-  // 1. Comprobar si hay un comando de configuración desde la web.
-  if (Serial.available() > 0) {
-    String command = Serial.readStringUntil('\n');
-    command.trim(); // Limpiar espacios en blanco.
-
-    if (command.startsWith("CONFIG:")) {
-      configureModel(command.substring(7));
-    } else {
-      // Si no es un comando de config, es una orden para dispensar.
-      // Simulamos la pulsación de un botón aleatorio del modelo actual.
-      dispenseRandomCoin();
-    }
-  }
-
-  // 2. En un caso real, aquí se leerían los pulsadores físicos.
-  // Ejemplo:
-  // for (int i = 0; i < NUM_BUTTONS; i++) {
-  //   if (digitalRead(BUTTON_PINS[i]) == LOW) {
-  //     dispenseCoin(i);
-  //     delay(200); // Anti-rebote simple.
-  //   }
-  // }
-}
-
-void configureModel(String modelCode) {
-  if (modelCode == "S") {
-    currentModel = MODEL_S;
-    Serial.println("EVENTO: Maquina configurada como Modelo S.");
-  } else if (modelCode == "M") {
-    currentModel = MODEL_M;
-    Serial.println("EVENTO: Maquina configurada como Modelo M.");
-  } else if (modelCode == "MAX") {
-    currentModel = MODEL_MAX;
-    Serial.println("EVENTO: Maquina configurada como Modelo MAX.");
-  } else {
-    Serial.println("ERROR: Modelo desconocido.");
-  }
-}
-
-void dispenseRandomCoin() {
-  int coinIndex;
-
-  switch (currentModel) {
-    case MODEL_S:
-      coinIndex = MODEL_S_COINS[random(sizeof(MODEL_S_COINS) / sizeof(int))];
-      break;
-    case MODEL_M:
-      coinIndex = MODEL_M_COINS[random(sizeof(MODEL_M_COINS) / sizeof(int))];
-      break;
-    case MODEL_MAX:
-      coinIndex = MODEL_MAX_COINS[random(sizeof(MODEL_MAX_COINS) / sizeof(int))];
-      break;
-  }
-
-  dispenseCoin(coinIndex);
-}
-
-void dispenseCoin(int coinIndex) {
-  if (coinIndex >= 0 && coinIndex < NUM_BUTTONS) {
-    Serial.print("EVENTO: Dispensando ");
-    Serial.println(COIN_VALUES[coinIndex]);
-  }
-}
+```bash
+git clone <url-del-repositorio>
+cd <nombre-del-repositorio>
 ```
 
-### Cómo Utilizar la Funcionalidad
+### 2. Crear un Entorno Virtual
 
-1.  **Carga el código**: Sube el sketch anterior a tu placa Arduino.
-2.  **Abre la aplicación**: Abre el archivo `index.html` en un navegador compatible.
-3.  **Ve a Configuración**: Navega a la página de configuración.
-4.  **Selecciona el Modelo**: Elige el modelo de tu máquina (S, M, o MAX) en el menú desplegable.
-5.  **Conecta el dispositivo**: Haz clic en **"Conectar Dispositivo"**. El modelo seleccionado se enviará automáticamente al Arduino.
-6.  **Comunícate**: Una vez conectado:
-    - Puedes cambiar el modelo en el menú desplegable para reconfigurar el Arduino en cualquier momento.
-    - Escribe cualquier texto en el campo de comando (ej. "dame una moneda") y presiona **"Enviar"**. Esto simulará la dispensación de una moneda aleatoria permitida por el modelo actual.
-    - Todos los eventos (configuración, monedas dispensadas) se mostrarán en la consola de la página.
-7.  **Desconecta**: Cuando termines, haz clic en **"Desconectar"**.
+Es una buena práctica usar un entorno virtual para aislar las dependencias del proyecto.
+
+```bash
+# Crear el entorno virtual
+python -m venv venv
+
+# Activar el entorno (en Windows)
+# venv\Scripts\activate
+
+# Activar el entorno (en macOS/Linux)
+source venv/bin/activate
+```
+
+### 3. Instalar Dependencias
+
+Instala todas las librerías de Python necesarias con un solo comando:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Inicializar la Base de Datos
+
+Antes de ejecutar la aplicación por primera vez, necesitas crear la base de datos y la tabla para el historial. Flask lo hace fácil con un comando personalizado.
+
+```bash
+flask --app app init-db
+```
+Deberías ver un mensaje que dice "Initialized the database."
+
+### 5. Ejecutar la Aplicación
+
+Ahora puedes iniciar el servidor de desarrollo de Flask:
+
+```bash
+flask --app app run
+```
+
+La aplicación estará disponible en `http://127.0.0.1:5000` en tu navegador.
+
+## Estructura del Proyecto
+
+La nueva arquitectura del proyecto es la siguiente:
+
+```
+.
+├── app/
+│   ├── static/             # Archivos estáticos (CSS, JS, imágenes) que no se pudieron mover
+│   │   └── ...
+│   ├── templates/          # Plantillas HTML de Jinja2
+│   │   ├── index.html
+│   │   ├── history.html
+│   │   └── configuracion.html
+│   ├── translations/       # Archivos de traducción de Gettext (.po)
+│   │   ├── es/LC_MESSAGES/
+│   │   └── ...
+│   ├── __init__.py         # Inicializador de la aplicación Flask
+│   ├── api.py              # Blueprint para la API (cálculo, historial)
+│   ├── db.py               # Lógica de la base de datos
+│   ├── routes.py           # Rutas principales de la aplicación
+│   └── schema.sql          # Esquema de la base de datos
+├── docs/                   # Directorio original, ahora solo para activos estáticos
+│   └── assets/
+├── arduino_sketch/
+│   └── arduino_sketch.ino  # Código de ejemplo para el dispositivo Arduino
+├── tests/
+│   └── e2e.spec.js         # Pruebas End-to-End con Playwright
+├── requirements.txt        # Dependencias de Python
+├── vercel.json             # Configuración de despliegue para Vercel
+└── README.md               # Este archivo
+```
+
+## Comunicación con Arduino
+
+El código de ejemplo para un dispositivo compatible con Arduino se ha movido a `arduino_sketch/arduino_sketch.ino`. Puedes cargarlo en tu dispositivo para probar la funcionalidad de comunicación serie desde la página de **Configuración**.
