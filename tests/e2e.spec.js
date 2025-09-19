@@ -11,7 +11,7 @@ test.describe('Once App E2E Tests', () => {
     // Listen for all console events and capture errors
     page.on('console', msg => {
       if (msg.type() === 'error') {
-        console.Errors.push(msg.text());
+        consoleErrors.push(msg.text());
       }
     });
 
