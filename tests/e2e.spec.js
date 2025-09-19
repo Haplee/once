@@ -16,8 +16,8 @@ test.describe('Once App E2E Tests', () => {
     });
 
     // Navigate to the local server hosting the app
-    // Note: This assumes the server is running and `docs` is the root.
-    await page.goto('http://localhost:8000/index.html', { waitUntil: 'networkidle' });
+    // Note: This assumes the Flask server is running on port 5000.
+    await page.goto('http://localhost:5000/', { waitUntil: 'networkidle' });
   });
 
   test('should load the page without console errors', async ({ page }) => {

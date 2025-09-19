@@ -19,53 +19,34 @@ document.addEventListener('DOMContentLoaded', () => {
     if (speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = populateVoiceList;
     }
-    /**
-     * Applies the selected theme (light/dark) to the application.
-     * It reads the theme from localStorage, applies it to the body, and updates
-     * the theme toggle switch. It specifically avoids theming the configuration page.
-     */
+
     const applyTheme = () => {
         let theme = localStorage.getItem('theme');
         if (!theme) {
             theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-mode' : 'light-mode';
             localStorage.setItem('theme', theme);
         }
-
-        // Apply the theme to the body.
-        if (theme === 'dark-mode') {
-            document.body.classList.add('dark-mode');
-        } else {
-            document.body.classList.remove('dark-mode');
-        }
-
-        // Update the toggle state on the config page if it exists.
+        document.body.classList.toggle('dark-mode', theme === 'dark-mode');
         const themeToggleButton = getEl('theme-toggle', { type: 'id', silent: true });
         if (themeToggleButton) {
             themeToggleButton.checked = theme === 'dark-mode';
         }
     };
 
-    // Apply theme on initial load
     applyTheme();
 
-    // Add event listener for the toggle on the config page
     const themeToggleButton = getEl('theme-toggle', { type: 'id', silent: true });
     if (themeToggleButton) {
         themeToggleButton.addEventListener('change', function() {
             const newTheme = this.checked ? 'dark-mode' : 'light-mode';
             localStorage.setItem('theme', newTheme);
-            // Re-apply theme to respect the "don't theme config page" rule
             applyTheme();
         });
     }
 
-    /**
-     * Handles the main calculator form submission.
-     * It calculates the change, displays it, speaks it, and saves it to history.
-     */
     const form = getEl('change-form', { type: 'id' });
     if (form) {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const totalAmountInput = getEl('total-amount', { type: 'id' });
@@ -74,85 +55,83 @@ document.addEventListener('DOMContentLoaded', () => {
             const resultSpinner = getEl('result-spinner', { type: 'id', silent: true });
             const calculateBtn = getEl('calculate-btn', { type: 'id' });
 
-            if (!totalAmountInput || !amountReceivedInput || !resultDiv || !calculateBtn) {
-                console.error('Faltan elementos esenciales del formulario', { totalAmountInput, amountReceivedInput, resultDiv, calculateBtn, resultSpinner });
-                if (resultSpinner) resultSpinner.classList.add('d-none');
-                if (calculateBtn) calculateBtn.disabled = false;
-                return;
-            }
-
             const totalAmount = parseFloat(totalAmountInput.value);
             const amountReceived = parseFloat(amountReceivedInput.value);
 
-            // Disable button to prevent multiple submissions
-            if(calculateBtn) calculateBtn.disabled = true;
-
-            // Clear previous result and show spinner
-            if(resultDiv) resultDiv.textContent = '';
+            calculateBtn.disabled = true;
+            resultDiv.textContent = '';
             if (resultSpinner) resultSpinner.classList.remove('d-none');
 
-            // --- Basic Validation ---
+            // Client-side validation remains
             if (isNaN(totalAmount) || isNaN(amountReceived)) {
-                if(resultDiv) resultDiv.textContent = 'Por favor, introduce importes válidos.';
-                if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
-                if (calculateBtn) calculateBtn.disabled = false; // Re-enable button
+                resultDiv.textContent = 'Por favor, introduce importes válidos.';
+                if (resultSpinner) resultSpinner.classList.add('d-none');
+                calculateBtn.disabled = false;
                 return;
             }
 
             if (amountReceived < totalAmount) {
-                if(resultDiv) resultDiv.textContent = 'El importe recibido es menor que el total a pagar.';
-                if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
-                if (calculateBtn) calculateBtn.disabled = false; // Re-enable button
+                resultDiv.textContent = 'El importe recibido es menor que el total a pagar.';
+                if (resultSpinner) resultSpinner.classList.add('d-none');
+                calculateBtn.disabled = false;
                 return;
             }
 
             try {
-                const change = amountReceived - totalAmount;
+                // Call backend API to calculate change
+                const response = await fetch('/api/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ total: totalAmount, received: amountReceived }),
+                });
 
-                // Hide spinner
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Error en la comunicación con el servidor.');
+                }
+
+                const data = await response.json();
+                const change = data.change;
+
                 if (resultSpinner) resultSpinner.classList.add('d-none');
 
-                // Format for display
-                const lang = localStorage.getItem('language') || 'es';
-                const translations = window.currentTranslations || (window.allTranslations ? window.allTranslations[lang] : null) || {};
-                const changeTextForDisplayTemplate = translations.changeResultText || 'El cambio a devolver es: {change} €';
-                const changeTextForDisplay = changeTextForDisplayTemplate.replace('{change}', change.toFixed(2));
-                if(resultDiv) resultDiv.textContent = changeTextForDisplay;
+                // The text for display is now hardcoded in the template, so we just update the dynamic part.
+                // This will be improved when the whole display is rendered by the backend.
+                resultDiv.textContent = `El cambio a devolver es: ${change.toFixed(2)} €`;
 
-                // Format for speech using the new helper function
                 const speakableChange = formatChangeForSpeech(change);
-                const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
+                const changeIntro = "El cambio a devolver es:"; // This should also come from backend eventually
                 const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
 
-                // Re-enable the button immediately after showing the result
-                if (calculateBtn) calculateBtn.disabled = false;
+                speak(changeTextForSpeech, null);
 
-                // Announce the result without blocking the UI
-                speak(changeTextForSpeech, null); // No callback needed
+                // Save to history via API
+                await fetch('/api/history', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ total: totalAmount, received: amountReceived, change: change }),
+                });
 
-                saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
             } catch (error) {
-                // Handle any errors that might occur during calculation
-                console.error('Error en el cálculo:', error);
-                if(resultDiv) resultDiv.textContent = 'Ha ocurrido un error durante el cálculo. Por favor, inténtalo de nuevo.';
-                if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
-                if (calculateBtn) calculateBtn.disabled = false; // Re-enable button immediately on error
+                console.error('Error en el cálculo o guardado:', error);
+                resultDiv.textContent = error.message || 'Ha ocurrido un error. Por favor, inténtalo de nuevo.';
+                if (resultSpinner) resultSpinner.classList.add('d-none');
+            } finally {
+                calculateBtn.disabled = false;
             }
         });
 
-        // Initialize the new single-button speech recognition, only on the calculator page
         if (window.initializeSpeechRecognition) {
             window.initializeSpeechRecognition();
         }
     }
 
-    /**
-     * Formats the change amount into a natural-sounding Spanish string for speech.
-     * @param {number} change - The amount of change.
-     * @returns {string} - A natural language string (e.g., "dos euros con cincuenta céntimos").
-     */
     function formatChangeForSpeech(change) {
-        const translations = window.currentTranslations || {};
+        // This function remains as it is, but ideally the translated parts would be fetched from the server
+        // For now, we keep the JS-based translation as a fallback.
+        const translations = window.currentTranslations || {}; // Assuming this might still exist for speech parts
         const euros = Math.floor(change);
         const cents = Math.round((change - euros) * 100);
 
@@ -165,178 +144,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const oneEuro = translations.speechOneEuro || `un ${euroSingular}`;
         const oneCent = translations.speechOneCent || `un ${centSingular}`;
 
-        if (euros === 0 && cents === 0) {
-            return `${cero} ${euroPlural}`;
-        }
-
+        if (euros === 0 && cents === 0) return `${cero} ${euroPlural}`;
         let parts = [];
-
-        if (euros > 0) {
-            if (euros === 1) {
-                parts.push(oneEuro);
-            } else {
-                parts.push(`${euros} ${euroPlural}`);
-            }
-        }
-
-        if (cents > 0) {
-            if (cents === 1) {
-                parts.push(oneCent);
-            } else {
-                parts.push(`${cents} ${centPlural}`);
-            }
-        }
-
+        if (euros > 0) parts.push(euros === 1 ? oneEuro : `${euros} ${euroPlural}`);
+        if (cents > 0) parts.push(cents === 1 ? oneCent : `${cents} ${centPlural}`);
         return parts.join(` ${con} `);
     }
 
-    /**
-     * Uses the SpeechSynthesis API to read text aloud.
-     * This version includes a safety timeout to prevent the UI from freezing
-     * if the `onend` event never fires.
-     * @param {string} text - The text to be spoken.
-     * @param {function} onEndCallback - A function to call when speech is finished.
-     */
     function speak(text, onEndCallback) {
         if ('speechSynthesis' in window && text) {
-            window.speechSynthesis.cancel(); // Cancel any ongoing speech
-
+            window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
-            const lang = localStorage.getItem('language') || 'es';
-            const langMap = {
-                es: 'es-ES', en: 'en-US', gl: 'gl-ES',
-                ca: 'ca-ES', va: 'ca-ES', eu: 'eu-ES'
-            };
+            const lang = document.documentElement.lang || 'es';
+            const langMap = { es: 'es-ES', en: 'en-US', gl: 'gl-ES', ca: 'ca-ES', va: 'ca-ES', eu: 'eu-ES' };
             utterance.lang = langMap[lang] || 'es-ES';
 
             const voice = voices.find(v => v.lang === utterance.lang);
-            if (voice) {
-                utterance.voice = voice;
-            }
+            if (voice) utterance.voice = voice;
 
             let spoken = false;
             const onEnd = () => {
-                if (spoken) return; // Ensure the callback is only called once
+                if (spoken) return;
                 spoken = true;
-                if (typeof onEndCallback === 'function') {
-                    onEndCallback();
-                }
+                if (typeof onEndCallback === 'function') onEndCallback();
             };
 
             utterance.onend = onEnd;
             utterance.onerror = (event) => {
                 console.error('SpeechSynthesis Error:', event.error);
-                onEnd(); // Ensure callback runs even on error
+                onEnd();
             };
-
-            // Safety timeout: if speech doesn't end after 10 seconds, fire callback anyway
-            setTimeout(onEnd, 10000);
-
+            setTimeout(onEnd, 10000); // Safety timeout
             window.speechSynthesis.speak(utterance);
         } else {
-            // If speech synthesis is not supported or text is empty, run the callback immediately
-            if (typeof onEndCallback === 'function') {
-                onEndCallback();
-            }
+            if (typeof onEndCallback === 'function') onEndCallback();
         }
-    }
-
-    /**
-     * Saves the transaction data asynchronously using a Web Worker.
-     * @param {object} data - The transaction data.
-     */
-    function saveToHistory(data) {
-        if (window.Worker) {
-            const historyWorker = new Worker('assets/js/historyWorker.js');
-
-            historyWorker.onmessage = (e) => {
-                if (e.data.status === 'success') {
-                    try {
-                        // The worker has added the timestamp, now we handle localStorage
-                        const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
-                        history.unshift(e.data.payload);
-                        localStorage.setItem('transactionHistory', JSON.stringify(history));
-                    } catch (error) {
-                         console.error('Error saving history after worker processing:', error);
-                    }
-                } else if (e.data.status === 'error') { // This case is now unlikely but good to keep
-                    console.error('Error reported from history worker:', e.data.error);
-                }
-                historyWorker.terminate(); // Clean up the worker
-            };
-
-            historyWorker.onerror = (e) => {
-                console.error(`Error in historyWorker: ${e.message}`, e);
-                // Also terminate on error
-                historyWorker.terminate();
-            };
-
-            // Send the new data to the worker for timestamping
-            historyWorker.postMessage({ action: 'save', payload: data });
-        } else {
-            // Fallback for older browsers that don't support Web Workers.
-            try {
-                const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
-                data.timestamp = new Date().toLocaleString('es-ES');
-                history.unshift(data);
-                localStorage.setItem('transactionHistory', JSON.stringify(history));
-            } catch (error) {
-                console.error('Error saving history without worker:', error);
-            }
-        }
-    }
-
-    /**
-     * Handles language selection buttons on the settings page.
-     */
-    const languageSelector = getEl('language-selector', { type: 'id', silent: true });
-    if (languageSelector) {
-        const langButtons = languageSelector.querySelectorAll('.lang-btn');
-
-        const setActiveButton = () => {
-            const currentLang = localStorage.getItem('language') || 'es';
-            langButtons.forEach(btn => {
-                if (btn.dataset.lang === currentLang) {
-                    btn.classList.add('btn-primary');
-                    btn.classList.remove('btn-secondary');
-                } else {
-                    btn.classList.add('btn-secondary');
-                    btn.classList.remove('btn-primary');
-                }
-            });
-        };
-
-        langButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const lang = e.currentTarget.dataset.lang;
-                // window.setLanguage is exposed by i18n.js
-                if (window.setLanguage) {
-                    window.setLanguage(lang).then(setActiveButton);
-                }
-            });
-        });
-
-        // Set initial state
-        setActiveButton();
-    }
-
-    /**
-     * Example function to demonstrate calling a mock Arduino API.
-     * This is a placeholder for future integration.
-     * @param {object} data - Data to be sent to the mock Arduino.
-     */
-    function sendToArduino(data) {
-        console.log("Simulating sending data to Arduino:", data);
-        // In a real scenario, this would be a fetch call to the API endpoint
-        // fetch('/api/arduino', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify(data),
-        // })
-        // .then(response => response.json())
-        // .then(result => {
-        //     console.log('Arduino API response:', result);
-        // });
     }
 });
 
