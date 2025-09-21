@@ -30,6 +30,4 @@ def send_docs(path):
 
 @app.route('/favicon.ico')
 def favicon():
-    # Serve the logo as the favicon to prevent 404 errors.
-    favicon_path = os.path.join(current_app.root_path, '..', 'docs', 'assets', 'img')
-    return send_from_directory(os.path.abspath(favicon_path), 'logo.png')
+    return redirect(url_for('send_docs', path='assets/img/logo.png'))
