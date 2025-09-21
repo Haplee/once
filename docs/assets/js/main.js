@@ -124,6 +124,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // This function remains client-side as it depends on browser APIs
     function speak(text, onEndCallback) {
+        // Do not speak if running in test mode, to avoid CI errors.
+        if (window.APP_IS_TESTING) {
+            if (typeof onEndCallback === 'function') onEndCallback();
+            return;
+        }
+
         if ('speechSynthesis' in window && text) {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);

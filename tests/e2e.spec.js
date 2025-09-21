@@ -26,6 +26,9 @@ test.describe('Once App E2E Tests', () => {
     // Navigate to the local server hosting the app
     // Note: This assumes the Flask server is running on port 5000.
     await page.goto('http://localhost:5000/', { waitUntil: 'networkidle' });
+
+    // Set a flag to disable speech synthesis during tests to avoid CI errors
+    await page.evaluate(() => { window.APP_IS_TESTING = true; });
   });
 
   test('should load the page without console errors', async ({ page }) => {

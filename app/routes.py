@@ -30,4 +30,5 @@ def send_docs(path):
 
 @app.route('/favicon.ico')
 def favicon():
-    return redirect(url_for('send_docs', path='assets/img/logo.png'))
+    return send_from_directory(os.path.join(app.root_path, '..', 'docs', 'assets', 'img'),
+                               'logo.png', mimetype='image/png')
