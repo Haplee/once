@@ -12,9 +12,12 @@ test.describe('Once App E2E Tests', () => {
     page.on('console', msg => {
       if (msg.type() === 'error') {
         const errorText = msg.text();
-        // Ignore specific, known errors that can occur in a headless CI environment
-        if (errorText.includes('synthesis-failed')) {
-          return;
+        // Ignore known, non-critical errors
+        if (
+          errorText.includes('synthesis-failed') ||
+          (errorText.includes('Failed to load resource') && errorText.includes('favicon.ico'))
+        ) {
+          return; // Ignore this error
         }
         consoleErrors.push(errorText);
       }
