@@ -12,19 +12,15 @@ test.describe('Once App E2E Tests', () => {
     page.on('console', msg => {
       if (msg.type() === 'error') {
         const errorText = msg.text();
-        // Ignore known, non-critical errors
-        if (
-          errorText.includes('synthesis-failed') ||
-          (errorText.includes('Failed to load resource') && errorText.includes('favicon.ico'))
-        ) {
-          return; // Ignore this error
+        // Ignore known, non-critical errors from the CI environment
+        if (errorText.includes('synthesis-failed')) {
+          return;
         }
         consoleErrors.push(errorText);
       }
     });
 
     // Navigate to the local server hosting the app
-    // Note: This assumes the Flask server is running on port 5000.
     await page.goto('http://localhost:5000/', { waitUntil: 'networkidle' });
 
     // Set a flag to disable speech synthesis during tests to avoid CI errors
@@ -50,11 +46,10 @@ test.describe('Once App E2E Tests', () => {
     await calculateBtn.click();
 
     // The result text can vary with language, so we look for part of it.
-    // "El cambio a devolver es: 9.50 €"
-    await expect(resultDiv).toContainText('9.50', { timeout: 15000 }); // Increased timeout to account for speech
+    await expect(resultDiv).toContainText('9.50', { timeout: 10000 });
 
     // Check that the button is re-enabled
-    await expect(calculateBtn).toBeEnabled({ timeout: 15000 }); // Safety timeout
+    await expect(calculateBtn).toBeEnabled({ timeout: 10000 });
     console.log('First calculation successful, button is enabled.');
 
     // --- Second operation ---
@@ -63,10 +58,10 @@ test.describe('Once App E2E Tests', () => {
     await amountReceivedInput.fill('10.00');
     await calculateBtn.click();
 
-    await expect(resultDiv).toContainText('5.00', { timeout: 15000 });
+    await expect(resultDiv).toContainText('5.00', { timeout: 10000 });
 
     // Check that the button is re-enabled again
-    await expect(calculateBtn).toBeEnabled({ timeout: 15000 });
+    await expect(calculateBtn).toBeEnabled({ timeout: 10000 });
     console.log('Second calculation successful, button is enabled.');
 
     // Final check for any unexpected console errors during the test

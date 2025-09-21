@@ -24,7 +24,6 @@ def set_language(lang_code):
 # Serve files from the 'docs' directory directly.
 @app.route('/docs/<path:path>')
 def send_docs(path):
-    # Correctly construct the path to the 'docs' directory, which is one level above the app's root path.
     docs_dir = os.path.join(current_app.root_path, '..', 'docs')
     return send_from_directory(os.path.abspath(docs_dir), path)
 

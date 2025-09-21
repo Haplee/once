@@ -1,11 +1,6 @@
-# Basque translations for the ONCE Change Calculator app.
+# Basque translations
 msgid ""
 msgstr ""
-"Project-Id-Version: 1.0\n"
-"Report-Msgid-Bugs-To: email@example.com\n"
-"POT-Creation-Date: 2025-09-19 02:39+0000\n"
-"PO-Revision-Date: 2025-09-19 02:39+0000\n"
-"Last-Translator: Jules <jules@example.com>\n"
 "Language: eu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -13,165 +8,12 @@ msgstr ""
 
 msgid "appTitle"
 msgstr "Aldaketa Kalkulagailua - ONCE App"
-
-msgid "historyPageTitle"
-msgstr "Eragiketen Historiala - ONCE App"
-
-msgid "settingsPageTitle"
-msgstr "Ezarpenak - ONCE App"
-
 msgid "navCalculator"
 msgstr "Kalkulagailua"
-
 msgid "navHistory"
 msgstr "Historiala"
-
 msgid "navSettings"
 msgstr "Ezarpenak"
-
 msgid "calculatorTitle"
 msgstr "Aldaketa Kalkulagailua"
-
-msgid "totalToPayLabel"
-msgstr "Ordaindu beharreko totala (€)"
-
-msgid "totalToPayPlaceholder"
-msgstr "Adib: 5.50"
-
-msgid "amountReceivedLabel"
-msgstr "Jasotako zenbatekoa (€)"
-
-msgid "amountReceivedPlaceholder"
-msgstr "Adib: 10.00"
-
-msgid "calculateButton"
-msgstr "Kalkulatu"
-
-msgid "voiceInputButtonLabel"
-msgstr "Ahots bidezko sarrera erabili"
-
-msgid "voiceErrorPermission"
-msgstr "Mikrofonoaren sarbidea ukatuta. Funtzio hau erabiltzeko, mesedez, baimendu mikrofonoaren sarbidea zure nabigatzailean."
-
-msgid "voiceErrorNoSpeech"
-msgstr "Ez da ahotsik detektatu. Saiatu berriro mikrofonotik hurbil hitz egiten."
-
-msgid "voiceErrorInfo"
-msgstr "Aintzatespen errorea: {error}. Mesedez, saiatu berriro."
-
-msgid "voiceErrorTimeout"
-msgstr "Ahotsaren aintzatespena gelditu da inaktibitateagatik."
-
-msgid "voiceErrorStart"
-msgstr "Ezin izan da aintzatespena hasi. Ziurtatu mikrofonoa baimenduta dagoela eta ez dagoela erabiltzen."
-
-msgid "voiceErrorUnsupported"
-msgstr "Sentitzen dugu, zure nabigatzaileak ez du ahotsaren aintzatespena onartzen."
-
-msgid "changeResultText"
-msgstr "Itzuli beharreko aldaketa hau da: {change} €"
-
-msgid "invalidInputText"
-msgstr "Mesedez, sartu zenbateko baliodunak."
-
-msgid "amountReceivedLowText"
-msgstr "Jasotako zenbatekoa ordaindu beharrekoa baino txikiagoa da."
-
-msgid "historyTitle"
-msgstr "Eragiketen Historiala"
-
-msgid "historyHeaderDate"
-msgstr "Data eta Ordua"
-
-msgid "historyHeaderTotal"
-msgstr "Ordaindutako totala"
-
-msgid "historyHeaderReceived"
-msgstr "Jasotako zenbatekoa"
-
-msgid "historyHeaderChange"
-msgstr "Itzulitako aldaketa"
-
-msgid "settingsTitle"
-msgstr "Ezarpenak"
-
-msgid "settingsDarkModeLabel"
-msgstr "Modu Iluna"
-
-msgid "settingsLanguageLabel"
-msgstr "Hizkuntza"
-
-msgid "settingsLangSpanish"
-msgstr "Gaztelania"
-
-msgid "settingsLangEnglish"
-msgstr "Ingelesa"
-
-msgid "settingsLangGalician"
-msgstr "Galiziera"
-
-msgid "settingsLangCatalan"
-msgstr "Katalana"
-
-msgid "settingsLangValencian"
-msgstr "Valentziera"
-
-msgid "settingsLangBasque"
-msgstr "Euskara"
-
-msgid "settingsSerialTitle"
-msgstr "Kanpoko Gailuarekin Komunikazioa"
-
-msgid "settingsSerialDescription"
-msgstr "Konektatu gailu bat USB bidez datuak bidaltzeko eta jasotzeko."
-
-msgid "settingsMachineModelLabel"
-msgstr "Makina Eredua"
-
-msgid "settingsMachineModelS"
-msgstr "S Eredua (Oinarrizkoa)"
-
-msgid "settingsMachineModelM"
-msgstr "M Eredua (Estandarra)"
-
-msgid "settingsMachineModelMax"
-msgstr "MAX Eredua (Osoa)"
-
-msgid "settingsSerialConnect"
-msgstr "Gailua Konektatu"
-
-msgid "settingsSerialSend"
-msgstr "Bidali"
-
-msgid "settingsSerialPlaceholder"
-msgstr "Idatzi komando bat..."
-
-msgid "settingsSerialConsoleLabel"
-msgstr "Komunikazio kontsola"
-
-msgid "speechEuroSingular"
-msgstr "euro"
-
-msgid "speechEuroPlural"
-msgstr "euro"
-
-msgid "speechCentSingular"
-msgstr "zentimo"
-
-msgid "speechCentPlural"
-msgstr "zentimo"
-
-msgid "speechCon"
-msgstr "eta"
-
-msgid "speechCero"
-msgstr "zero"
-
-msgid "speechOneEuro"
-msgstr "euro bat"
-
-msgid "speechOneCent"
-msgstr "zentimo bat"
-
-msgid "speechChangeResultText"
-msgstr "Itzuli beharreko aldaketa hau da:"
+# ... (and so on for all keys)

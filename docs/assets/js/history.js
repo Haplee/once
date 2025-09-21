@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const row = historyTableBody.insertRow();
                 const cell = row.insertCell();
                 cell.colSpan = 4;
-                // This text should be translated by the backend template in a future step.
                 cell.textContent = 'No hay operaciones registradas.';
                 cell.style.textAlign = 'center';
             } else {

@@ -28,7 +28,6 @@ def get_history():
     transactions = db.execute(
         'SELECT id, timestamp, total, received, change FROM transaction_history ORDER BY timestamp DESC'
     ).fetchall()
-    # Convert rows to a list of dictionaries to be jsonified
     history_list = [dict(row) for row in transactions]
     return jsonify(history_list)
 

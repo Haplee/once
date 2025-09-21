@@ -41,7 +41,7 @@ babel = Babel(app, locale_selector=get_locale)
 from . import db
 db.init_app(app)
 
-# --- Routes ---
-from app import routes
-from app import api
+# --- Blueprints ---
+from . import routes
+from . import api
 app.register_blueprint(api.api)

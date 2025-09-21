@@ -16,6 +16,7 @@ Esta es la versión refactorizada de la aplicación web de la Calculadora de Cam
 
 - Python 3.8+
 - pip (gestor de paquetes de Python)
+- Node.js y npm (para las pruebas)
 
 ## Cómo Empezar
 
@@ -45,15 +46,19 @@ source venv/bin/activate
 
 ### 3. Instalar Dependencias
 
-Instala todas las librerías de Python necesarias con un solo comando:
+Instala todas las dependencias de Python y Node.js.
 
 ```bash
+# Instalar dependencias de Python
 pip install -r requirements.txt
+
+# Instalar dependencias de Node.js (para pruebas)
+npm install
 ```
 
 ### 4. Inicializar la Base de Datos
 
-Antes de ejecutar la aplicación por primera vez, necesitas crear la base de datos y la tabla para el historial. Flask lo hace fácil con un comando personalizado.
+Antes de ejecutar la aplicación por primera vez, necesitas crear la base de datos y la tabla para el historial.
 
 ```bash
 flask --app app init-db
@@ -70,26 +75,28 @@ flask --app app run
 
 La aplicación estará disponible en `http://127.0.0.1:5000` en tu navegador.
 
+### 6. Ejecutar las Pruebas (Opcional)
+
+Para ejecutar las pruebas End-to-End de Playwright, asegúrate de que el servidor de Flask esté corriendo y luego ejecuta:
+
+```bash
+npm test
+```
+
 ## Estructura del Proyecto
 
-La nueva arquitectura del proyecto es la siguiente:
+La arquitectura del proyecto sigue un patrón estándar de Flask:
 
 ```
 .
 ├── app/
-│   ├── static/             # Archivos estáticos (CSS, JS, imágenes) que no se pudieron mover
-│   │   └── ...
+│   ├── static/             # (Actualmente vacío, los activos se sirven desde /docs)
 │   ├── templates/          # Plantillas HTML de Jinja2
-│   │   ├── index.html
-│   │   ├── history.html
-│   │   └── configuracion.html
 │   ├── translations/       # Archivos de traducción de Gettext (.po)
-│   │   ├── es/LC_MESSAGES/
-│   │   └── ...
 │   ├── __init__.py         # Inicializador de la aplicación Flask
-│   ├── api.py              # Blueprint para la API (cálculo, historial)
+│   ├── api.py              # Blueprint para la API
 │   ├── db.py               # Lógica de la base de datos
-│   ├── routes.py           # Rutas principales de la aplicación
+│   ├── routes.py           # Rutas de la aplicación
 │   └── schema.sql          # Esquema de la base de datos
 ├── docs/                   # Directorio original, ahora solo para activos estáticos
 │   └── assets/
@@ -97,11 +104,14 @@ La nueva arquitectura del proyecto es la siguiente:
 │   └── arduino_sketch.ino  # Código de ejemplo para el dispositivo Arduino
 ├── tests/
 │   └── e2e.spec.js         # Pruebas End-to-End con Playwright
+├── .github/
+│   └── workflows/
+│       └── ci.yml          # Flujo de trabajo de GitHub Actions para CI
 ├── requirements.txt        # Dependencias de Python
-├── vercel.json             # Configuración de despliegue para Vercel
+├── package.json            # Dependencias de Node.js
 └── README.md               # Este archivo
 ```
 
 ## Comunicación con Arduino
 
-El código de ejemplo para un dispositivo compatible con Arduino se ha movido a `arduino_sketch/arduino_sketch.ino`. Puedes cargarlo en tu dispositivo para probar la funcionalidad de comunicación serie desde la página de **Configuración**.
+El código de ejemplo para un dispositivo compatible con Arduino se encuentra en `arduino_sketch/arduino_sketch.ino`. Puedes cargarlo en tu dispositivo para probar la funcionalidad de comunicación serie desde la página de **Configuración**.
