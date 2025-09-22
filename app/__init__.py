@@ -17,6 +17,11 @@ def get_locale():
         return session['language']
     return request.accept_languages.best_match(list(LANGUAGES.keys()))
 
+@app.context_processor
+def inject_get_locale():
+    """Inject get_locale function into all templates."""
+    return dict(get_locale=get_locale)
+
 # Initialize the app
 app = Flask(__name__, instance_relative_config=True)
 
