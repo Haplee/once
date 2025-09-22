@@ -36,10 +36,15 @@ jobs:
       - name: Start Flask server
         run: |
           source venv/bin/activate
-          flask --app app run --host=0.0.0.0 &
+          python vercel.py > server.log 2>&1 &
 
       - name: Wait for server to be ready
         run: npx wait-on http://localhost:5000/ --timeout 60000
+
+      - name: Display server log
+        if: always()
+        run: |
+          cat server.log || echo "server.log not found"
 
       - name: Run Playwright tests
         run: npm test
