@@ -2,4 +2,5 @@
 # It imports the Flask app instance from our 'app' package.
 from app import app
 
-# No content here, effectively deleting the block
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
