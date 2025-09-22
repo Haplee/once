@@ -1,6 +1,5 @@
 // Helper: get element safely
 function getEl(selector, opts = {}) {
-    // opts.type: 'id'|'qs' for logging clarity
     const el = opts.type === 'id' ? document.getElementById(selector) : document.querySelector(selector);
     if (!el && !opts.silent) {
         console.warn(`[getEl] Elemento no encontrado: ${selector}`, opts);
@@ -19,53 +18,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = populateVoiceList;
     }
-    /**
-     * Applies the selected theme (light/dark) to the application.
-     * It reads the theme from localStorage, applies it to the body, and updates
-     * the theme toggle switch. It specifically avoids theming the configuration page.
-     */
+
+    // --- Theme Management ---
     const applyTheme = () => {
         let theme = localStorage.getItem('theme');
         if (!theme) {
             theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-mode' : 'light-mode';
             localStorage.setItem('theme', theme);
         }
-
-        // Apply the theme to the body.
-        if (theme === 'dark-mode') {
-            document.body.classList.add('dark-mode');
-        } else {
-            document.body.classList.remove('dark-mode');
-        }
-
-        // Update the toggle state on the config page if it exists.
+        document.body.classList.toggle('dark-mode', theme === 'dark-mode');
         const themeToggleButton = getEl('theme-toggle', { type: 'id', silent: true });
         if (themeToggleButton) {
             themeToggleButton.checked = theme === 'dark-mode';
         }
     };
 
-    // Apply theme on initial load
     applyTheme();
 
-    // Add event listener for the toggle on the config page
     const themeToggleButton = getEl('theme-toggle', { type: 'id', silent: true });
     if (themeToggleButton) {
         themeToggleButton.addEventListener('change', function() {
             const newTheme = this.checked ? 'dark-mode' : 'light-mode';
             localStorage.setItem('theme', newTheme);
-            // Re-apply theme to respect the "don't theme config page" rule
             applyTheme();
         });
     }
 
-    /**
-     * Handles the main calculator form submission.
-     * It calculates the change, displays it, speaks it, and saves it to history.
-     */
+    // --- Calculator Logic ---
     const form = getEl('change-form', { type: 'id' });
     if (form) {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const totalAmountInput = getEl('total-amount', { type: 'id' });
@@ -74,272 +56,136 @@ document.addEventListener('DOMContentLoaded', () => {
             const resultSpinner = getEl('result-spinner', { type: 'id', silent: true });
             const calculateBtn = getEl('calculate-btn', { type: 'id' });
 
-            if (!totalAmountInput || !amountReceivedInput || !resultDiv || !calculateBtn) {
-                console.error('Faltan elementos esenciales del formulario', { totalAmountInput, amountReceivedInput, resultDiv, calculateBtn, resultSpinner });
-                if (resultSpinner) resultSpinner.classList.add('d-none');
-                if (calculateBtn) calculateBtn.disabled = false;
-                return;
-            }
-
             const totalAmount = parseFloat(totalAmountInput.value);
             const amountReceived = parseFloat(amountReceivedInput.value);
 
-            // Disable button to prevent multiple submissions
-            if(calculateBtn) calculateBtn.disabled = true;
-
-            // Clear previous result and show spinner
-            if(resultDiv) resultDiv.textContent = '';
+            calculateBtn.disabled = true;
+            resultDiv.textContent = '';
             if (resultSpinner) resultSpinner.classList.remove('d-none');
 
-            // --- Basic Validation ---
+            // Client-side validation
             if (isNaN(totalAmount) || isNaN(amountReceived)) {
-                if(resultDiv) resultDiv.textContent = 'Por favor, introduce importes válidos.';
-                if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
-                if (calculateBtn) calculateBtn.disabled = false; // Re-enable button
-                return;
-            }
-
-            if (amountReceived < totalAmount) {
-                if(resultDiv) resultDiv.textContent = 'El importe recibido es menor que el total a pagar.';
-                if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
-                if (calculateBtn) calculateBtn.disabled = false; // Re-enable button
+                resultDiv.textContent = 'Por favor, introduce importes válidos.'; // This should be translated
+                if (resultSpinner) resultSpinner.classList.add('d-none');
+                calculateBtn.disabled = false;
                 return;
             }
 
             try {
-                const change = amountReceived - totalAmount;
+                // 1. Call backend API to calculate change
+                const response = await fetch('/api/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ total: totalAmount, received: amountReceived }),
+                });
 
-                // Hide spinner
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Error en la comunicación con el servidor.');
+                }
+
+                const data = await response.json();
+                const change = data.change;
+
+                // 2. Display result and speak it
                 if (resultSpinner) resultSpinner.classList.add('d-none');
 
-                // Format for display
-                const lang = localStorage.getItem('language') || 'es';
-                const translations = window.currentTranslations || (window.allTranslations ? window.allTranslations[lang] : null) || {};
-                const changeTextForDisplayTemplate = translations.changeResultText || 'El cambio a devolver es: {change} €';
-                const changeTextForDisplay = changeTextForDisplayTemplate.replace('{change}', change.toFixed(2));
-                if(resultDiv) resultDiv.textContent = changeTextForDisplay;
+                // Note: The display text is hardcoded for now, as the i18n is backend-driven.
+                // A more advanced implementation would update this text via another API call or websocket.
+                resultDiv.textContent = `El cambio a devolver es: ${change.toFixed(2)} €`;
 
-                // Format for speech using the new helper function
                 const speakableChange = formatChangeForSpeech(change);
-                const changeIntro = translations.speechChangeResultText || "El cambio a devolver es:";
+                // This intro text is also hardcoded and should ideally come from the backend.
+                const changeIntro = "El cambio a devolver es:";
                 const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
+                speak(changeTextForSpeech, null);
 
-                // Re-enable the button immediately after showing the result
-                if (calculateBtn) calculateBtn.disabled = false;
+                // 3. Save to history via API
+                await fetch('/api/history', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ total: totalAmount, received: amountReceived, change: change }),
+                });
 
-                // Announce the result without blocking the UI
-                speak(changeTextForSpeech, null); // No callback needed
-
-                saveToHistory({ total: totalAmount, received: amountReceived, change: change }); // Save to history
             } catch (error) {
-                // Handle any errors that might occur during calculation
-                console.error('Error en el cálculo:', error);
-                if(resultDiv) resultDiv.textContent = 'Ha ocurrido un error durante el cálculo. Por favor, inténtalo de nuevo.';
-                if (resultSpinner) resultSpinner.classList.add('d-none'); // Hide spinner
-                if (calculateBtn) calculateBtn.disabled = false; // Re-enable button immediately on error
+                console.error('Error en el proceso de cálculo:', error);
+                resultDiv.textContent = error.message || 'Ha ocurrido un error. Por favor, inténtalo de nuevo.';
+                if (resultSpinner) resultSpinner.classList.add('d-none');
+            } finally {
+                calculateBtn.disabled = false;
             }
         });
 
-        // Initialize the new single-button speech recognition, only on the calculator page
+        // Initialize speech recognition if the function exists
         if (window.initializeSpeechRecognition) {
             window.initializeSpeechRecognition();
         }
     }
 
-    /**
-     * Formats the change amount into a natural-sounding Spanish string for speech.
-     * @param {number} change - The amount of change.
-     * @returns {string} - A natural language string (e.g., "dos euros con cincuenta céntimos").
-     */
-    function formatChangeForSpeech(change) {
-        const translations = window.currentTranslations || {};
-        const euros = Math.floor(change);
-        const cents = Math.round((change - euros) * 100);
-
-        const euroSingular = translations.speechEuroSingular || 'euro';
-        const euroPlural = translations.speechEuroPlural || 'euros';
-        const centSingular = translations.speechCentSingular || 'céntimo';
-        const centPlural = translations.speechCentPlural || 'céntimos';
-        const con = translations.speechCon || 'con';
-        const cero = translations.speechCero || 'cero';
-        const oneEuro = translations.speechOneEuro || `un ${euroSingular}`;
-        const oneCent = translations.speechOneCent || `un ${centSingular}`;
-
-        if (euros === 0 && cents === 0) {
-            return `${cero} ${euroPlural}`;
-        }
-
-        let parts = [];
-
-        if (euros > 0) {
-            if (euros === 1) {
-                parts.push(oneEuro);
-            } else {
-                parts.push(`${euros} ${euroPlural}`);
-            }
-        }
-
-        if (cents > 0) {
-            if (cents === 1) {
-                parts.push(oneCent);
-            } else {
-                parts.push(`${cents} ${centPlural}`);
-            }
-        }
-
-        return parts.join(` ${con} `);
-    }
-
-    /**
-     * Uses the SpeechSynthesis API to read text aloud.
-     * This version includes a safety timeout to prevent the UI from freezing
-     * if the `onend` event never fires.
-     * @param {string} text - The text to be spoken.
-     * @param {function} onEndCallback - A function to call when speech is finished.
-     */
+    // This function remains client-side as it depends on browser APIs
     function speak(text, onEndCallback) {
-        if ('speechSynthesis' in window && text) {
-            window.speechSynthesis.cancel(); // Cancel any ongoing speech
+        // Do not speak if running in test mode, to avoid CI errors.
+        if (window.APP_IS_TESTING) {
+            if (typeof onEndCallback === 'function') onEndCallback();
+            return;
+        }
 
+        if ('speechSynthesis' in window && text) {
+            window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
-            const lang = localStorage.getItem('language') || 'es';
-            const langMap = {
-                es: 'es-ES', en: 'en-US', gl: 'gl-ES',
-                ca: 'ca-ES', va: 'ca-ES', eu: 'eu-ES'
-            };
+
+            // Use the HTML lang attribute as the source of truth for language
+            const lang = document.documentElement.lang || 'es';
+            const langMap = { es: 'es-ES', en: 'en-US', gl: 'gl-ES', ca: 'ca-ES', va: 'ca-ES', eu: 'eu-ES' };
             utterance.lang = langMap[lang] || 'es-ES';
 
             const voice = voices.find(v => v.lang === utterance.lang);
-            if (voice) {
-                utterance.voice = voice;
-            }
+            if (voice) utterance.voice = voice;
 
             let spoken = false;
             const onEnd = () => {
-                if (spoken) return; // Ensure the callback is only called once
+                if (spoken) return;
                 spoken = true;
-                if (typeof onEndCallback === 'function') {
-                    onEndCallback();
-                }
+                if (typeof onEndCallback === 'function') onEndCallback();
             };
 
             utterance.onend = onEnd;
             utterance.onerror = (event) => {
                 console.error('SpeechSynthesis Error:', event.error);
-                onEnd(); // Ensure callback runs even on error
+                onEnd();
             };
-
-            // Safety timeout: if speech doesn't end after 10 seconds, fire callback anyway
-            setTimeout(onEnd, 10000);
-
+            setTimeout(onEnd, 10000); // Safety timeout
             window.speechSynthesis.speak(utterance);
         } else {
-            // If speech synthesis is not supported or text is empty, run the callback immediately
-            if (typeof onEndCallback === 'function') {
-                onEndCallback();
-            }
+            if (typeof onEndCallback === 'function') onEndCallback();
         }
     }
 
-    /**
-     * Saves the transaction data asynchronously using a Web Worker.
-     * @param {object} data - The transaction data.
-     */
-    function saveToHistory(data) {
-        if (window.Worker) {
-            const historyWorker = new Worker('assets/js/historyWorker.js');
+    // This function is kept for formatting the spoken change.
+    // It's a candidate for future improvement to make it language-dynamic from the backend.
+    function formatChangeForSpeech(change) {
+        const euros = Math.floor(change);
+        const cents = Math.round((change - euros) * 100);
 
-            historyWorker.onmessage = (e) => {
-                if (e.data.status === 'success') {
-                    try {
-                        // The worker has added the timestamp, now we handle localStorage
-                        const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
-                        history.unshift(e.data.payload);
-                        localStorage.setItem('transactionHistory', JSON.stringify(history));
-                    } catch (error) {
-                         console.error('Error saving history after worker processing:', error);
-                    }
-                } else if (e.data.status === 'error') { // This case is now unlikely but good to keep
-                    console.error('Error reported from history worker:', e.data.error);
-                }
-                historyWorker.terminate(); // Clean up the worker
-            };
+        // These are hardcoded Spanish words. This is a limitation of the current implementation.
+        const euroSingular = 'euro';
+        const euroPlural = 'euros';
+        const centSingular = 'céntimo';
+        const centPlural = 'céntimos';
+        const con = 'con';
+        const cero = 'cero';
+        const oneEuro = `un ${euroSingular}`;
+        const oneCent = `un ${centSingular}`;
 
-            historyWorker.onerror = (e) => {
-                console.error(`Error in historyWorker: ${e.message}`, e);
-                // Also terminate on error
-                historyWorker.terminate();
-            };
-
-            // Send the new data to the worker for timestamping
-            historyWorker.postMessage({ action: 'save', payload: data });
-        } else {
-            // Fallback for older browsers that don't support Web Workers.
-            try {
-                const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
-                data.timestamp = new Date().toLocaleString('es-ES');
-                history.unshift(data);
-                localStorage.setItem('transactionHistory', JSON.stringify(history));
-            } catch (error) {
-                console.error('Error saving history without worker:', error);
-            }
-        }
-    }
-
-    /**
-     * Handles language selection buttons on the settings page.
-     */
-    const languageSelector = getEl('language-selector', { type: 'id', silent: true });
-    if (languageSelector) {
-        const langButtons = languageSelector.querySelectorAll('.lang-btn');
-
-        const setActiveButton = () => {
-            const currentLang = localStorage.getItem('language') || 'es';
-            langButtons.forEach(btn => {
-                if (btn.dataset.lang === currentLang) {
-                    btn.classList.add('btn-primary');
-                    btn.classList.remove('btn-secondary');
-                } else {
-                    btn.classList.add('btn-secondary');
-                    btn.classList.remove('btn-primary');
-                }
-            });
-        };
-
-        langButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const lang = e.currentTarget.dataset.lang;
-                // window.setLanguage is exposed by i18n.js
-                if (window.setLanguage) {
-                    window.setLanguage(lang).then(setActiveButton);
-                }
-            });
-        });
-
-        // Set initial state
-        setActiveButton();
-    }
-
-    /**
-     * Example function to demonstrate calling a mock Arduino API.
-     * This is a placeholder for future integration.
-     * @param {object} data - Data to be sent to the mock Arduino.
-     */
-    function sendToArduino(data) {
-        console.log("Simulating sending data to Arduino:", data);
-        // In a real scenario, this would be a fetch call to the API endpoint
-        // fetch('/api/arduino', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify(data),
-        // })
-        // .then(response => response.json())
-        // .then(result => {
-        //     console.log('Arduino API response:', result);
-        // });
+        if (euros === 0 && cents === 0) return `${cero} ${euroPlural}`;
+        let parts = [];
+        if (euros > 0) parts.push(euros === 1 ? oneEuro : `${euros} ${euroPlural}`);
+        if (cents > 0) parts.push(cents === 1 ? oneCent : `${cents} ${centPlural}`);
+        return parts.join(` ${con} `);
     }
 });
 
+// The speech recognition parts remain unchanged as they are client-side only.
 // Helper functions for parsing Spanish numbers from text
 const SMALL_WORDS = {
     'cero':0,'uno':1,'dos':2,'tres':3,'cuatro':4,'cinco':5,'seis':6,'siete':7,'ocho':8,'nueve':9,
@@ -356,21 +202,15 @@ function esToDigits(text) {
 
 function wordsToNumber(text) {
     if (!text) return null;
-
-    // Direct match for digits first
     const numericText = text.trim().toLowerCase();
     if (/^-?\d+([.,]\d+)?$/.test(numericText)) {
         return parseFloat(numericText.replace(',', '.'));
     }
-
     const tokens = numericText.split(/[\s-]+/);
     const groups = [];
-
-    // Group numbers by "mil"
     let currentGroup = [];
     for (const token of tokens) {
         if (token === 'mil') {
-            // "mil" acts as a separator
             groups.push(currentGroup);
             currentGroup = [];
         } else {
@@ -378,63 +218,43 @@ function wordsToNumber(text) {
         }
     }
     groups.push(currentGroup);
-
     let total = 0;
     const groupCount = groups.length;
-
     for (let i = 0; i < groupCount; i++) {
         let groupValue = 0;
         let groupTokens = groups[i];
-
-        // Handle "un" before "mil" -> becomes 1 for calculation
         if (groupTokens.length === 1 && groupTokens[0] === 'un' && groupCount > 1) {
             groupTokens = ['uno'];
         }
-
         let current = 0;
-
-        // Process tokens within each group (e.g., "doscientos treinta y cinco")
         for (let j = 0; j < groupTokens.length; j++) {
             const t = groupTokens[j];
-
-            if (t === 'y') continue; // Skip 'y', it's just a connector
-
+            if (t === 'y') continue;
             if (SMALL_WORDS.hasOwnProperty(t)) {
                 const val = SMALL_WORDS[t];
-                if (val >= 100) { // Cientos
-                    // Handles "ciento" correctly
+                if (val >= 100) {
                     groupValue += (current > 0 ? current : 1) * val;
                     current = 0;
-                } else { // Decenas y unidades
+                } else {
                     current += val;
                 }
             } else {
-                // If a word is not a number or connector, parsing fails for this group
                 return null;
             }
         }
         groupValue += current;
-
-        // Apply "mil" multiplier
         const multiplier = Math.pow(1000, groupCount - 1 - i);
-
-        // Handle cases like "mil" (group is empty but represents 1000)
         if (groupValue === 0 && multiplier >= 1000) {
             groupValue = 1;
         }
-
         total += groupValue * multiplier;
     }
-
     return total;
 }
 
 function parseSpanishAmount(text) {
     if (!text) return null;
-
     let normalizedText = text.toLowerCase().trim();
-
-    // Handle time-like format from speech recognition e.g., "5:50"
     const timeMatch = normalizedText.match(/(\d{1,2}):(\d{2})/);
     if (timeMatch) {
         const potentialNumber = timeMatch[0].replace(':', '.');
@@ -443,216 +263,121 @@ function parseSpanishAmount(text) {
             return parseFloat(val.toFixed(2));
         }
     }
-    // Normalize currency symbols and common words, but leave "y" alone for now.
-    normalizedText = normalizedText.replace(/€/g, ' euros ');
-    normalizedText = normalizedText.replace(/centimo[s]?/g, ' centimos ');
-    normalizedText = normalizedText.replace(/\s+/g, ' '); // Collapse multiple spaces
-
-    // 1. Direct number match (e.g., "2,50", "2.50", "25")
-    // This is the most reliable, so we check it first.
+    normalizedText = normalizedText.replace(/€/g, ' euros ').replace(/centimo[s]?/g, ' centimos ').replace(/\s+/g, ' ');
     const numMatch = normalizedText.match(/-?\d+([.,]\d*)?/);
     if (numMatch) {
         const numStr = numMatch[0].replace(',', '.');
         const val = parseFloat(numStr);
         if (!isNaN(val)) return parseFloat(val.toFixed(2));
     }
-
-    // 2. "X euros y Y [centimos]" (e.g., "dos euros y cincuenta")
     const eurosYMatch = normalizedText.match(/([\w\s-]+?)\s*(?:euros|euro)\s+y\s+([\w\s-]+?)\s*(?:centimos)?$/);
     if (eurosYMatch) {
-        const eurosPart = eurosYMatch[1].trim();
-        const centsPart = eurosYMatch[2].trim();
-        const euros = wordsToNumber(esToDigits(eurosPart));
-        const cents = wordsToNumber(esToDigits(centsPart));
-        if (euros != null && cents != null) {
-            return parseFloat((euros + (cents / 100)).toFixed(2));
-        }
+        const euros = wordsToNumber(esToDigits(eurosYMatch[1].trim()));
+        const cents = wordsToNumber(esToDigits(eurosYMatch[2].trim()));
+        if (euros != null && cents != null) return parseFloat((euros + (cents / 100)).toFixed(2));
     }
-
-    // 3. "X [euros] con Y [centimos]" (flexible)
     const eurosConMatch = normalizedText.match(/([\w\s-]+?)\s*(?:euros|euro)?\s*con\s*([\w\s-]+?)\s*(?:centimos)?$/);
     if (eurosConMatch) {
-        const eurosPart = eurosConMatch[1].trim();
-        const centsPart = eurosConMatch[2].trim();
-        const euros = wordsToNumber(esToDigits(eurosPart));
-        const cents = wordsToNumber(esToDigits(centsPart));
-        if (euros != null && cents != null) {
-            return parseFloat((euros + (cents / 100)).toFixed(2));
-        }
+        const euros = wordsToNumber(esToDigits(eurosConMatch[1].trim()));
+        const cents = wordsToNumber(esToDigits(eurosConMatch[2].trim()));
+        if (euros != null && cents != null) return parseFloat((euros + (cents / 100)).toFixed(2));
     }
-
-    // 4. "X coma/punto Y"
     const commaPointMatch = normalizedText.match(/([\w\s-]+)\s*(?:coma|punto)\s*([\w\s-]+)/);
     if (commaPointMatch) {
         const left = wordsToNumber(esToDigits(commaPointMatch[1].trim()));
         const right = wordsToNumber(esToDigits(commaPointMatch[2].trim()));
         if (left != null && right != null) {
             const rightStr = right.toString().padStart(2, '0');
-            const finalVal = parseFloat(`${left}.${rightStr}`);
-            return parseFloat(finalVal.toFixed(2));
+            return parseFloat(parseFloat(`${left}.${rightStr}`).toFixed(2));
         }
     }
-
-    // 5. Heuristic for "X Y" format (e.g., "siete cincuenta" -> 7.50)
     const parts = normalizedText.split(' ');
     if (parts.length === 2 && !normalizedText.includes(' y ')) {
-        const eurosPart = parts[0];
-        const centsPart = parts[1];
-        const euros = wordsToNumber(esToDigits(eurosPart));
-        const cents = wordsToNumber(esToDigits(centsPart));
-
+        const euros = wordsToNumber(esToDigits(parts[0]));
+        const cents = wordsToNumber(esToDigits(parts[1]));
         if (euros != null && cents != null && cents > 0 && cents < 100) {
-            const combined = wordsToNumber(esToDigits(normalizedText));
-            if (combined != null && combined === euros + cents && euros < 20) {
+            if (wordsToNumber(esToDigits(normalizedText)) === euros + cents && euros < 20) {
                 return parseFloat((euros + (cents / 100)).toFixed(2));
             }
         }
     }
-
-    // 6. "X euros"
     const eurosOnlyMatch = normalizedText.match(/([\w\s-]+?)\s*(?:euros|euro)$/);
     if (eurosOnlyMatch) {
         const euros = wordsToNumber(esToDigits(eurosOnlyMatch[1].trim()));
         if (euros != null) return parseFloat(euros.toFixed(2));
     }
-
-    // 7. "Y centimos"
     const centsOnlyMatch = normalizedText.match(/([\w\s-]+?)\s*centimos$/);
     if (centsOnlyMatch) {
         const cents = wordsToNumber(esToDigits(centsOnlyMatch[1].trim()));
         if (cents != null) return parseFloat((cents / 100).toFixed(2));
     }
-
-    // 8. Just a number word (e.g., "veinticinco")
     const onlyWords = wordsToNumber(esToDigits(normalizedText));
     if (onlyWords != null) return parseFloat(onlyWords.toFixed(2));
-
-    return null; // Return null if no pattern matches
+    return null;
 }
 
-// --- BEGIN: Conservative & Debuggable Speech Recognition Module ---
-
-// Detect variants
+// Speech Recognition Module
 const _SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
-
-// Expose for debugging
 window._SpeechRecognitionAvailable = !!_SpeechRecognition;
-
 console.log('[speech] Feature detect - SpeechRecognition available?', window._SpeechRecognitionAvailable);
-
-// Global recognition instance (conservative: recreate if needed)
-window.recognition = window.recognition || null;
+window.recognition = null;
 let _isRecognizing = false;
 let _micHandler = null;
 
-/** Detect iOS Safari (common source of unsupported SpeechRecognition) */
 function isMobileSafari() {
     try {
-        const ua = navigator.userAgent || '';
-        return /iP(hone|od|ad)/i.test(ua) && /Safari/i.test(ua) && !/CriOS|FxiOS|OPiOS|EdgiOS/i.test(ua);
-    } catch (e) {
-        return false;
-    }
+        return /iP(hone|od|ad)/i.test(navigator.userAgent) && /Safari/i.test(navigator.userAgent) && !/CriOS|FxiOS|OPiOS|EdgiOS/i.test(navigator.userAgent);
+    } catch (e) { return false; }
 }
 
-/** Create or reset the global recognition instance */
 function createRecognitionInstance() {
-    if (!_SpeechRecognition) {
-        console.warn('[speech] No SpeechRecognition constructor available.');
-        window.recognition = null;
-        return null;
-    }
-
+    if (!_SpeechRecognition) return null;
     try {
-        // Always create fresh instance to avoid stale event handlers
         const rec = new _SpeechRecognition();
         rec.lang = 'es-ES';
         rec.interimResults = false;
         rec.maxAlternatives = 1;
         rec.continuous = false;
-
-        // Safe handlers (lightweight)
-        rec.onstart = () => {
-            _isRecognizing = true;
-            console.log('[speech] rec.onstart');
-        };
-        rec.onend = () => {
-            _isRecognizing = false;
-            console.log('[speech] rec.onend');
-        };
-        rec.onerror = (ev) => {
-            _isRecognizing = false;
-            console.error('[speech] rec.onerror', ev && ev.error ? ev.error : ev);
-        };
-        rec.onresult = (ev) => {
-            console.log('[speech] rec.onresult', ev);
-            // result handling will be delegated in initializeSpeechRecognition to capture current UI elements
-        };
-
-        // Expose globally so you can inspect it from console
+        rec.onstart = () => { _isRecognizing = true; console.log('[speech] rec.onstart'); };
+        rec.onend = () => { _isRecognizing = false; console.log('[speech] rec.onend'); };
+        rec.onerror = (ev) => { _isRecognizing = false; console.error('[speech] rec.onerror', ev.error || ev); };
         window.recognition = rec;
-        console.log('[speech] recognition instance created and exposed as window.recognition');
         return rec;
     } catch (err) {
         console.error('[speech] Failed to create recognition instance:', err);
-        window.recognition = null;
         return null;
     }
 }
 
-/** Main initializer to bind UI and handlers. Safe to call multiple times. */
 function initializeSpeechRecognition() {
     const micBtn = getEl('#mic-btn', { type: 'qs', silent: true });
     const statusSpan = getEl('#mic-status', { type: 'qs', silent: true });
     const totalAmountInput = getEl('total-amount', { type: 'id', silent: true });
     const amountReceivedInput = getEl('amount-received', { type: 'id', silent: true });
 
-    console.log('[speech] initializeSpeechRecognition called', {
-        micBtnExists: !!micBtn, statusSpanExists: !!statusSpan,
-        totalExists: !!totalAmountInput, receivedExists: !!amountReceivedInput,
-        mobileSafari: isMobileSafari()
-    });
-
-    // If no API support or mobile Safari, disable gracefully
     if (!_SpeechRecognition || isMobileSafari()) {
         if (micBtn) micBtn.disabled = true;
-        if (statusSpan) statusSpan.textContent = 'Reconocimiento de voz no disponible en este navegador.';
-        console.warn('[speech] SpeechRecognition not supported or running on mobile Safari — mic disabled.');
+        if (statusSpan) statusSpan.textContent = 'Reconocimiento de voz no disponible.';
         return;
     }
-
-    // Require UI elements to operate
     if (!micBtn || !statusSpan || !totalAmountInput || !amountReceivedInput) {
-        console.warn('[speech] Missing UI elements for mic; disabling mic if present.');
         if (micBtn) micBtn.disabled = true;
         return;
     }
 
-    // Ensure we have a recognition instance
-    let rec = window.recognition;
-    if (!rec) rec = createRecognitionInstance();
+    let rec = window.recognition || createRecognitionInstance();
     if (!rec) {
         if (micBtn) micBtn.disabled = true;
-        if (statusSpan) statusSpan.textContent = 'No se pudo inicializar el reconocimiento de voz.';
+        if (statusSpan) statusSpan.textContent = 'No se pudo inicializar el reconocimiento.';
         return;
     }
 
-    // Attach dynamic result handler that closes over current inputs/statusSpan
     rec.onresult = (event) => {
         const transcript = event?.results?.[0]?.[0]?.transcript?.trim().toLowerCase() || '';
-
-        console.log('[speech] Transcript:', transcript);
-
         if (statusSpan) statusSpan.textContent = 'Procesando...';
-
-        let totalStr = '';
-        let receivedStr = '';
-
-        // Keywords ordered by specificity to avoid ambiguity
+        let totalStr = '', receivedStr = '';
         const keywords = ['paga con', 'me da', 'le doy', 'recibido', 'entrego', 'pagan'];
-        let separatorKeyword = null;
-        let separatorIndex = -1;
-
+        let separatorKeyword = null, separatorIndex = -1;
         for (const key of keywords) {
             const index = transcript.indexOf(key);
             if (index !== -1) {
@@ -661,30 +386,20 @@ function initializeSpeechRecognition() {
                 break;
             }
         }
-
         if (separatorIndex !== -1) {
             totalStr = transcript.substring(0, separatorIndex).trim();
             receivedStr = transcript.substring(separatorIndex + separatorKeyword.length).trim();
         } else {
             totalStr = transcript;
         }
-
         const totalAmount = parseSpanishAmount(totalStr);
         const amountReceived = parseSpanishAmount(receivedStr);
-
-        if (totalAmount != null && totalAmountInput) {
-            totalAmountInput.value = totalAmount.toFixed(2);
-        }
-
-        if (amountReceived != null && amountReceivedInput) {
-            amountReceivedInput.value = amountReceived.toFixed(2);
-        }
-
+        if (totalAmount != null) totalAmountInput.value = totalAmount.toFixed(2);
+        if (amountReceived != null) amountReceivedInput.value = amountReceived.toFixed(2);
         if (totalAmount != null || amountReceived != null) {
             if (statusSpan) statusSpan.textContent = 'Valores reconocidos';
         } else {
             if (statusSpan) statusSpan.textContent = 'No se pudo interpretar.';
-
         }
         setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
     };
@@ -695,47 +410,29 @@ function initializeSpeechRecognition() {
         setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
     };
 
-
-    // Manage click handler safely (remove previous if present)
     if (_micHandler && micBtn) {
-        try { micBtn.removeEventListener('click', _micHandler); } catch (e) { /* ignore */ }
-        _micHandler = null;
+        try { micBtn.removeEventListener('click', _micHandler); } catch (e) {}
     }
-
     _micHandler = () => {
-
-        // Toggle behavior: if recognizing, stop
         if (_isRecognizing) {
             try { rec.stop(); } catch (e) { try { rec.abort(); } catch(_){} }
             return;
         }
-
-
-        // Try to start
         try {
-            // ensure fresh instance just before start (some browsers require this after permission changes)
-            if (!window.recognition) {
-                rec = createRecognitionInstance();
-                if (!rec) throw new Error('No recognition instance available');
-            }
-            // reset state and start
-            try { rec.abort(); } catch(e) { /* ignore */ }
+            if (!window.recognition) rec = createRecognitionInstance();
+            if (!rec) throw new Error('No recognition instance');
+            try { rec.abort(); } catch(e) {}
             rec.start();
-            console.log('[speech] recognition.start() called');
         } catch (err) {
             console.error('[speech] Error starting recognition:', err);
             if (statusSpan) statusSpan.textContent = 'Error al iniciar reconocimiento.';
             setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
         }
     };
-
-    // Add the click listener
     if (micBtn) {
         micBtn.addEventListener('click', _micHandler);
         micBtn.disabled = false;
     }
-
-    // Stop recognition on visibility change (background)
     document.removeEventListener('visibilitychange', window._speechVisibilityHandler || (() => {}));
     window._speechVisibilityHandler = () => {
         if (document.hidden && window.recognition && _isRecognizing) {
@@ -743,11 +440,6 @@ function initializeSpeechRecognition() {
         }
     };
     document.addEventListener('visibilitychange', window._speechVisibilityHandler);
-
-    console.log('[speech] initializeSpeechRecognition completed.');
 }
 
-// Expose initializer
 window.initializeSpeechRecognition = initializeSpeechRecognition;
-
-// --- END: Conservative & Debuggable Speech Recognition Module ---

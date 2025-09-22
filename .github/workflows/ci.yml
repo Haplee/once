@@ -1,0 +1,50 @@
+name: End-to-end tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Initialize Database
+        run: |
+          source venv/bin/activate
+          flask --app app init-db
+
+      - name: Install Node.js and project dependencies
+        run: |
+          npm install
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Start Flask server
+        run: |
+          source venv/bin/activate
+          flask --app app run --host=0.0.0.0 &
+
+      - name: Wait for server to be ready
+        run: npx wait-on http://localhost:5000/ --timeout 60000
+
+      - name: Run Playwright tests
+        run: npm test
+
+      - name: Stop Flask server
+        if: always()
+        run: |
+          kill $(lsof -t -i:5000) || echo "Server was not running."

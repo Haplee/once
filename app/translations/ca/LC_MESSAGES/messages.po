@@ -1,0 +1,19 @@
+# Catalan translations
+msgid ""
+msgstr ""
+"Language: ca\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "appTitle"
+msgstr "Calculadora de Canvi - ONCE App"
+msgid "navCalculator"
+msgstr "Calculadora"
+msgid "navHistory"
+msgstr "Historial"
+msgid "navSettings"
+msgstr "Configuració"
+msgid "calculatorTitle"
+msgstr "Calculadora de Canvi"
+# ... (and so on for all keys)

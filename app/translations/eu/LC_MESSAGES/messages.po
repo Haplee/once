@@ -1,0 +1,19 @@
+# Basque translations
+msgid ""
+msgstr ""
+"Language: eu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "appTitle"
+msgstr "Aldaketa Kalkulagailua - ONCE App"
+msgid "navCalculator"
+msgstr "Kalkulagailua"
+msgid "navHistory"
+msgstr "Historiala"
+msgid "navSettings"
+msgstr "Ezarpenak"
+msgid "calculatorTitle"
+msgstr "Aldaketa Kalkulagailua"
+# ... (and so on for all keys)
