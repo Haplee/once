@@ -3,175 +3,176 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: email@example.com\n"
-"POT-Creation-Date: 2025-09-21 11:56+0000\n"
-"PO-Revision-Date: 2025-09-21 11:56+0000\n"
+"POT-Creation-Date: 2025-09-26 13:00+0000\n"
+"PO-Revision-Date: 2025-09-26 13:00+0000\n"
 "Last-Translator: Jules <jules@example.com>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+# Template Keys
 msgid "appTitle"
 msgstr "Calculadora de Cambio - ONCE App"
-
 msgid "historyPageTitle"
 msgstr "Historial de Operaciones - ONCE App"
-
 msgid "settingsPageTitle"
 msgstr "Configuración - ONCE App"
-
+msgid "appDescription"
+msgstr "Aplicación web accesible para la ONCE"
+msgid "logoAlt"
+msgstr "Logotipo de la ONCE"
 msgid "navCalculator"
 msgstr "Calculadora"
-
 msgid "navHistory"
 msgstr "Historial"
-
 msgid "navSettings"
 msgstr "Configuración"
-
 msgid "calculatorTitle"
 msgstr "Calculadora de Cambio"
-
 msgid "totalToPayLabel"
 msgstr "Total a Pagar (€)"
-
 msgid "totalToPayPlaceholder"
 msgstr "Ej: 5.50"
-
 msgid "amountReceivedLabel"
 msgstr "Importe Recibido (€)"
-
 msgid "amountReceivedPlaceholder"
 msgstr "Ej: 10.00"
-
 msgid "calculateButton"
 msgstr "Calcular"
-
 msgid "voiceInputButtonLabel"
 msgstr "Usar entrada de voz"
-
-msgid "voiceErrorPermission"
-msgstr "Acceso al micrófono denegado. Para usar esta función, por favor, permite el acceso al micrófono en tu navegador."
-
-msgid "voiceErrorNoSpeech"
-msgstr "No se ha detectado ninguna voz. Inténtalo de nuevo hablando cerca del micrófono."
-
-msgid "voiceErrorInfo"
-msgstr "Error de reconocimiento: {error}. Por favor, inténtalo de nuevo."
-
-msgid "voiceErrorTimeout"
-msgstr "El reconocimiento de voz se detuvo por inactividad."
-
-msgid "voiceErrorStart"
-msgstr "No se pudo iniciar el reconocimiento. Asegúrate de que el micrófono esté permitido y no esté en uso."
-
-msgid "voiceErrorUnsupported"
-msgstr "Lo sentimos, tu navegador no es compatible con el reconocimiento de voz."
-
-msgid "changeResultText"
-msgstr "El cambio a devolver es: {change} €"
-
-msgid "invalidInputText"
-msgstr "Por favor, introduce importes válidos."
-
-msgid "amountReceivedLowText"
-msgstr "El importe recibido es menor que el total a pagar."
-
+msgid "microphoneIconAlt"
+msgstr "Icono de micrófono"
+msgid "loadingText"
+msgstr "Cargando..."
 msgid "historyTitle"
 msgstr "Historial de Operaciones"
-
 msgid "historyHeaderDate"
 msgstr "Fecha y Hora"
-
 msgid "historyHeaderTotal"
 msgstr "Total Pagado"
-
 msgid "historyHeaderReceived"
 msgstr "Importe Recibido"
-
 msgid "historyHeaderChange"
 msgstr "Cambio Devuelto"
-
 msgid "settingsTitle"
 msgstr "Configuración"
-
 msgid "settingsDarkModeLabel"
 msgstr "Modo Oscuro"
-
 msgid "settingsLanguageLabel"
 msgstr "Idioma"
-
 msgid "settingsLangSpanish"
 msgstr "Español"
-
 msgid "settingsLangEnglish"
 msgstr "Inglés"
-
 msgid "settingsLangGalician"
 msgstr "Gallego"
-
 msgid "settingsLangCatalan"
 msgstr "Catalán"
-
 msgid "settingsLangValencian"
 msgstr "Valenciano"
-
 msgid "settingsLangBasque"
 msgstr "Euskera"
-
 msgid "settingsSerialTitle"
 msgstr "Comunicación con Dispositivo Externo"
-
 msgid "settingsSerialDescription"
 msgstr "Conecta un dispositivo por USB para enviar y recibir datos."
-
 msgid "settingsMachineModelLabel"
 msgstr "Modelo de Máquina"
-
 msgid "settingsMachineModelS"
 msgstr "Modelo S (Básico)"
-
 msgid "settingsMachineModelM"
 msgstr "Modelo M (Estándar)"
-
 msgid "settingsMachineModelMax"
 msgstr "Modelo MAX (Completo)"
-
 msgid "settingsSerialConnect"
 msgstr "Conectar Dispositivo"
-
 msgid "settingsSerialSend"
 msgstr "Enviar"
-
 msgid "settingsSerialPlaceholder"
 msgstr "Escribe un comando..."
-
 msgid "settingsSerialConsoleLabel"
 msgstr "Consola de comunicación"
 
+# JavaScript Keys
+msgid "changeResultText"
+msgstr "El cambio a devolver es: {change} €"
+msgid "invalidInputText"
+msgstr "Por favor, introduce importes válidos."
+msgid "amountReceivedLowText"
+msgstr "El importe recibido es menor que el total a pagar."
+msgid "serverCommunicationError"
+msgstr "Error en la comunicación con el servidor."
+msgid "genericError"
+msgstr "Ha ocurrido un error. Por favor, inténtalo de nuevo."
+msgid "historyEmpty"
+msgstr "No hay operaciones registradas."
+msgid "historyError"
+msgstr "Error al cargar el historial."
+msgid "serialNotSupported"
+msgstr "Error: La Web Serial API no es compatible con este navegador."
+msgid "serialConfigSent"
+msgstr "Configuración enviada: Modelo {model}"
+msgid "serialConfigError"
+msgstr "Error al enviar configuración: {error}"
+msgid "serialConnected"
+msgstr "Conectado al puerto serie."
+msgid "serialDisconnect"
+msgstr "Desconectar"
+msgid "serialConnectError"
+msgstr "Error al conectar: {error}"
+msgid "serialDisconnected"
+msgstr "Desconectado del puerto serie."
+msgid "serialDisconnectError"
+msgstr "Error al desconectar: {error}"
+msgid "serialReceived"
+msgstr "Recibido: {value}"
+msgid "serialReadError"
+msgstr "Error de lectura: {error}"
+msgid "serialSent"
+msgstr "Enviado: {data}"
+msgid "serialSendError"
+msgstr "Error al enviar: {error}"
+msgid "speechRecognitionNotAvailable"
+msgstr "Reconocimiento de voz no disponible."
+msgid "speechRecognitionInitError"
+msgstr "No se pudo inicializar el reconocimiento."
+msgid "speechProcessing"
+msgstr "Procesando..."
+msgid "speechRecognized"
+msgstr "Valores reconocidos"
+msgid "speechNotInterpreted"
+msgstr "No se pudo interpretar."
+msgid "speechError"
+msgstr "Error de reconocimiento: {error}"
+msgid "speechStartError"
+msgstr "Error al iniciar reconocimiento."
+msgid "speechChangeToReturn"
+msgstr "El cambio a devolver es:"
 msgid "speechEuroSingular"
 msgstr "euro"
-
 msgid "speechEuroPlural"
 msgstr "euros"
-
 msgid "speechCentSingular"
 msgstr "céntimo"
-
 msgid "speechCentPlural"
 msgstr "céntimos"
-
-msgid "speechCon"
+msgid "speechWith"
 msgstr "con"
-
-msgid "speechCero"
+msgid "speechZero"
 msgstr "cero"
-
 msgid "speechOneEuro"
 msgstr "un euro"
-
 msgid "speechOneCent"
 msgstr "un céntimo"
+msgid "Missing required fields"
+msgstr "Faltan campos obligatorios"
+msgid "Invalid number format"
+msgstr "Formato de número no válido"
 
-msgid "speechChangeResultText"
-msgstr "El cambio a devolver es:"
+msgid "smallWords"
+msgstr "cero:0,uno:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9,diez:10,once:11,doce:12,trece:13,catorce:14,quince:15,dieciseis:16,dieciséis:16,diecisiete:17,dieciocho:18,diecinueve:19,veinte:20,veintiuno:21,veintidos:22,veintidós:22,treinta:30,cuarenta:40,cincuenta:50,sesenta:60,setenta:70,ochenta:80,noventa:90,cien:100,ciento:100,doscientos:200,trescientos:300,cuatrocientos:400,quinientos:500,seiscientos:600,setecientos:700,ochocientos:800,novecientos:900,mil:1000"
+
+msgid "speechKeywords"
+msgstr "paga con,me da,le doy,recibido,entrego,pagan"

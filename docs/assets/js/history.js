@@ -1,10 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Check if translations are loaded
+    if (!window.translations) {
+        console.error("Translations not found. Aborting history.js initialization.");
+        return;
+    }
+
     const historyTableBody = document.getElementById('history-table-body');
+    if (!historyTableBody) return;
 
     fetch('/api/history')
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(window.t('serverCommunicationError'));
             }
             return response.json();
         })
@@ -13,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const row = historyTableBody.insertRow();
                 const cell = row.insertCell();
                 cell.colSpan = 4;
-                cell.textContent = 'No hay operaciones registradas.';
+                cell.textContent = window.t('historyEmpty');
                 cell.style.textAlign = 'center';
             } else {
                 history.forEach(item => {
@@ -38,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = historyTableBody.insertRow();
             const cell = row.insertCell();
             cell.colSpan = 4;
-            cell.textContent = 'Error al cargar el historial.';
+            cell.textContent = window.t('historyError');
             cell.style.textAlign = 'center';
         });
 });
