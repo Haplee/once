@@ -1,13 +1,6 @@
-# Python
-__pycache__/
-*.pyc
-.Python
-env/
-venv/
+# Flask
 instance/
+__pycache__/
 
-# Node
-node_modules/
-
-# Logs
-*.log
+# Translations
+*.mo
