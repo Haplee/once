@@ -114,9 +114,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        if (window.initializeSpeechRecognition) {
-            window.initializeSpeechRecognition();
+        // This function is defined globally in the scope of the DOMContentLoaded event
+        // so it can be called from the speech recognition module initializer.
+        function formatChangeForSpeech(change) {
+            const euros = Math.floor(change);
+            const cents = Math.round((change - euros) * 100);
+
+            if (euros === 0 && cents === 0) return `${window.t('speechZero')} ${window.t('speechEuroPlural')}`;
+
+            let parts = [];
+            if (euros > 0) {
+                parts.push(euros === 1 ? window.t('speechOneEuro') : `${euros} ${window.t('speechEuroPlural')}`);
+            }
+            if (cents > 0) {
+                parts.push(cents === 1 ? window.t('speechOneCent') : `${cents} ${window.t('speechCentPlural')}`);
+            }
+            return parts.join(` ${window.t('speechWith')} `);
         }
+
+        initializeSpeechRecognition(formatChangeForSpeech);
     }
 
     function speak(text, onEndCallback) {
@@ -150,169 +166,157 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof onEndCallback === 'function') onEndCallback();
         }
     }
-
-    function formatChangeForSpeech(change) {
-        const euros = Math.floor(change);
-        const cents = Math.round((change - euros) * 100);
-
-        if (euros === 0 && cents === 0) return `${window.t('speechZero')} ${window.t('speechEuroPlural')}`;
-
-        let parts = [];
-        if (euros > 0) {
-            parts.push(euros === 1 ? window.t('speechOneEuro') : `${euros} ${window.t('speechEuroPlural')}`);
-        }
-        if (cents > 0) {
-            parts.push(cents === 1 ? window.t('speechOneCent') : `${cents} ${window.t('speechCentPlural')}`);
-        }
-        return parts.join(` ${window.t('speechWith')} `);
-    }
-
-    const _SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
-    if (_SpeechRecognition) {
-        window.recognition = null;
-        let _isRecognizing = false;
-        let _micHandler = null;
-
-        const createRecognitionInstance = () => {
-            const rec = new _SpeechRecognition();
-            const lang = document.documentElement.lang || 'es';
-            const langMap = { es: 'es-ES', en: 'en-US', gl: 'gl-ES', ca: 'ca-ES', va: 'ca-ES', eu: 'eu-ES' };
-            rec.lang = langMap[lang] || 'es-ES';
-            rec.interimResults = false;
-            rec.maxAlternatives = 1;
-            rec.continuous = false;
-            rec.onstart = () => { _isRecognizing = true; };
-            rec.onend = () => { _isRecognizing = false; };
-            rec.onerror = (ev) => { _isRecognizing = false; console.error('[speech] rec.onerror', ev.error || ev); };
-            window.recognition = rec;
-            return rec;
-        };
-
-        window.initializeSpeechRecognition = () => {
-            const micBtn = getEl('#mic-btn', { type: 'qs', silent: true });
-            const statusSpan = getEl('#mic-status', { type: 'qs', silent: true });
-            const totalAmountInput = getEl('total-amount', { type: 'id', silent: true });
-            const amountReceivedInput = getEl('amount-received', { type: 'id', silent: true });
-
-            if (!micBtn || !statusSpan || !totalAmountInput || !amountReceivedInput) return;
-
-            if (!_SpeechRecognition) {
-                micBtn.disabled = true;
-                statusSpan.textContent = window.t('speechRecognitionNotAvailable');
-                return;
-            }
-
-            let rec = window.recognition || createRecognitionInstance();
-            const amountParser = createAmountParser();
-
-            rec.onresult = (event) => {
-                const transcript = event?.results?.[0]?.[0]?.transcript?.trim().toLowerCase() || '';
-                statusSpan.textContent = window.t('speechProcessing');
-
-                const keywords = window.t('speechKeywords').split(',');
-                let separatorKeyword = null;
-                let separatorIndex = -1;
-                for (const key of keywords) {
-                    const index = transcript.indexOf(key.trim());
-                    if (index !== -1) {
-                        separatorKeyword = key.trim();
-                        separatorIndex = index;
-                        break;
-                    }
-                }
-
-                let totalStr = separatorIndex !== -1 ? transcript.substring(0, separatorIndex).trim() : transcript;
-                let receivedStr = separatorIndex !== -1 ? transcript.substring(separatorIndex + separatorKeyword.length).trim() : '';
-
-                const totalAmount = amountParser.parse(totalStr);
-                const amountReceived = amountParser.parse(receivedStr);
-
-                if (totalAmount != null) totalAmountInput.value = totalAmount.toFixed(2);
-                if (amountReceived != null) amountReceivedInput.value = amountReceived.toFixed(2);
-
-                if (totalAmount != null || amountReceived != null) {
-                    statusSpan.textContent = window.t('speechRecognized');
-                } else {
-                    statusSpan.textContent = window.t('speechNotInterpreted');
-                }
-                setTimeout(() => { statusSpan.textContent = ''; }, 2500);
-            };
-
-            rec.onerror = (event) => {
-                console.error('[speech] rec.onerror (from initializer):', event);
-                statusSpan.textContent = window.t('speechError', { error: event?.error || 'unknown' });
-                setTimeout(() => { statusSpan.textContent = ''; }, 2500);
-            };
-
-            if (_micHandler) micBtn.removeEventListener('click', _micHandler);
-            _micHandler = () => {
-                if (_isRecognizing) {
-                    try { rec.stop(); } catch (e) { try { rec.abort(); } catch(_){} }
-                    return;
-                }
-                try {
-                    if (!window.recognition) rec = createRecognitionInstance();
-                    rec.start();
-                } catch (err) {
-                    console.error('[speech] Error starting recognition:', err);
-                    statusSpan.textContent = window.t('speechStartError');
-                    setTimeout(() => { statusSpan.textContent = ''; }, 2500);
-                }
-            };
-            micBtn.addEventListener('click', _micHandler);
-            micBtn.disabled = false;
-        };
-    }
-
-    function createAmountParser() {
-        const smallWordsStr = window.t('smallWords');
-        const SMALL_WORDS = smallWordsStr.split(',').reduce((acc, pair) => {
-            const [key, value] = pair.split(':');
-            acc[normalize(key)] = parseInt(value, 10);
-            return acc;
-        }, {});
-
-        function normalize(text) {
-            return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        }
-
-        function wordsToNumber(text) {
-            if (!text) return null;
-            const numericText = text.trim().toLowerCase();
-            if (/^-?\d+([.,]\d+)?$/.test(numericText)) return parseFloat(numericText.replace(',', '.'));
-
-            const tokens = normalize(numericText).split(/[\s-]+/);
-            let total = 0;
-            let current = 0;
-            for (const token of tokens) {
-                if (SMALL_WORDS.hasOwnProperty(token)) {
-                    const val = SMALL_WORDS[token];
-                    if (val >= 1000) { // Handle "mil" / "thousand"
-                        current = current === 0 ? 1 : current;
-                        total += current * val;
-                        current = 0;
-                    } else if (val >= 100) { // Handle "cien" / "hundred"
-                        current = current === 0 ? 1 : current;
-                        total += current * val;
-                        current = 0;
-                    } else {
-                        current += val;
-                    }
-                }
-            }
-            return total + current;
-        }
-
-        return {
-            parse: (text) => {
-                if (!text) return null;
-                // This parsing is simplified and may not cover all cases for all languages.
-                // It's a best-effort approach based on the translated keywords.
-                const onlyWords = wordsToNumber(text);
-                if (onlyWords != null) return parseFloat(onlyWords.toFixed(2));
-
-                return null;
-            }
-        };
-    }
 });
+
+function createAmountParser() {
+    const smallWordsStr = window.t('smallWords');
+    const SMALL_WORDS = smallWordsStr.split(',').reduce((acc, pair) => {
+        const [key, value] = pair.split(':');
+        acc[normalize(key)] = parseInt(value, 10);
+        return acc;
+    }, {});
+
+    function normalize(text) {
+        return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function wordsToNumber(text) {
+        if (!text) return null;
+        const numericText = text.trim().toLowerCase();
+        if (/^-?\d+([.,]\d+)?$/.test(numericText)) return parseFloat(numericText.replace(',', '.'));
+
+        const tokens = normalize(numericText).split(/[\s-]+/);
+        let total = 0;
+        let current = 0;
+        for (const token of tokens) {
+            if (SMALL_WORDS.hasOwnProperty(token)) {
+                const val = SMALL_WORDS[token];
+                if (val >= 1000) { // Handle "mil" / "thousand"
+                    current = current === 0 ? 1 : current;
+                    total += current * val;
+                    current = 0;
+                } else if (val >= 100) { // Handle "cien" / "hundred"
+                     current = current === 0 ? 1 : current;
+                     total += current * val;
+                     current = 0;
+                } else {
+                    current += val;
+                }
+            }
+        }
+        return total + current;
+    }
+
+    return {
+        parse: (text) => {
+            if (!text) return null;
+            let normalizedText = text.toLowerCase().trim();
+            const numMatch = normalizedText.match(/-?\d+([.,]\d*)?/);
+            if (numMatch) {
+                const numStr = numMatch[0].replace(',', '.');
+                const val = parseFloat(numStr);
+                if (!isNaN(val)) return parseFloat(val.toFixed(2));
+            }
+            const onlyWords = wordsToNumber(normalizedText);
+            if (onlyWords != null) return parseFloat(onlyWords.toFixed(2));
+
+            return null;
+        }
+    };
+}
+
+function initializeSpeechRecognition(formatChangeForSpeech) {
+    const _SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+    if (!_SpeechRecognition) {
+        const micBtn = getEl('#mic-btn', { type: 'qs', silent: true });
+        if (micBtn) micBtn.disabled = true;
+        const statusSpan = getEl('#mic-status', { type: 'qs', silent: true });
+        if (statusSpan) statusSpan.textContent = window.t('speechRecognitionNotAvailable');
+        return;
+    }
+
+    let recognition = null;
+    let isRecognizing = false;
+    let micHandler = null;
+
+    const createRecognitionInstance = () => {
+        const rec = new _SpeechRecognition();
+        const lang = document.documentElement.lang || 'es';
+        const langMap = { es: 'es-ES', en: 'en-US', gl: 'gl-ES', ca: 'ca-ES', va: 'ca-ES', eu: 'eu-ES' };
+        rec.lang = langMap[lang] || 'es-ES';
+        rec.interimResults = false;
+        rec.maxAlternatives = 1;
+        rec.continuous = false;
+        rec.onstart = () => { isRecognizing = true; };
+        rec.onend = () => { isRecognizing = false; };
+        rec.onerror = (ev) => { isRecognizing = false; console.error('[speech] rec.onerror', ev.error || ev); };
+        return rec;
+    };
+
+    const micBtn = getEl('#mic-btn', { type: 'qs', silent: true });
+    const statusSpan = getEl('#mic-status', { type: 'qs', silent: true });
+    const totalAmountInput = getEl('total-amount', { type: 'id', silent: true });
+    const amountReceivedInput = getEl('amount-received', { type: 'id', silent: true });
+
+    if (!micBtn || !statusSpan || !totalAmountInput || !amountReceivedInput) return;
+
+    recognition = createRecognitionInstance();
+    const amountParser = createAmountParser();
+
+    recognition.onresult = (event) => {
+        const transcript = event?.results?.[0]?.[0]?.transcript?.trim().toLowerCase() || '';
+        statusSpan.textContent = window.t('speechProcessing');
+
+        const keywords = window.t('speechKeywords').split(',');
+        let separatorKeyword = null;
+        let separatorIndex = -1;
+        for (const key of keywords) {
+            const index = transcript.indexOf(key.trim());
+            if (index !== -1) {
+                separatorKeyword = key.trim();
+                separatorIndex = index;
+                break;
+            }
+        }
+
+        let totalStr = separatorIndex !== -1 ? transcript.substring(0, separatorIndex).trim() : transcript;
+        let receivedStr = separatorIndex !== -1 ? transcript.substring(separatorIndex + separatorKeyword.length).trim() : '';
+
+        const totalAmount = amountParser.parse(totalStr);
+        const amountReceived = amountParser.parse(receivedStr);
+
+        if (totalAmount != null) totalAmountInput.value = totalAmount.toFixed(2);
+        if (amountReceived != null) amountReceivedInput.value = amountReceived.toFixed(2);
+
+        if (totalAmount != null || amountReceived != null) {
+            statusSpan.textContent = window.t('speechRecognized');
+        } else {
+            statusSpan.textContent = window.t('speechNotInterpreted');
+        }
+        setTimeout(() => { statusSpan.textContent = ''; }, 2500);
+    };
+
+    recognition.onerror = (event) => {
+        console.error('[speech] rec.onerror (from initializer):', event);
+        statusSpan.textContent = window.t('speechError', { error: event?.error || 'unknown' });
+        setTimeout(() => { statusSpan.textContent = ''; }, 2500);
+    };
+
+    if (micHandler) micBtn.removeEventListener('click', micHandler);
+    micHandler = () => {
+        if (isRecognizing) {
+            try { recognition.stop(); } catch (e) { try { recognition.abort(); } catch(_){} }
+            return;
+        }
+        try {
+            if (!recognition) recognition = createRecognitionInstance();
+            recognition.start();
+        } catch (err) {
+            console.error('[speech] Error starting recognition:', err);
+            statusSpan.textContent = window.t('speechStartError');
+            setTimeout(() => { statusSpan.textContent = ''; }, 2500);
+        }
+    };
+    micBtn.addEventListener('click', micHandler);
+    micBtn.disabled = false;
+}
