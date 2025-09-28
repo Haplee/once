@@ -54,7 +54,14 @@ window.allTranslations = {
         "speechCero": "cero",
         "speechOneEuro": "un euro",
         "speechOneCent": "un céntimo",
-        "speechChangeResultText": "El cambio a devolver es:"
+        "speechChangeResultText": "El cambio a devolver es:",
+        "serverCommunicationError": "Error en la comunicación con el servidor.",
+        "genericError": "Ha ocurrido un error. Por favor, inténtalo de nuevo.",
+        "voiceErrorInitFailed": "No se pudo inicializar el reconocimiento.",
+        "voiceProcessing": "Procesando...",
+        "voiceValuesRecognized": "Valores reconocidos",
+        "voiceInterpretError": "No se pudo interpretar.",
+        "voiceErrorGeneric": "Error: {error}"
     },
     "en": {
         "appTitle": "Change Calculator - ONCE App",
@@ -111,7 +118,14 @@ window.allTranslations = {
         "speechCero": "zero",
         "speechOneEuro": "one euro",
         "speechOneCent": "one cent",
-        "speechChangeResultText": "The change to return is:"
+        "speechChangeResultText": "The change to return is:",
+        "serverCommunicationError": "Error communicating with the server.",
+        "genericError": "An error has occurred. Please try again.",
+        "voiceErrorInitFailed": "Could not initialize recognition.",
+        "voiceProcessing": "Processing...",
+        "voiceValuesRecognized": "Values recognized",
+        "voiceInterpretError": "Could not interpret.",
+        "voiceErrorGeneric": "Error: {error}"
     },
     "gl": {
         "appTitle": "Calculadora de Troco - ONCE App",
@@ -168,7 +182,14 @@ window.allTranslations = {
         "speechCero": "cero",
         "speechOneEuro": "un euro",
         "speechOneCent": "un céntimo",
-        "speechChangeResultText": "O troco a devolver é:"
+        "speechChangeResultText": "O troco a devolver é:",
+        "serverCommunicationError": "Erro na comunicación co servidor.",
+        "genericError": "Ocorreu un erro. Por favor, téntao de novo.",
+        "voiceErrorInitFailed": "Non se puido inicializar o recoñecemento.",
+        "voiceProcessing": "Procesando...",
+        "voiceValuesRecognized": "Valores recoñecidos",
+        "voiceInterpretError": "Non se puido interpretar.",
+        "voiceErrorGeneric": "Erro: {error}"
     },
     "ca": {
         "appTitle": "Calculadora de Canvi - ONCE App",
@@ -225,7 +246,14 @@ window.allTranslations = {
         "speechCero": "zero",
         "speechOneEuro": "un euro",
         "speechOneCent": "un cèntim",
-        "speechChangeResultText": "El canvi a tornar és:"
+        "speechChangeResultText": "El canvi a tornar és:",
+        "serverCommunicationError": "Error en la comunicació amb el servidor.",
+        "genericError": "Ha ocorregut un error. Per favor, intenta-ho de nou.",
+        "voiceErrorInitFailed": "No s'ha pogut inicialitzar el reconeixement.",
+        "voiceProcessing": "Processant...",
+        "voiceValuesRecognized": "Valors reconeguts",
+        "voiceInterpretError": "No s'ha pogut interpretar.",
+        "voiceErrorGeneric": "Error: {error}"
     },
     "va": {
         "appTitle": "Calculadora de Canvi - ONCE App",
@@ -282,7 +310,14 @@ window.allTranslations = {
         "speechCero": "zero",
         "speechOneEuro": "un euro",
         "speechOneCent": "un cèntim",
-        "speechChangeResultText": "El canvi a tornar és:"
+        "speechChangeResultText": "El canvi a tornar és:",
+        "serverCommunicationError": "Error en la comunicació amb el servidor.",
+        "genericError": "Ha ocorregut un error. Si us plau, intenteu-ho de nou.",
+        "voiceErrorInitFailed": "No s'ha pogut inicialitzar el reconeixement.",
+        "voiceProcessing": "Processant...",
+        "voiceValuesRecognized": "Valors reconeguts",
+        "voiceInterpretError": "No s'ha pogut interpretar.",
+        "voiceErrorGeneric": "Error: {error}"
     },
     "eu": {
         "appTitle": "Aldaketa Kalkulagailua - ONCE App",
@@ -339,7 +374,14 @@ window.allTranslations = {
         "speechCero": "zero",
         "speechOneEuro": "euro bat",
         "speechOneCent": "zentimo bat",
-        "speechChangeResultText": "Itzuli beharreko aldaketa hau da:"
+        "speechChangeResultText": "Itzuli beharreko aldaketa hau da:",
+        "serverCommunicationError": "Errorea zerbitzariarekin komunikatzean.",
+        "genericError": "Errore bat gertatu da. Mesedez, saiatu berriro.",
+        "voiceErrorInitFailed": "Ezin izan da aintzatespena hasi.",
+        "voiceProcessing": "Prozesatzen...",
+        "voiceValuesRecognized": "Balioak ezagututa",
+        "voiceInterpretError": "Ezin izan da interpretatu.",
+        "voiceErrorGeneric": "Errorea: {error}"
     }
 };
 
