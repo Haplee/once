@@ -7,6 +7,24 @@ function getEl(selector, opts = {}) {
     return el;
 }
 
+// --- I18n Helper ---
+/**
+ * Simple translation function.
+ * @param {string} key - The key of the string to translate.
+ * @param {Object.<string, string>} [replacements] - An object of placeholders to replace.
+ * @returns {string} The translated string.
+ */
+function t(key, replacements) {
+    let text = window.currentTranslations?.[key] || key;
+    if (replacements) {
+        for (const [placeholder, value] of Object.entries(replacements)) {
+            text = text.replace(`{${placeholder}}`, value);
+        }
+    }
+    return text;
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
     let voices = [];
 
@@ -65,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Client-side validation
             if (isNaN(totalAmount) || isNaN(amountReceived)) {
-                resultDiv.textContent = 'Por favor, introduce importes válidos.'; // This should be translated
+                resultDiv.textContent = t('invalidInputText');
                 if (resultSpinner) resultSpinner.classList.add('d-none');
                 calculateBtn.disabled = false;
                 return;
@@ -81,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || 'Error en la comunicación con el servidor.');
+                    throw new Error(errorData.error || t('serverCommunicationError'));
                 }
 
                 const data = await response.json();
@@ -90,13 +108,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 2. Display result and speak it
                 if (resultSpinner) resultSpinner.classList.add('d-none');
 
-                // Note: The display text is hardcoded for now, as the i18n is backend-driven.
-                // A more advanced implementation would update this text via another API call or websocket.
-                resultDiv.textContent = `El cambio a devolver es: ${change.toFixed(2)} €`;
+                resultDiv.textContent = t('changeResultText', { change: change.toFixed(2) });
 
                 const speakableChange = formatChangeForSpeech(change);
-                // This intro text is also hardcoded and should ideally come from the backend.
-                const changeIntro = "El cambio a devolver es:";
+                const changeIntro = t('speechChangeResultText');
                 const changeTextForSpeech = `${changeIntro} ${speakableChange}`;
                 speak(changeTextForSpeech, null);
 
@@ -109,17 +124,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } catch (error) {
                 console.error('Error en el proceso de cálculo:', error);
-                resultDiv.textContent = error.message || 'Ha ocurrido un error. Por favor, inténtalo de nuevo.';
+                resultDiv.textContent = error.message || t('genericError');
                 if (resultSpinner) resultSpinner.classList.add('d-none');
             } finally {
                 calculateBtn.disabled = false;
             }
         });
 
-        // Initialize speech recognition if the function exists
-        if (window.initializeSpeechRecognition) {
-            window.initializeSpeechRecognition();
-        }
+        // Initialize speech recognition
+        initializeSpeechRecognition();
     }
 
     // This function remains client-side as it depends on browser APIs
@@ -161,21 +174,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // This function is kept for formatting the spoken change.
-    // It's a candidate for future improvement to make it language-dynamic from the backend.
     function formatChangeForSpeech(change) {
         const euros = Math.floor(change);
         const cents = Math.round((change - euros) * 100);
 
-        // These are hardcoded Spanish words. This is a limitation of the current implementation.
-        const euroSingular = 'euro';
-        const euroPlural = 'euros';
-        const centSingular = 'céntimo';
-        const centPlural = 'céntimos';
-        const con = 'con';
-        const cero = 'cero';
-        const oneEuro = `un ${euroSingular}`;
-        const oneCent = `un ${centSingular}`;
+        const euroSingular = t('speechEuroSingular');
+        const euroPlural = t('speechEuroPlural');
+        const centSingular = t('speechCentSingular');
+        const centPlural = t('speechCentPlural');
+        const con = t('speechCon');
+        const cero = t('speechCero');
+        const oneEuro = t('speechOneEuro');
+        const oneCent = t('speechOneCent');
 
         if (euros === 0 && cents === 0) return `${cero} ${euroPlural}`;
         let parts = [];
@@ -185,7 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// The speech recognition parts remain unchanged as they are client-side only.
 // Helper functions for parsing Spanish numbers from text
 const SMALL_WORDS = {
     'cero':0,'uno':1,'dos':2,'tres':3,'cuatro':4,'cinco':5,'seis':6,'siete':7,'ocho':8,'nueve':9,
@@ -316,65 +325,64 @@ function parseSpanishAmount(text) {
     return null;
 }
 
-// Speech Recognition Module
-const _SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
-window._SpeechRecognitionAvailable = !!_SpeechRecognition;
-console.log('[speech] Feature detect - SpeechRecognition available?', window._SpeechRecognitionAvailable);
-window.recognition = null;
-let _isRecognizing = false;
-let _micHandler = null;
-
-function isMobileSafari() {
-    try {
-        return /iP(hone|od|ad)/i.test(navigator.userAgent) && /Safari/i.test(navigator.userAgent) && !/CriOS|FxiOS|OPiOS|EdgiOS/i.test(navigator.userAgent);
-    } catch (e) { return false; }
-}
-
-function createRecognitionInstance() {
-    if (!_SpeechRecognition) return null;
-    try {
-        const rec = new _SpeechRecognition();
-        rec.lang = 'es-ES';
-        rec.interimResults = false;
-        rec.maxAlternatives = 1;
-        rec.continuous = false;
-        rec.onstart = () => { _isRecognizing = true; console.log('[speech] rec.onstart'); };
-        rec.onend = () => { _isRecognizing = false; console.log('[speech] rec.onend'); };
-        rec.onerror = (ev) => { _isRecognizing = false; console.error('[speech] rec.onerror', ev.error || ev); };
-        window.recognition = rec;
-        return rec;
-    } catch (err) {
-        console.error('[speech] Failed to create recognition instance:', err);
-        return null;
-    }
-}
-
+// --- Speech Recognition ---
 function initializeSpeechRecognition() {
     const micBtn = getEl('#mic-btn', { type: 'qs', silent: true });
     const statusSpan = getEl('#mic-status', { type: 'qs', silent: true });
     const totalAmountInput = getEl('total-amount', { type: 'id', silent: true });
     const amountReceivedInput = getEl('amount-received', { type: 'id', silent: true });
 
-    if (!_SpeechRecognition || isMobileSafari()) {
+    let recognition = null;
+    let isRecognizing = false;
+
+    const SpeechRecognition = typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
+    const isRecognitionAvailable = !!SpeechRecognition;
+
+    const isMobileSafari = () => {
+        try {
+            return /iP(hone|od|ad)/i.test(navigator.userAgent) && /Safari/i.test(navigator.userAgent) && !/CriOS|FxiOS|OPiOS|EdgiOS/i.test(navigator.userAgent);
+        } catch (e) { return false; }
+    };
+
+    if (!isRecognitionAvailable || isMobileSafari()) {
         if (micBtn) micBtn.disabled = true;
-        if (statusSpan) statusSpan.textContent = 'Reconocimiento de voz no disponible.';
+        if (statusSpan) statusSpan.textContent = t('voiceErrorUnsupported');
         return;
     }
+
     if (!micBtn || !statusSpan || !totalAmountInput || !amountReceivedInput) {
         if (micBtn) micBtn.disabled = true;
         return;
     }
 
-    let rec = window.recognition || createRecognitionInstance();
-    if (!rec) {
+    try {
+        recognition = new SpeechRecognition();
+    } catch (err) {
+        console.error('[speech] Failed to create recognition instance:', err);
         if (micBtn) micBtn.disabled = true;
-        if (statusSpan) statusSpan.textContent = 'No se pudo inicializar el reconocimiento.';
+        if (statusSpan) statusSpan.textContent = t('voiceErrorInitFailed');
         return;
     }
 
-    rec.onresult = (event) => {
+    recognition.lang = 'es-ES';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false;
+
+    recognition.onstart = () => {
+        isRecognizing = true;
+        console.log('[speech] Recognition started.');
+    };
+
+    recognition.onend = () => {
+        isRecognizing = false;
+        console.log('[speech] Recognition ended.');
+    };
+
+    recognition.onresult = (event) => {
         const transcript = event?.results?.[0]?.[0]?.transcript?.trim().toLowerCase() || '';
-        if (statusSpan) statusSpan.textContent = 'Procesando...';
+        if (statusSpan) statusSpan.textContent = t('voiceProcessing');
+
         let totalStr = '', receivedStr = '';
         const keywords = ['paga con', 'me da', 'le doy', 'recibido', 'entrego', 'pagan'];
         let separatorKeyword = null, separatorIndex = -1;
@@ -392,54 +400,52 @@ function initializeSpeechRecognition() {
         } else {
             totalStr = transcript;
         }
+
         const totalAmount = parseSpanishAmount(totalStr);
         const amountReceived = parseSpanishAmount(receivedStr);
+
         if (totalAmount != null) totalAmountInput.value = totalAmount.toFixed(2);
         if (amountReceived != null) amountReceivedInput.value = amountReceived.toFixed(2);
+
         if (totalAmount != null || amountReceived != null) {
-            if (statusSpan) statusSpan.textContent = 'Valores reconocidos';
+            if (statusSpan) statusSpan.textContent = t('voiceValuesRecognized');
         } else {
-            if (statusSpan) statusSpan.textContent = 'No se pudo interpretar.';
+            if (statusSpan) statusSpan.textContent = t('voiceInterpretError');
         }
         setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
     };
 
-    rec.onerror = (event) => {
-        console.error('[speech] rec.onerror (from initializer):', event);
-        if (statusSpan) statusSpan.textContent = `Error: ${event?.error || 'desconocido'}`;
-        setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
+    recognition.onerror = (event) => {
+        isRecognizing = false;
+        console.error('[speech] Recognition error:', event.error);
+        if (statusSpan) {
+            let errorKey = 'voiceErrorGeneric';
+            if (event.error === 'no-speech') errorKey = 'voiceErrorNoSpeech';
+            if (event.error === 'not-allowed' || event.error === 'service-not-allowed') errorKey = 'voiceErrorPermission';
+            statusSpan.textContent = t(errorKey, { error: event.error || 'unknown' });
+        }
+        setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 3500);
     };
 
-    if (_micHandler && micBtn) {
-        try { micBtn.removeEventListener('click', _micHandler); } catch (e) {}
-    }
-    _micHandler = () => {
-        if (_isRecognizing) {
-            try { rec.stop(); } catch (e) { try { rec.abort(); } catch(_){} }
-            return;
+    micBtn.addEventListener('click', () => {
+        if (!recognition) return;
+        if (isRecognizing) {
+            recognition.stop();
+        } else {
+            try {
+                recognition.start();
+            } catch (err) {
+                console.error('[speech] Error starting recognition:', err);
+                if (statusSpan) statusSpan.textContent = t('voiceErrorStart');
+            }
         }
-        try {
-            if (!window.recognition) rec = createRecognitionInstance();
-            if (!rec) throw new Error('No recognition instance');
-            try { rec.abort(); } catch(e) {}
-            rec.start();
-        } catch (err) {
-            console.error('[speech] Error starting recognition:', err);
-            if (statusSpan) statusSpan.textContent = 'Error al iniciar reconocimiento.';
-            setTimeout(() => { if (statusSpan) statusSpan.textContent = ''; }, 2500);
+    });
+
+    micBtn.disabled = false;
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && recognition && isRecognizing) {
+            recognition.stop();
         }
-    };
-    if (micBtn) {
-        micBtn.addEventListener('click', _micHandler);
-        micBtn.disabled = false;
-    }
-    document.removeEventListener('visibilitychange', window._speechVisibilityHandler || (() => {}));
-    window._speechVisibilityHandler = () => {
-        if (document.hidden && window.recognition && _isRecognizing) {
-            try { window.recognition.stop(); } catch (e) { try { window.recognition.abort(); } catch(_){} }
-        }
-    };
-    document.addEventListener('visibilitychange', window._speechVisibilityHandler);
+    });
 }
-
-window.initializeSpeechRecognition = initializeSpeechRecognition;
