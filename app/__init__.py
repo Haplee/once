@@ -20,11 +20,6 @@ def get_locale():
 # Initialize the app
 app = Flask(__name__, instance_relative_config=True)
 
-@app.context_processor
-def inject_get_locale():
-    """Inject get_locale function into all templates."""
-    return dict(get_locale=get_locale)
-
 # --- Configuration ---
 app.config.from_mapping(
     SECRET_KEY='dev',  # Change for production
@@ -32,6 +27,11 @@ app.config.from_mapping(
     LANGUAGES=LANGUAGES,
     BABEL_TRANSLATION_DIRECTORIES=os.path.join(app.root_path, 'translations')
 )
+
+@app.context_processor
+def inject_get_locale():
+    """Inject get_locale function into all templates."""
+    return dict(get_locale=get_locale)
 
 # Ensure the instance folder exists
 try:
