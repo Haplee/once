@@ -1,33 +1,29 @@
-import os
-from flask import render_template, send_from_directory, session, redirect, url_for, current_app
-from app import app
+from flask import (
+    Blueprint, render_template, session, redirect, url_for, current_app
+)
 
-@app.route('/')
+# Create a Blueprint for the main routes
+main = Blueprint('main', __name__)
+
+@main.route('/')
 def index():
+    """Render the main calculator page."""
     return render_template('index.html')
 
-@app.route('/history')
+@main.route('/history')
 def history():
+    """Render the transaction history page."""
     return render_template('history.html')
 
-@app.route('/configuracion')
+@main.route('/configuracion')
 def configuracion():
+    """Render the configuration page."""
     return render_template('configuracion.html')
 
-@app.route('/set_language/<lang_code>')
+@main.route('/set_language/<lang_code>')
 def set_language(lang_code):
-    if lang_code in app.config['LANGUAGES']:
+    """Set the user's preferred language."""
+    if lang_code in current_app.config['LANGUAGES']:
         session['language'] = lang_code
-    return redirect(url_for('configuracion'))
-
-# Workaround for not being able to move asset files.
-# Serve files from the 'docs' directory directly.
-@app.route('/docs/<path:path>')
-def send_docs(path):
-    docs_dir = os.path.join(current_app.root_path, '..', 'docs')
-    return send_from_directory(os.path.abspath(docs_dir), path)
-
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, '..', 'docs', 'assets', 'img'),
-                               'logo.png', mimetype='image/png')
+    # Redirect back to the configuration page
+    return redirect(url_for('main.configuracion'))

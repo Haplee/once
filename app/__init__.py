@@ -49,4 +49,5 @@ db.init_app(app)
 # --- Blueprints ---
 from . import routes
 from . import api
+app.register_blueprint(routes.main)
 app.register_blueprint(api.api)
