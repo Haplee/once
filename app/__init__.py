@@ -1,55 +1,47 @@
 import os
-from flask import Flask, session, request
+from flask import Flask, request, session
 from flask_babel import Babel
 
-LANGUAGES = {
-    'es': 'Español',
-    'en': 'English',
-    'gl': 'Galego',
-    'ca': 'Català',
-    'va': 'Valencià',
-    'eu': 'Euskara'
-}
+def create_app(test_config=None):
+    # Create and configure the app
+    # static_folder and static_url_path are set explicitly to ensure assets load correctly
+    app = Flask(__name__, instance_relative_config=True, static_folder='static', static_url_path='/static')
+    
+    # Simple configuration
+    app.config.from_mapping(
+        SECRET_KEY='dev',
+        DATABASE=os.path.join(app.instance_path, 'once_app.sqlite'),
+        LANGUAGES=['es', 'en', 'gl', 'ca', 'va', 'eu']
+    )
 
-def get_locale():
-    """Determine the user's locale."""
-    if 'language' in session:
-        return session['language']
-    return request.accept_languages.best_match(list(LANGUAGES.keys()))
+    if test_config is None:
+        # load the instance config, if it exists, when not testing
+        app.config.from_pyfile('config.py', silent=True)
+    else:
+        # load the test config if passed in
+        app.config.from_mapping(test_config)
 
-# Initialize the app
-app = Flask(__name__, instance_relative_config=True, static_folder='static', static_url_path='/static')
+    # ensure the instance folder exists
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
 
-# --- Configuration ---
-app.config.from_mapping(
-    SECRET_KEY=os.environ.get('SECRET_KEY', 'dev'),
-    DATABASE=os.environ.get('DATABASE_PATH', 
-             os.path.join('/tmp', 'app.sqlite') if os.environ.get('VERCEL') 
-             else os.path.join(app.instance_path, 'app.sqlite')),
-    LANGUAGES=LANGUAGES,
-    BABEL_TRANSLATION_DIRECTORIES=os.path.join(app.root_path, 'translations')
-)
+    # --- Database Init ---
+    from . import db
+    db.init_app(app)
 
-@app.context_processor
-def inject_get_locale():
-    """Inject get_locale function into all templates."""
-    return dict(get_locale=get_locale)
+    # --- I18N ---
+    def get_locale():
+        if 'language' in session:
+            return session['language']
+        # Try to match the best language from the request
+        return request.accept_languages.best_match(app.config['LANGUAGES'])
 
-# Ensure the instance folder exists
-try:
-    os.makedirs(app.instance_path)
-except OSError:
-    pass
+    babel = Babel(app, locale_selector=get_locale)
 
-# --- Babel for i18n ---
-babel = Babel(app, locale_selector=get_locale)
+    # --- Blueprints ---
+    from . import routes
+    app.register_blueprint(routes.main)
 
-# --- Database Initialization ---
-from . import db
-db.init_app(app)
-
-# --- Blueprints ---
-from . import routes
-from . import api
-app.register_blueprint(routes.main)
-app.register_blueprint(api.api)
+    return app
