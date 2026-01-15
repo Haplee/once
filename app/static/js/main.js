@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const themeToggleButton = getEl('theme-toggle', { type: 'id', silent: true });
     if (themeToggleButton) {
-        themeToggleButton.addEventListener('change', function() {
+        themeToggleButton.addEventListener('change', function () {
             const newTheme = this.checked ? 'dark-mode' : 'light-mode';
             localStorage.setItem('theme', newTheme);
             applyTheme();
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Calculator Logic ---
     const form = getEl('change-form', { type: 'id' });
     if (form) {
-        form.addEventListener('submit', async function(e) {
+        form.addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const totalAmountInput = getEl('total-amount', { type: 'id' });
@@ -197,12 +197,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Helper functions for parsing Spanish numbers from text
 const SMALL_WORDS = {
-    'cero':0,'uno':1,'dos':2,'tres':3,'cuatro':4,'cinco':5,'seis':6,'siete':7,'ocho':8,'nueve':9,
-    'diez':10,'once':11,'doce':12,'trece':13,'catorce':14,'quince':15,'dieciseis':16,'dieciséis':16,
-    'diecisiete':17,'dieciocho':18,'diecinueve':19,'veinte':20,'veintiuno':21,'veintidos':22,'veintidós':22,
-    'treinta':30,'cuarenta':40,'cincuenta':50,'sesenta':60,'setenta':70,'ochenta':80,'noventa':90,
-    'cien':100,'ciento':100,'doscientos':200,'trescientos':300,'cuatrocientos':400,'quinientos':500,
-    'seiscientos':600,'setecientos':700,'ochocientos':800,'novecientos':900,'mil':1000
+    'cero': 0, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4, 'cinco': 5, 'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9,
+    'diez': 10, 'once': 11, 'doce': 12, 'trece': 13, 'catorce': 14, 'quince': 15, 'dieciseis': 16, 'dieciséis': 16,
+    'diecisiete': 17, 'dieciocho': 18, 'diecinueve': 19, 'veinte': 20, 'veintiuno': 21, 'veintidos': 22, 'veintidós': 22,
+    'treinta': 30, 'cuarenta': 40, 'cincuenta': 50, 'sesenta': 60, 'setenta': 70, 'ochenta': 80, 'noventa': 90,
+    'cien': 100, 'ciento': 100, 'doscientos': 200, 'trescientos': 300, 'cuatrocientos': 400, 'quinientos': 500,
+    'seiscientos': 600, 'setecientos': 700, 'ochocientos': 800, 'novecientos': 900, 'mil': 1000
 };
 
 function esToDigits(text) {
@@ -364,7 +364,10 @@ function initializeSpeechRecognition() {
         return;
     }
 
-    recognition.lang = 'es-ES';
+    // Map internal language codes to BCP 47 language tags
+    const langMap = { es: 'es-ES', en: 'en-US', gl: 'gl-ES', ca: 'ca-ES', va: 'ca-ES', eu: 'eu-ES' };
+    const currentLang = document.documentElement.lang || 'es';
+    recognition.lang = langMap[currentLang] || 'es-ES';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     recognition.continuous = false;
@@ -384,7 +387,10 @@ function initializeSpeechRecognition() {
         if (statusSpan) statusSpan.textContent = t('voiceProcessing');
 
         let totalStr = '', receivedStr = '';
-        const keywords = ['paga con', 'me da', 'le doy', 'recibido', 'entrego', 'pagan'];
+        // Get keywords from translations
+        const keywordsStr = t('voiceKeywords');
+        const keywords = keywordsStr && keywordsStr !== 'voiceKeywords' ? keywordsStr.split('|') : ['paga con', 'me da', 'le doy', 'recibido', 'entrego', 'pagan'];
+
         let separatorKeyword = null, separatorIndex = -1;
         for (const key of keywords) {
             const index = transcript.indexOf(key);

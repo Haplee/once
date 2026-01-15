@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ get_locale() }}">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,17 +8,22 @@
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
     <div class="container">
         <header>
             <div class="logo">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logotipo de la ONCE" class="logo-light">
-                <img src="{{ url_for('static', filename='img/logo-dark.png') }}" alt="Logotipo de la ONCE" class="logo-dark">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logotipo de la ONCE"
+                    class="logo-light">
+                <img src="{{ url_for('static', filename='img/logo-dark.png') }}" alt="Logotipo de la ONCE"
+                    class="logo-dark">
             </div>
             <nav>
                 <a href="{{ url_for('main.index') }}">{{ _('navCalculator') }}</a>
@@ -39,12 +45,24 @@
                         <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
                             <h2 class="h5 mb-0">{{ _('settingsLanguageLabel') }}</h2>
                             <div id="language-selector" class="d-flex gap-2 flex-wrap justify-content-end">
-                                <a href="{{ url_for('main.set_language', lang_code='es') }}" class="btn btn-sm {{ 'btn-primary' if get_locale() == 'es' else 'btn-secondary' }} lang-btn">{{ _('settingsLangSpanish') }}</a>
-                                <a href="{{ url_for('main.set_language', lang_code='en') }}" class="btn btn-sm {{ 'btn-primary' if get_locale() == 'en' else 'btn-secondary' }} lang-btn">{{ _('settingsLangEnglish') }}</a>
-                                <a href="{{ url_for('main.set_language', lang_code='gl') }}" class="btn btn-sm {{ 'btn-primary' if get_locale() == 'gl' else 'btn-secondary' }} lang-btn">{{ _('settingsLangGalician') }}</a>
-                                <a href="{{ url_for('main.set_language', lang_code='ca') }}" class="btn btn-sm {{ 'btn-primary' if get_locale() == 'ca' else 'btn-secondary' }} lang-btn">{{ _('settingsLangCatalan') }}</a>
-                                <a href="{{ url_for('main.set_language', lang_code='va') }}" class="btn btn-sm {{ 'btn-primary' if get_locale() == 'va' else 'btn-secondary' }} lang-btn">{{ _('settingsLangValencian') }}</a>
-                                <a href="{{ url_for('main.set_language', lang_code='eu') }}" class="btn btn-sm {{ 'btn-primary' if get_locale() == 'eu' else 'btn-secondary' }} lang-btn">{{ _('settingsLangBasque') }}</a>
+                                <a href="{{ url_for('main.set_language', lang_code='es') }}"
+                                    class="btn btn-sm {{ 'btn-primary' if get_locale() == 'es' else 'btn-secondary' }} lang-btn">{{
+                                    _('settingsLangSpanish') }}</a>
+                                <a href="{{ url_for('main.set_language', lang_code='en') }}"
+                                    class="btn btn-sm {{ 'btn-primary' if get_locale() == 'en' else 'btn-secondary' }} lang-btn">{{
+                                    _('settingsLangEnglish') }}</a>
+                                <a href="{{ url_for('main.set_language', lang_code='gl') }}"
+                                    class="btn btn-sm {{ 'btn-primary' if get_locale() == 'gl' else 'btn-secondary' }} lang-btn">{{
+                                    _('settingsLangGalician') }}</a>
+                                <a href="{{ url_for('main.set_language', lang_code='ca') }}"
+                                    class="btn btn-sm {{ 'btn-primary' if get_locale() == 'ca' else 'btn-secondary' }} lang-btn">{{
+                                    _('settingsLangCatalan') }}</a>
+                                <a href="{{ url_for('main.set_language', lang_code='va') }}"
+                                    class="btn btn-sm {{ 'btn-primary' if get_locale() == 'va' else 'btn-secondary' }} lang-btn">{{
+                                    _('settingsLangValencian') }}</a>
+                                <a href="{{ url_for('main.set_language', lang_code='eu') }}"
+                                    class="btn btn-sm {{ 'btn-primary' if get_locale() == 'eu' else 'btn-secondary' }} lang-btn">{{
+                                    _('settingsLangBasque') }}</a>
                             </div>
                         </li>
                     </ul>
@@ -56,7 +74,8 @@
                         <p class="text-muted">{{ _('settingsSerialDescription') }}</p>
 
                         <div class="mb-3">
-                            <label for="machineModelSelect" class="form-label">{{ _('settingsMachineModelLabel') }}</label>
+                            <label for="machineModelSelect" class="form-label">{{ _('settingsMachineModelLabel')
+                                }}</label>
                             <select class="form-select" id="machineModelSelect">
                                 <option value="S">{{ _('settingsMachineModelS') }}</option>
                                 <option value="M" selected>{{ _('settingsMachineModelM') }}</option>
@@ -64,26 +83,38 @@
                             </select>
                         </div>
 
-                        <button class="btn btn-primary" id="connectSerialButton">{{ _('settingsSerialConnect') }}</button>
+                        <button class="btn btn-primary" id="connectSerialButton">{{ _('settingsSerialConnect')
+                            }}</button>
 
                         <div id="serial-controls" class="mt-3" style="display: none;">
                             <div class="input-group mb-3">
-                                <input type="text" id="serialCommandInput" class="form-control" placeholder="{{ _('settingsSerialPlaceholder') }}">
-                                <button class="btn btn-outline-secondary" id="sendSerialButton">{{ _('settingsSerialSend') }}</button>
+                                <input type="text" id="serialCommandInput" class="form-control"
+                                    placeholder="{{ _('settingsSerialPlaceholder') }}">
+                                <button class="btn btn-outline-secondary" id="sendSerialButton">{{
+                                    _('settingsSerialSend') }}</button>
                             </div>
 
                             <label for="serialConsole" class="form-label">{{ _('settingsSerialConsoleLabel') }}</label>
-                            <pre id="serialConsole" class="form-control" style="height: 150px; background-color: #f8f9fa;"></pre>
+                            <pre id="serialConsole" class="form-control"
+                                style="height: 150px; background-color: #f8f9fa;"></pre>
                         </div>
                     </div>
 
                 </div>
             </div>
         </main>
+
+        <footer class="mt-5 text-center text-muted" style="font-size: 0.9rem; opacity: 0.8;">
+            <p>&copy; 2024 ONCE - Todos los derechos reservados.</p>
+        </footer>
     </div>
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/serial.js') }}"></script>
     <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
 </body>
+
 </html>

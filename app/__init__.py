@@ -22,8 +22,10 @@ app = Flask(__name__, instance_relative_config=True)
 
 # --- Configuration ---
 app.config.from_mapping(
-    SECRET_KEY='dev',  # Change for production
-    DATABASE=os.path.join(app.instance_path, 'app.sqlite'),
+    SECRET_KEY=os.environ.get('SECRET_KEY', 'dev'),
+    DATABASE=os.environ.get('DATABASE_PATH', 
+             os.path.join('/tmp', 'app.sqlite') if os.environ.get('VERCEL') 
+             else os.path.join(app.instance_path, 'app.sqlite')),
     LANGUAGES=LANGUAGES,
     BABEL_TRANSLATION_DIRECTORIES=os.path.join(app.root_path, 'translations')
 )

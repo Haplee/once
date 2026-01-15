@@ -9,11 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .then(history => {
-            if (history.length === 0) {
+            if (!Array.isArray(history) || history.length === 0) {
                 const row = historyTableBody.insertRow();
                 const cell = row.insertCell();
                 cell.colSpan = 4;
-                cell.textContent = 'No hay operaciones registradas.';
+                cell.textContent = window.currentTranslations?.noHistory || 'No hay operaciones registradas.';
                 cell.style.textAlign = 'center';
             } else {
                 history.forEach(item => {
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = historyTableBody.insertRow();
             const cell = row.insertCell();
             cell.colSpan = 4;
-            cell.textContent = 'Error al cargar el historial.';
+            cell.textContent = window.currentTranslations?.historyLoadError || 'Error al cargar el historial.';
             cell.style.textAlign = 'center';
         });
 });

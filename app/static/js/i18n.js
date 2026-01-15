@@ -61,7 +61,11 @@ window.allTranslations = {
         "voiceProcessing": "Procesando...",
         "voiceValuesRecognized": "Valores reconocidos",
         "voiceInterpretError": "No se pudo interpretar.",
-        "voiceErrorGeneric": "Error: {error}"
+        "voiceErrorGeneric": "Error: {error}",
+        "voiceKeywords": "paga con|me da|le doy|recibido|entrego|pagan",
+        "voiceSplitSeparator": "con",
+        "noHistory": "No hay operaciones registradas.",
+        "historyLoadError": "Error al cargar el historial."
     },
     "en": {
         "appTitle": "Change Calculator - ONCE App",
@@ -125,7 +129,11 @@ window.allTranslations = {
         "voiceProcessing": "Processing...",
         "voiceValuesRecognized": "Values recognized",
         "voiceInterpretError": "Could not interpret.",
-        "voiceErrorGeneric": "Error: {error}"
+        "voiceErrorGeneric": "Error: {error}",
+        "voiceKeywords": "pays with|gives me|received|hand over|paying with",
+        "voiceSplitSeparator": "with",
+        "noHistory": "No history recorded.",
+        "historyLoadError": "Error loading history."
     },
     "gl": {
         "appTitle": "Calculadora de Troco - ONCE App",
@@ -396,7 +404,7 @@ let currentTranslations = {};
  * @returns {string} The current language code (e.g., 'es', 'en').
  */
 const getCurrentLanguage = () => {
-    return localStorage.getItem('language') || 'es';
+    return document.documentElement.lang || localStorage.getItem('language') || 'es';
 };
 
 /**

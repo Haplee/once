@@ -11,3 +11,15 @@ node_modules/
 
 # Logs
 *.log
+
+# Translations (generated)
+*.mo
+*.pot
+
+# Database
+*.sqlite
+*.db
+
+# Vercel
+.vercel
+
