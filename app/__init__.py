@@ -18,7 +18,7 @@ def get_locale():
     return request.accept_languages.best_match(list(LANGUAGES.keys()))
 
 # Initialize the app
-app = Flask(__name__, instance_relative_config=True)
+app = Flask(__name__, instance_relative_config=True, static_folder='static', static_url_path='/static')
 
 # --- Configuration ---
 app.config.from_mapping(
