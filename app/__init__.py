@@ -4,10 +4,16 @@ from flask_babel import Babel, gettext as _
 
 def create_app(test_config=None):
     # Create and configure the app
-    app = Flask(__name__, instance_relative_config=True, static_folder='static', static_url_path='/static')
+    # Point static_folder to the root 'static' directory
+    app = Flask(__name__, instance_relative_config=True, static_folder='../static', static_url_path='/static')
     
-    # Configure path to be in the app directory for safety
-    db_path = os.path.join(app.root_path, 'once_app.sqlite')
+    # Configure database path
+    # On Vercel (serverless), we must use /tmp which is writable (but ephemeral)
+    if os.environ.get('VERCEL'):
+        db_path = os.path.join('/tmp', 'once_app.sqlite')
+    else:
+        # Local development
+        db_path = os.path.join(app.root_path, 'once_app.sqlite')
     
     app.config.from_mapping(
         SECRET_KEY='dev',
