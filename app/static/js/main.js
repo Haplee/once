@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const micBtn = document.getElementById('mic-btn');
     if (micBtn && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition = new SpeechRecognition();
+        let recognition = null;
         let isRecognizing = false;
         let silenceTimer;
         let finalTranscript = '';
@@ -148,8 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             recognition.onstart = () => {
                 isRecognizing = true;
                 micBtn.classList.add('listening');
-                finalTranscript = '';
-                console.log('Recognition started...');
+                console.log('Micrófono activo y escuchando...');
             };
 
             recognition.onresult = (event) => {
@@ -171,16 +170,15 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             recognition.onerror = (event) => {
-                console.error('Recognition error:', event.error);
+                console.error('Error de reconocimiento:', event.error);
                 micBtn.classList.remove('listening');
                 isRecognizing = false;
                 const trans = window.currentTranslations || {};
+
                 if (event.error === 'not-allowed') {
-                    alert(trans.voiceErrorPermission || 'Error: Permiso de micrófono denegado.');
-                } else if (event.error === 'no-speech') {
-                    // Ignore or show subtle hint
-                } else {
-                    alert((trans.voiceErrorInfo || 'Error de voz: {error}').replace('{error}', event.error));
+                    alert(trans.voiceErrorPermission || 'Debe permitir el acceso al micrófono en la barra del navegador.');
+                } else if (event.error !== 'no-speech') {
+                    alert('Error de voz (' + event.error + '). Intente recargar la página.');
                 }
             };
 
@@ -193,29 +191,25 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         };
 
-        setupRecognition();
-
         micBtn.addEventListener('click', () => {
             if (isRecognizing) {
                 recognition.stop();
             } else {
                 try {
-                    setupRecognition(); // Re-setup to ensure fresh state/lang
+                    setupRecognition();
                     recognition.start();
+                    micBtn.classList.add('listening'); // Feedback inmediato
                 } catch (err) {
-                    console.error('Start error:', err);
+                    console.error('Error al iniciar micrófono:', err);
+                    micBtn.classList.remove('listening');
+                    alert('No se pudo iniciar el micro. Asegúrese de que no lo está usando otra app.');
                 }
             }
         });
     } else {
-        console.warn('Speech Recognition not supported or disabled.');
         if (micBtn) {
             micBtn.addEventListener('click', () => {
-                if (!window.isSecureContext && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-                    alert('El micrófono requiere una conexión segura (HTTPS) o usar "localhost" para funcionar.');
-                } else {
-                    alert('Tu navegador no soporta el reconocimiento de voz. Usa Google Chrome o Edge.');
-                }
+                alert('Su navegador no soporta entrada de voz. Use Chrome o Edge para esta función.');
             });
         }
     }

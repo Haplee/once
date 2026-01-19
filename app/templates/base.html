@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ _('appTitle') }}{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=9">
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
 </head>
 
@@ -21,7 +21,7 @@
             <img src="{{ url_for('static', filename='img/logo.png') }}" alt="ONCE" height="42"
                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
             <span
-                style="display: none; color: #00853F; font-weight: 800; font-size: 1.6rem; letter-spacing: 1px;">ONCE</span>
+                style="display: none; color: #00853F !important; font-weight: 800; font-size: 1.6rem; letter-spacing: 1px;">ONCE</span>
         </a>
         <div class="nav-links">
             <a href="{{ url_for('main.index') }}" class="{{ 'active' if request.endpoint == 'main.index' else '' }}">{{
