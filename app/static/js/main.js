@@ -130,85 +130,83 @@ document.addEventListener('DOMContentLoaded', () => {
     const micBtn = document.getElementById('mic-btn');
     if (micBtn && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
+        let recognition = new SpeechRecognition();
+        let isRecognizing = false;
+        let silenceTimer;
+        let finalTranscript = '';
 
-        // Map 2-char lang to BCP-47
-        const langMap = {
-            'es': 'es-ES',
-            'en': 'en-US',
-            'ca': 'ca-ES',
-            'gl': 'gl-ES',
-            'eu': 'eu-ES',
-            'fr': 'fr-FR',
-            'va': 'ca-ES'
+        const setupRecognition = () => {
+            recognition = new SpeechRecognition();
+            const langMap = {
+                'es': 'es-ES', 'en': 'en-US', 'ca': 'ca-ES',
+                'gl': 'gl-ES', 'eu': 'eu-ES', 'fr': 'fr-FR', 'va': 'ca-ES'
+            };
+            recognition.lang = langMap[currentLang] || 'es-ES';
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            recognition.onstart = () => {
+                isRecognizing = true;
+                micBtn.classList.add('listening');
+                finalTranscript = '';
+                console.log('Recognition started...');
+            };
+
+            recognition.onresult = (event) => {
+                clearTimeout(silenceTimer);
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                const resultText = document.getElementById('result-text');
+                if (resultText) {
+                    resultText.textContent = '"' + (finalTranscript + interimTranscript) + '"';
+                    resultText.classList.remove('hidden');
+                }
+                silenceTimer = setTimeout(() => { recognition.stop(); }, 2000);
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Recognition error:', event.error);
+                micBtn.classList.remove('listening');
+                isRecognizing = false;
+                const trans = window.currentTranslations || {};
+                if (event.error === 'not-allowed') {
+                    alert(trans.voiceErrorPermission || 'Error: Permiso de micrófono denegado.');
+                } else if (event.error === 'no-speech') {
+                    // Ignore or show subtle hint
+                } else {
+                    alert((trans.voiceErrorInfo || 'Error de voz: {error}').replace('{error}', event.error));
+                }
+            };
+
+            recognition.onend = () => {
+                micBtn.classList.remove('listening');
+                isRecognizing = false;
+                if (finalTranscript) {
+                    window.parseVoiceInput(finalTranscript);
+                }
+            };
         };
 
-        recognition.lang = langMap[currentLang] || 'es-ES';
-        recognition.continuous = true; // Stay active to give more time
-        recognition.interimResults = true; // To reset the silence timer
-
-        let isRecognizing = false;
+        setupRecognition();
 
         micBtn.addEventListener('click', () => {
             if (isRecognizing) {
                 recognition.stop();
-                return;
-            }
-            try {
-                recognition.start();
-            } catch (err) {
-                console.error('Recognition start error:', err);
-            }
-        });
-
-        let silenceTimer;
-        let finalTranscript = '';
-
-        recognition.onstart = () => {
-            isRecognizing = true;
-            micBtn.classList.add('listening');
-            finalTranscript = '';
-            console.log('Recognition started...');
-        };
-
-        recognition.onresult = (event) => {
-            clearTimeout(silenceTimer);
-            let interimTranscript = '';
-
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript;
-                } else {
-                    interimTranscript += event.results[i][0].transcript;
+            } else {
+                try {
+                    setupRecognition(); // Re-setup to ensure fresh state/lang
+                    recognition.start();
+                } catch (err) {
+                    console.error('Start error:', err);
                 }
             }
-
-            const currentText = finalTranscript + interimTranscript;
-            const resultText = document.getElementById('result-text');
-            if (resultText) {
-                resultText.textContent = '"' + currentText + '"';
-                resultText.classList.remove('hidden');
-            }
-
-            // If we stop talking for 2 seconds, stop recognition and process
-            silenceTimer = setTimeout(() => {
-                recognition.stop();
-            }, 2000);
-        };
-
-        recognition.onerror = (event) => {
-            micBtn.classList.remove('listening');
-            isRecognizing = false;
-            console.error('Recognition error:', event.error);
-        };
-
-        recognition.onend = () => {
-            micBtn.classList.remove('listening');
-            isRecognizing = false;
-            if (finalTranscript) {
-                window.parseVoiceInput(finalTranscript);
-            }
-        };
+        });
     } else {
         console.warn('Speech Recognition not supported or disabled.');
         if (micBtn) {
