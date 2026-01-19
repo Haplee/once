@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const currentLang = document.documentElement.lang || 'es';
     console.log('App JS cargado. Idioma detectado:', currentLang);
-    console.log('Contexto seguro (HTTPS):', window.isSecureContext);
+    console.log('Contexto seguro:', window.isSecureContext ? 'Sí' : 'No');
 
     // --- Speech Synthesis Setup ---
     let voices = [];
