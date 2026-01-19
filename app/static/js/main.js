@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const currentLang = document.documentElement.lang || 'es';
+    console.log('App JS cargado. Idioma detectado:', currentLang);
+    console.log('Contexto seguro (HTTPS):', window.isSecureContext);
 
     // --- Speech Synthesis Setup ---
     let voices = [];
@@ -170,16 +172,25 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             recognition.onerror = (event) => {
-                console.error('Error de reconocimiento:', event.error);
+                console.error('Error de reconocimiento persistente:', event.error);
                 micBtn.classList.remove('listening');
                 isRecognizing = false;
+
                 const trans = window.currentTranslations || {};
+                let errorMsg = '';
 
                 if (event.error === 'not-allowed') {
-                    alert(trans.voiceErrorPermission || 'Debe permitir el acceso al micrófono en la barra del navegador.');
-                } else if (event.error !== 'no-speech') {
-                    alert('Error de voz (' + event.error + '). Intente recargar la página.');
+                    errorMsg = 'Permiso denegado. Haz clic en el candado 🔒 de la barra de direcciones y activa el Micrófono.';
+                } else if (event.error === 'network') {
+                    errorMsg = 'Error de red. El reconocimiento de voz necesita conexión a internet.';
+                } else if (event.error === 'no-speech') {
+                    console.log('Silencio detectado');
+                    return;
+                } else {
+                    errorMsg = 'Error de voz: ' + event.error;
                 }
+
+                if (errorMsg) alert(errorMsg);
             };
 
             recognition.onend = () => {

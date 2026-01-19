@@ -17,11 +17,10 @@
 
     <nav class="navbar glass-panel">
         <a href="{{ url_for('main.index') }}" class="logo"
-            style="text-decoration: none; display: flex; align-items: center;">
+            style="text-decoration: none; display: flex; align-items: center; color: #00853F !important;">
             <img src="{{ url_for('static', filename='img/logo.png') }}" alt="ONCE" height="42"
                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-            <span
-                style="display: none; color: #00853F !important; font-weight: 800; font-size: 1.6rem; letter-spacing: 1px;">ONCE</span>
+            <span style="display: none; font-weight: 800; font-size: 1.6rem; letter-spacing: 1px;">ONCE</span>
         </a>
         <div class="nav-links">
             <a href="{{ url_for('main.index') }}" class="{{ 'active' if request.endpoint == 'main.index' else '' }}">{{
@@ -38,7 +37,7 @@
     </main>
 
     <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=2"></script>
     {% block scripts %}{% endblock %}
 </body>
 
