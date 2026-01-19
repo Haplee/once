@@ -5,7 +5,10 @@ from flask_babel import Babel, gettext as _
 def create_app(test_config=None):
     # Create and configure the app
     # Default static and template folders (relative to this file)
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__, 
+                instance_relative_config=True,
+                static_folder='static',
+                template_folder='templates')
     
     # Configure database path
     # On Vercel (serverless), we must use /tmp which is writable
@@ -20,7 +23,9 @@ def create_app(test_config=None):
         DATABASE=db_path,
         LANGUAGES=['es', 'en', 'gl', 'ca', 'va', 'ca_ES', 'eu', 'fr'],
         # Explicitly set translations directory
-        BABEL_TRANSLATION_DIRECTORIES=os.path.join(app.root_path, 'translations')
+        BABEL_TRANSLATION_DIRECTORIES=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'translations'),
+        # Ensure static files are served by Flask
+        SEND_FILE_MAX_AGE_DEFAULT=0
     )
 
     if test_config is None:
