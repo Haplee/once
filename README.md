@@ -1,22 +1,22 @@
-# Aplicación Web Accesible para la ONCE (Versión Python)
+# Aplicación Web Accesible para la ONCE (Next.js)
 
-Esta es la versión refactorizada de la aplicación web de la Calculadora de Cambio, ahora impulsada por un backend de Python usando el framework Flask. La aplicación mantiene toda la funcionalidad original, incluyendo la alta accesibilidad, pero ahora con una arquitectura más robusta y modular.
+Esta es la aplicación web de la Calculadora de Cambio, ahora impulsada por **Next.js** con un backend moderno usando API Routes. La aplicación mantiene toda la funcionalidad original, incluyendo la alta accesibilidad, pero ahora con una arquitectura más robusta y escalable.
 
 ## Características
 
-- **Backend en Python (Flask)**: La lógica de negocio, el enrutamiento y la gestión de datos ahora se manejan en el servidor.
-- **Calculadora de Cambio**: Calcula el cambio de forma rápida y precisa a través de una API interna.
+- **Framework Next.js 14**: Arquitectura moderna con App Router y Server Components.
+- **Calculadora de Cambio**: Calcula el cambio de forma rápida y precisa a través de API Routes internas.
 - **Entrada y Salida de Voz**: Utiliza las APIs del navegador para la entrada de voz y para anunciar los resultados en voz alta.
-- **Historial de Operaciones Persistente**: Guarda un registro de todas las transacciones en una base de datos SQLite en el servidor.
-- **Internacionalización (I18N)**: Soporte para múltiples idiomas (Español, Inglés, Gallego, Catalán, Valenciano, Euskera) gestionado por Flask-Babel.
-- **Modo Día/Noche**: Tema visual adaptable.
+- **Historial de Operaciones Persistente**: Guarda un registro de todas las transacciones en una base de datos SQLite.
+- **Internacionalización (I18N)**: Soporte para múltiples idiomas (Español, Inglés, Catalán) gestionado por React Context.
+- **Modo Día/Noche**: Tema visual adaptable con `next-themes`.
 - **Comunicación con Hardware**: Mantiene la capacidad de comunicarse con dispositivos externos (como Arduino) a través de la Web Serial API.
+- **Diseño Premium**: Interfaz glassmorphic moderna con animaciones suaves y diseño responsive.
 
 ## Requisitos
 
-- Python 3.8+
-- pip (gestor de paquetes de Python)
-- Node.js y npm (para las pruebas)
+- Node.js 18+ (recomendado 20+)
+- npm o yarn
 
 ## Cómo Empezar
 
@@ -29,55 +29,30 @@ git clone <url-del-repositorio>
 cd <nombre-del-repositorio>
 ```
 
-### 2. Crear un Entorno Virtual
-
-Es una buena práctica usar un entorno virtual para aislar las dependencias del proyecto.
+### 2. Instalar Dependencias
 
 ```bash
-# Crear el entorno virtual
-python -m venv venv
-
-# Activar el entorno (en Windows)
-# venv\Scripts\activate
-
-# Activar el entorno (en macOS/Linux)
-source venv/bin/activate
-```
-
-### 3. Instalar Dependencias
-
-Instala todas las dependencias de Python y Node.js.
-
-```bash
-# Instalar dependencias de Python
-pip install -r requirements.txt
-
-# Instalar dependencias de Node.js (para pruebas)
 npm install
 ```
 
-### 4. Inicializar la Base de Datos
-
-Antes de ejecutar la aplicación por primera vez, necesitas crear la base de datos y la tabla para el historial.
+### 3. Ejecutar el Servidor de Desarrollo
 
 ```bash
-flask --app app init-db
+npm run dev
 ```
-Deberías ver un mensaje que dice "Initialized the database."
 
-### 5. Ejecutar la Aplicación
+La aplicación estará disponible en `http://localhost:3000` en tu navegador.
 
-Ahora puedes iniciar el servidor de desarrollo de Flask:
+### 4. Construir para Producción
 
 ```bash
-flask --app app run
+npm run build
+npm start
 ```
 
-La aplicación estará disponible en `http://127.0.0.1:5000` en tu navegador.
+### 5. Ejecutar las Pruebas (Opcional)
 
-### 6. Ejecutar las Pruebas (Opcional)
-
-Para ejecutar las pruebas End-to-End de Playwright, asegúrate de que el servidor de Flask esté corriendo y luego ejecuta:
+Para ejecutar las pruebas End-to-End de Playwright:
 
 ```bash
 npm test
@@ -85,33 +60,65 @@ npm test
 
 ## Estructura del Proyecto
 
-La arquitectura del proyecto sigue un patrón estándar de Flask:
-
 ```
 .
-├── app/
-│   ├── static/             # (Actualmente vacío, los activos se sirven desde /docs)
-│   ├── templates/          # Plantillas HTML de Jinja2
-│   ├── translations/       # Archivos de traducción de Gettext (.po)
-│   ├── __init__.py         # Inicializador de la aplicación Flask
-│   ├── api.py              # Blueprint para la API
-│   ├── db.py               # Lógica de la base de datos
-│   ├── routes.py           # Rutas de la aplicación
-│   └── schema.sql          # Esquema de la base de datos
-├── docs/                   # Directorio original, ahora solo para activos estáticos
-│   └── assets/
-├── arduino_sketch/
-│   └── arduino_sketch.ino  # Código de ejemplo para el dispositivo Arduino
-├── tests/
-│   └── e2e.spec.js         # Pruebas End-to-End con Playwright
-├── .github/
-│   └── workflows/
-│       └── ci.yml          # Flujo de trabajo de GitHub Actions para CI
-├── requirements.txt        # Dependencias de Python
-├── package.json            # Dependencias de Node.js
-└── README.md               # Este archivo
+├── src/
+│   ├── app/                    # App Router de Next.js
+│   │   ├── api/               # API Routes
+│   │   │   ├── calculate/     # Endpoint de cálculo
+│   │   │   └── history/       # Endpoint de historial
+│   │   ├── configuracion/     # Página de configuración
+│   │   ├── history/           # Página de historial
+│   │   ├── layout.tsx         # Layout principal
+│   │   ├── page.tsx           # Página de inicio (calculadora)
+│   │   └── globals.css        # Estilos globales
+│   ├── components/            # Componentes React
+│   │   ├── Navbar.tsx         # Barra de navegación
+│   │   └── ThemeProvider.tsx  # Proveedor de tema
+│   ├── lib/                   # Utilidades
+│   │   ├── db.ts              # Conexión a SQLite
+│   │   └── i18n.tsx           # Sistema de internacionalización
+│   └── data/                  # Datos estáticos
+│       └── translations/      # Archivos de traducción JSON
+├── public/                    # Archivos estáticos
+│   └── static/                # Imágenes y assets
+├── arduino_sketch/            # Código de ejemplo para Arduino
+├── tests/                     # Pruebas E2E
+├── next.config.js             # Configuración de Next.js
+├── tsconfig.json              # Configuración de TypeScript
+├── package.json               # Dependencias del proyecto
+└── README.md                  # Este archivo
 ```
+
+## Migración desde Flask
+
+La versión anterior de Flask se encuentra archivada en la rama `old_version`. Para acceder a ella:
+
+```bash
+git checkout old_version
+```
+
+## Despliegue en Vercel
+
+Este proyecto está optimizado para desplegarse en Vercel:
+
+1. Conecta tu repositorio a Vercel
+2. Vercel detectará automáticamente que es un proyecto Next.js
+3. El despliegue se realizará automáticamente
 
 ## Comunicación con Arduino
 
 El código de ejemplo para un dispositivo compatible con Arduino se encuentra en `arduino_sketch/arduino_sketch.ino`. Puedes cargarlo en tu dispositivo para probar la funcionalidad de comunicación serie desde la página de **Configuración**.
+
+## Tecnologías Utilizadas
+
+- **Next.js 14**: Framework React con SSR y App Router
+- **TypeScript**: Tipado estático para mayor robustez
+- **SQLite**: Base de datos ligera para el historial
+- **Lucide React**: Iconos modernos
+- **next-themes**: Gestión de temas oscuro/claro
+- **Web APIs**: Speech Recognition, Speech Synthesis, Web Serial
+
+## Licencia
+
+ISC
