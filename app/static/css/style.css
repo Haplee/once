@@ -168,14 +168,11 @@ body {
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
-    padding: 2.5rem 1.5rem 4rem;
-    /* More top padding */
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Center horizontally */
-    justify-content: flex-start;
-    /* Don't center vertically to allow for growth */
+    justify-content: center;
     z-index: 5;
     text-align: center;
 }
