@@ -1,4 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const currentLang = document.documentElement.lang || 'es';
+
+    // --- Speech Synthesis Setup ---
+    let voices = [];
+    const loadVoices = () => {
+        voices = window.speechSynthesis.getVoices();
+    };
+    loadVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
     // --- Theme Manager ---
     const themeToggle = document.getElementById('theme-toggle');
     const storedTheme = localStorage.getItem('theme') || 'light';
@@ -23,111 +35,313 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Calculator Logic ---
-    const calcForm = document.getElementById('calculator-form');
-    if (calcForm) {
-        calcForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const total = parseFloat(document.getElementById('total').value);
-            const received = parseFloat(document.getElementById('received').value);
-            const resultBox = document.getElementById('result-value');
-            const resultText = document.getElementById('result-text'); // For accessibility/status
+    // --- Voice Gender Manager ---
+    const voiceGenderSelect = document.getElementById('voice-gender');
+    if (voiceGenderSelect) {
+        const storedGender = localStorage.getItem('voiceGender') || 'female';
+        voiceGenderSelect.value = storedGender;
+        voiceGenderSelect.addEventListener('change', (e) => {
+            localStorage.setItem('voiceGender', e.target.value);
+            console.log('Voice Gender set to:', e.target.value);
+        });
+    }
 
-            try {
-                const response = await fetch('/api/calculate', {
+    // --- Calculator Logic ---
+    const totalInput = document.getElementById('total');
+    const receivedInput = document.getElementById('received');
+    const calcForm = document.getElementById('calculator-form');
+
+    // --- (Removed auto-announcement on blur to only speak the final change) ---
+    // Previously announced values as they were entered, now we wait for the final result.
+
+    async function performCalculation() {
+        const total = parseFloat(totalInput.value);
+        const received = parseFloat(receivedInput.value);
+        const resultBox = document.getElementById('result-value');
+
+        if (isNaN(total) || isNaN(received)) return;
+
+        try {
+            const response = await fetch('/api/calculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ total, received })
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || 'Error en el cálculo');
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                const change = data.change.toFixed(2);
+                resultBox.textContent = `€ ${change}`;
+
+                const trans = window.currentTranslations || {};
+                const [euros, cents] = change.split('.');
+                const euroLabel = parseInt(euros) === 1 ? (trans.speechEuroSingular || 'euro') : (trans.speechEuroPlural || 'euros');
+                let announcementText = `${euros} ${euroLabel}`;
+
+                if (parseInt(cents) > 0) {
+                    const conLabel = trans.speechCon || 'con';
+                    announcementText += ` ${conLabel} ${cents}`;
+                }
+
+                // Optional: add localized prefix
+                const prefix = trans.speechChangeResultText || '';
+                announceResult(`${prefix} ${announcementText}`);
+
+                const historyRes = await fetch('/api/history', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ total, received })
+                    body: JSON.stringify({
+                        total: data.total,
+                        received: data.received,
+                        change: data.change
+                    })
                 });
 
-                const data = await response.json();
-
-                if (data.success) {
-                    const change = data.change.toFixed(2);
-                    resultBox.textContent = `€ ${change}`;
-                    announceResult(`El cambio es ${change} euros`);
-
-                    // Save to history
-                    await fetch('/api/history', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            total: data.total,
-                            received: data.received,
-                            change: data.change
-                        })
-                    });
-
-                    // Serial Communication (Fire and forget)
-                    sendSerialData(`C:${change}`);
-                } else {
-                    resultBox.textContent = 'Error';
-                    announceResult('Error en el cálculo. ' + (data.error || ''));
+                if (!historyRes.ok) {
+                    console.error('Error saving history:', await historyRes.text());
                 }
-            } catch (err) {
-                console.error(err);
-                resultBox.textContent = 'Error';
+
+                if (typeof sendSerialData === 'function') {
+                    sendSerialData(`C:${change}`);
+                }
             }
+        } catch (err) {
+            console.error('Calculation error:', err);
+            const trans = window.currentTranslations || {};
+            resultBox.textContent = 'Error';
+            alert(trans.genericError || 'Error al realizar el cálculo: ' + err.message);
+        }
+    }
+
+    if (calcForm) {
+        calcForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            performCalculation();
         });
     }
 
     // --- Voice Input ---
     const micBtn = document.getElementById('mic-btn');
-    if (micBtn && 'webkitSpeechRecognition' in window) {
-        const recognition = new webkitSpeechRecognition();
-        recognition.lang = document.documentElement.lang || 'es-ES';
-        recognition.continuous = false;
-        recognition.interimResults = false;
+    if (micBtn && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
 
-        micBtn.addEventListener('click', () => {
-            recognition.start();
-            micBtn.classList.add('listening'); // Add visual cue if needed
-        });
-
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            console.log('Voice Input:', transcript);
-            parseVoiceInput(transcript);
-            micBtn.classList.remove('listening');
+        // Map 2-char lang to BCP-47
+        const langMap = {
+            'es': 'es-ES',
+            'en': 'en-US',
+            'ca': 'ca-ES',
+            'gl': 'gl-ES',
+            'eu': 'eu-ES',
+            'fr': 'fr-FR',
+            'va': 'ca-ES'
         };
 
-        recognition.onerror = () => micBtn.classList.remove('listening');
-        recognition.onend = () => micBtn.classList.remove('listening');
-    }
+        recognition.lang = langMap[currentLang] || 'es-ES';
+        recognition.continuous = true; // Stay active to give more time
+        recognition.interimResults = true; // To reset the silence timer
 
-    function parseVoiceInput(text) {
-        // Simple regex to find numbers. "Cobrar 50.50 de 100"
-        // This is a naive implementation, can be improved with better NLP or regex
-        const numbers = text.match(/[\d]+([.,][\d]+)?/g);
-        if (numbers && numbers.length >= 2) {
-            // Assume first number is total, second is received? Or defined by keywords?
-            // "Total 10, Recibido 20"
-            // For now, let's just try to fill inputs if empty?
-            // Or just alert the user to be clearer? 
-            // Let's implement a "Total... Recibido..." logic if possible, 
-            // otherwise just fill them in order.
-            const n1 = parseFloat(numbers[0].replace(',', '.'));
-            const n2 = parseFloat(numbers[1].replace(',', '.'));
+        let isRecognizing = false;
 
-            // Which is bigger? usually received > total
-            if (n1 > n2) {
-                document.getElementById('received').value = n1;
-                document.getElementById('total').value = n2;
-            } else {
-                document.getElementById('received').value = n2;
-                document.getElementById('total').value = n1;
+        micBtn.addEventListener('click', () => {
+            if (isRecognizing) {
+                recognition.stop();
+                return;
             }
-            // Auto submit?
-            // calcForm.dispatchEvent(new Event('submit'));
+            try {
+                recognition.start();
+            } catch (err) {
+                console.error('Recognition start error:', err);
+            }
+        });
+
+        let silenceTimer;
+        let finalTranscript = '';
+
+        recognition.onstart = () => {
+            isRecognizing = true;
+            micBtn.classList.add('listening');
+            finalTranscript = '';
+            console.log('Recognition started...');
+        };
+
+        recognition.onresult = (event) => {
+            clearTimeout(silenceTimer);
+            let interimTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+
+            const currentText = finalTranscript + interimTranscript;
+            const resultText = document.getElementById('result-text');
+            if (resultText) {
+                resultText.textContent = '"' + currentText + '"';
+                resultText.classList.remove('hidden');
+            }
+
+            // If we stop talking for 2 seconds, stop recognition and process
+            silenceTimer = setTimeout(() => {
+                recognition.stop();
+            }, 2000);
+        };
+
+        recognition.onerror = (event) => {
+            micBtn.classList.remove('listening');
+            isRecognizing = false;
+            console.error('Recognition error:', event.error);
+        };
+
+        recognition.onend = () => {
+            micBtn.classList.remove('listening');
+            isRecognizing = false;
+            if (finalTranscript) {
+                window.parseVoiceInput(finalTranscript);
+            }
+        };
+    } else {
+        console.warn('Speech Recognition not supported or disabled.');
+        if (micBtn) {
+            micBtn.addEventListener('click', () => {
+                if (!window.isSecureContext && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                    alert('El micrófono requiere una conexión segura (HTTPS) o usar "localhost" para funcionar.');
+                } else {
+                    alert('Tu navegador no soporta el reconocimiento de voz. Usa Google Chrome o Edge.');
+                }
+            });
         }
     }
+
+    window.parseVoiceInput = function (text) {
+        console.log('Procesando voz original:', text);
+        const trans = window.currentTranslations || {};
+        const wordToNum = trans.wordToNum || {};
+        const keywords = trans.voiceKeywords || 'paga con|me da';
+        const separator = trans.voiceSplitSeparator || 'con';
+
+        text = text.toLowerCase();
+
+        // Check if the phrase contains payment keywords to reduce noise
+        const keywordRegex = new RegExp(keywords, 'i');
+        if (!keywordRegex.test(text) && !text.match(/\d/)) {
+            console.log('Voz ignorada (sin palabras clave ni números)');
+            return;
+        }
+
+        // 1. Handle decimal separators spoken as words early (contextual)
+        const sepRegex = new RegExp(`(\\d+)\\s+(${separator})\\s+(\\d+)`, 'gi');
+        text = text.replace(sepRegex, '$1.$3');
+
+        // 2. Convert localized words to numbers
+        let processedText = text;
+        const sortedWords = Object.keys(wordToNum).sort((a, b) => b.length - a.length);
+        for (const word of sortedWords) {
+            const regex = new RegExp(`\\b${word}\\b`, 'g');
+            processedText = processedText.replace(regex, wordToNum[word]);
+        }
+
+        // 3. Composite numbers (e.g., "twenty five") and separators again
+        processedText = processedText.replace(/(\d+)\s+(\d+)/g, (m, p1, p2) => {
+            if (parseInt(p1) > parseInt(p2) && parseInt(p2) < 10) return parseInt(p1) + parseInt(p2);
+            return m;
+        });
+        processedText = processedText.replace(sepRegex, '$1.$3');
+
+        // 4. Extract all numeric patterns
+        const numbers = processedText.match(/[\d]+([.,][\d]+)?/g);
+        console.log('Números detectados:', numbers);
+
+        if (numbers && numbers.length >= 2) {
+            const cleanNums = numbers.map(n => parseFloat(n.replace(',', '.')));
+            let n1 = cleanNums[0];
+            let n2 = cleanNums[1];
+
+            if (n1 > n2) {
+                totalInput.value = n2.toFixed(2);
+                receivedInput.value = n1.toFixed(2);
+            } else {
+                totalInput.value = n1.toFixed(2);
+                receivedInput.value = n2.toFixed(2);
+            }
+            performCalculation();
+        } else if (numbers && numbers.length === 1) {
+            const n = parseFloat(numbers[0].replace(',', '.'));
+            if (!totalInput.value) {
+                totalInput.value = n.toFixed(2);
+            } else {
+                receivedInput.value = n.toFixed(2);
+                performCalculation();
+            }
+        } else {
+            // Optional feedback if it seemed like a failed attempt
+            if (text.length > 5) {
+                console.warn('No se detectaron suficientes números en:', text);
+            }
+        }
+    };
 
     function announceResult(text) {
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = document.documentElement.lang || 'es-ES';
-            window.speechSynthesis.speak(utterance);
+        if (!('speechSynthesis' in window)) return;
+
+        window.speechSynthesis.cancel();
+
+        // Make the text more natural for humans
+        // e.g., "5.20" -> "5 con 20" is already handled in calculation logic, 
+        // but let's ensure it's clean and friendly.
+        const utterance = new SpeechSynthesisUtterance(text);
+        const langMap = {
+            'es': 'es-ES', 'en': 'en-US', 'ca': 'ca-ES',
+            'gl': 'gl-ES', 'eu': 'eu-ES', 'fr': 'fr-FR', 'va': 'ca-ES'
+        };
+        const targetLang = langMap[currentLang] || 'es-ES';
+        utterance.lang = targetLang;
+
+        const findBestVoice = () => {
+            if (voices.length === 0) loadVoices();
+            const langVoices = voices.filter(v => v.lang.includes(targetLang) || v.lang.replace('_', '-') === targetLang);
+
+            const preferredGender = localStorage.getItem('voiceGender') || 'female';
+
+            // Priority list for each gender
+            const femaleVoices = ['Elvira', 'Helena', 'Lucia', 'Hortense', 'Marie', 'Julie', 'Neural', 'Natural', 'Google español', 'Premium'];
+            const maleVoices = ['Alvaro', 'Arnav', 'Pablo', 'David', 'Paul', 'Jean', 'Neural', 'Natural', 'Google español', 'Premium'];
+
+            const searchTerms = preferredGender === 'female' ? femaleVoices : maleVoices;
+
+            for (const name of searchTerms) {
+                const found = langVoices.find(v => {
+                    const vName = v.name.toLowerCase();
+                    const searchTerm = name.toLowerCase();
+                    return vName.includes(searchTerm);
+                });
+                if (found) return found;
+            }
+
+            return langVoices.find(v => v.name.includes('Google') || v.name.includes('Microsoft')) || langVoices[0];
+        };
+
+        const voice = findBestVoice();
+        if (voice) {
+            utterance.voice = voice;
+            console.log('Selected Voice:', voice.name);
         }
+
+        // Slight adjustments for human-like cadence
+        utterance.rate = 0.92;  // Slightly more deliberate and clear
+        utterance.pitch = 1.05; // Slightly higher pitch can sound more friendly/human
+        utterance.volume = 1.0;
+
+        window.speechSynthesis.speak(utterance);
     }
 
     // --- Serial API ---

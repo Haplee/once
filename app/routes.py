@@ -31,10 +31,16 @@ def set_language(lang_code):
 def calculate():
     """Internal API to calculate change safely."""
     data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
     try:
         total = float(data.get('total', 0))
         received = float(data.get('received', 0))
         
+        if total <= 0:
+            return jsonify({'error': 'Total amount must be greater than zero'}), 400
+            
         if received < total:
             return jsonify({'error': 'Insufficient amount received'}), 400
             
@@ -47,7 +53,9 @@ def calculate():
             'change': change
         })
     except (ValueError, TypeError):
-        return jsonify({'error': 'Invalid input data'}), 400
+        return jsonify({'error': 'Invalid input data (must be numbers)'}), 400
+    except Exception as e:
+        return jsonify({'error': f'An unexpected error occurred: {str(e)}'}), 500
 
 @main.route('/api/history', methods=['GET', 'POST'])
 def api_history():
@@ -56,6 +64,9 @@ def api_history():
     if request.method == 'POST':
         # Save a new transaction
         data = request.get_json()
+        if not data:
+             return jsonify({'error': 'No data provided'}), 400
+             
         try:
             total = float(data.get('total'))
             received = float(data.get('received'))
@@ -67,8 +78,10 @@ def api_history():
             )
             db.commit()
             return jsonify({'success': True})
+        except (ValueError, TypeError, KeyError) as e:
+            return jsonify({'error': f'Invalid or missing data: {str(e)}'}), 400
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            return jsonify({'error': f'Database error: {str(e)}'}), 500
             
     elif request.method == 'GET':
         # Retrieve transactions (limit 50 by default)
@@ -82,9 +95,9 @@ def api_history():
             results.append({
                 'id': row['id'],
                 'timestamp': row['timestamp'],
-                'total': row['total_amount'],
-                'received': row['amount_received'],
-                'change': row['change_returned'],
+                'total_amount': row['total_amount'],
+                'amount_received': row['amount_received'],
+                'change_returned': row['change_returned'],
                 'currency': row['currency']
             })
             

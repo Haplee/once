@@ -18,7 +18,7 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY='dev',
         DATABASE=db_path,
-        LANGUAGES=['es', 'en', 'gl', 'ca', 'va', 'eu'],
+        LANGUAGES=['es', 'en', 'gl', 'ca', 'va', 'ca_ES', 'eu', 'fr'],
         # Explicitly set translations directory
         BABEL_TRANSLATION_DIRECTORIES=os.path.join(app.root_path, 'translations')
     )
@@ -34,9 +34,14 @@ def create_app(test_config=None):
 
     # --- I18N ---
     def get_locale():
-        if 'language' in session:
-            return session['language']
-        return request.accept_languages.best_match(app.config['LANGUAGES'])
+        lang = session.get('language')
+        if not lang:
+            lang = request.accept_languages.best_match(app.config['LANGUAGES'])
+        
+        # Internal mapping: 'va' (Valencian) is mapped to 'ca_ES' which Babel understands
+        if lang == 'va':
+            return 'ca_ES'
+        return lang
 
     babel = Babel(app, locale_selector=get_locale)
 

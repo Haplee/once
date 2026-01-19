@@ -1,4 +1,4 @@
-# Galician translations for the ONCE Change Calculator app.
+# Valencian translations for the ONCE Change Calculator app.
 msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
@@ -6,19 +6,19 @@ msgstr ""
 "POT-Creation-Date: 2025-09-21 11:56+0000\n"
 "PO-Revision-Date: 2025-09-21 11:56+0000\n"
 "Last-Translator: Jules <jules@example.com>\n"
-"Language: gl\n"
+"Language: va\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "appTitle"
-msgstr "Calculadora de Troco - ONCE App"
+msgstr "Calculadora de Canvi - ONCE App"
 
 msgid "historyPageTitle"
-msgstr "Historial de Operacións - ONCE App"
+msgstr "Historial d'Operacions - ONCE App"
 
 msgid "settingsPageTitle"
-msgstr "Configuración - ONCE App"
+msgstr "Configuració - ONCE App"
 
 msgid "navCalculator"
 msgstr "Calculadora"
@@ -27,10 +27,10 @@ msgid "navHistory"
 msgstr "Historial"
 
 msgid "navSettings"
-msgstr "Configuración"
+msgstr "Configuració"
 
 msgid "calculatorTitle"
-msgstr "Calculadora de Troco"
+msgstr "Calculadora de Canvi"
 
 msgid "totalToPayLabel"
 msgstr "Total a Pagar (€)"
@@ -39,7 +39,7 @@ msgid "totalToPayPlaceholder"
 msgstr "Ex: 5.50"
 
 msgid "amountReceivedLabel"
-msgstr "Importe Recibido (€)"
+msgstr "Import Rebut (€)"
 
 msgid "amountReceivedPlaceholder"
 msgstr "Ex: 10.00"
@@ -48,106 +48,106 @@ msgid "calculateButton"
 msgstr "Calcular"
 
 msgid "voiceInputButtonLabel"
-msgstr "Usar entrada de voz"
+msgstr "Utilitzar entrada de veu"
 
 msgid "voiceErrorPermission"
-msgstr "Acceso ao micrófono denegado. Para usar esta función, por favor, permite o acceso ao micrófono no teu navegador."
+msgstr "Accés al micròfon denegat. Per utilitzar aquesta funció, per favor, permet l'accés al micròfon al teu navegador."
 
 msgid "voiceErrorNoSpeech"
-msgstr "Non se detectou ningunha voz. Inténtao de novo falando preto do micrófono."
+msgstr "No s'ha detectat cap veu. Intenta-ho de nou parlant prop del micròfon."
 
 msgid "voiceErrorInfo"
-msgstr "Error de recoñecemento: {error}. Por favor, inténtao de novo."
+msgstr "Error de reconeixement: {error}. Per favor, intenta-ho de nou."
 
 msgid "voiceErrorTimeout"
-msgstr "O recoñecemento de voz detívose por inactividade."
+msgstr "El reconeixement de veu es va aturar per inactivitat."
 
 msgid "voiceErrorStart"
-msgstr "Non se puido iniciar o recoñecemento. Asegúrate de que o micrófono estea permitido e non estea en uso."
+msgstr "No es va poder iniciar el reconeixement. Assegura't que el micròfon estiga permés i no estiga en ús."
 
 msgid "voiceErrorUnsupported"
-msgstr "Sentímolo, o teu navegador non é compatible co recoñecemento de voz."
+msgstr "Ho sentim, el teu navegador no és compatible amb el reconeixement de veu."
 
 msgid "changeResultText"
-msgstr "O troco a devolver é: {change} €"
+msgstr "El canvi a retornar és: {change} €"
 
 msgid "invalidInputText"
-msgstr "Por favor, introduce importes válidos."
+msgstr "Per favor, introduïx imports vàlids."
 
 msgid "amountReceivedLowText"
-msgstr "O importe recibido é menor que o total a pagar."
+msgstr "L'import rebut és menor que el total a pagar."
 
 msgid "historyTitle"
-msgstr "Historial de Operacións"
+msgstr "Historial d'Operacions"
 
 msgid "historyHeaderDate"
-msgstr "Data e Hora"
+msgstr "Data i Hora"
 
 msgid "historyHeaderTotal"
-msgstr "Total Pagado"
+msgstr "Total Pagat"
 
 msgid "historyHeaderReceived"
-msgstr "Importe Recibido"
+msgstr "Import Rebut"
 
 msgid "historyHeaderChange"
-msgstr "Troco Devolvido"
+msgstr "Canvi Retornat"
 
 msgid "settingsTitle"
-msgstr "Configuración"
+msgstr "Configuració"
 
 msgid "settingsDarkModeLabel"
-msgstr "Modo Escuro"
+msgstr "Mode Fosc"
 
 msgid "settingsLanguageLabel"
 msgstr "Idioma"
 
 msgid "settingsLangSpanish"
-msgstr "Castelán"
+msgstr "Castellà"
 
 msgid "settingsLangEnglish"
-msgstr "Inglés"
+msgstr "Anglés"
 
 msgid "settingsLangGalician"
-msgstr "Galego"
+msgstr "Gallec"
 
 msgid "settingsLangCatalan"
-msgstr "Catalán"
+msgstr "Català"
 
 msgid "settingsLangValencian"
-msgstr "Valenciano"
+msgstr "Valencià"
 
 msgid "settingsLangBasque"
-msgstr "Éuscaro"
+msgstr "Basc"
 
 msgid "settingsSerialTitle"
-msgstr "Comunicación con Dispositivo Externo"
+msgstr "Comunicació amb Dispositiu Extern"
 
 msgid "settingsSerialDescription"
-msgstr "Conecta un dispositivo por USB para enviar e recibir datos."
+msgstr "Connecta un dispositiu per USB per a enviar i rebre dades."
 
 msgid "settingsMachineModelLabel"
-msgstr "Modelo de Máquina"
+msgstr "Model de Màquina"
 
 msgid "settingsMachineModelS"
-msgstr "Modelo S (Básico)"
+msgstr "Model S (Bàsic)"
 
 msgid "settingsMachineModelM"
-msgstr "Modelo M (Estándar)"
+msgstr "Model M (Estàndard)"
 
 msgid "settingsMachineModelMax"
-msgstr "Modelo MAX (Completo)"
+msgstr "Model MAX (Complet)"
 
 msgid "settingsSerialConnect"
-msgstr "Conectar Dispositivo"
+msgstr "Connectar Dispositiu"
 
 msgid "settingsSerialSend"
 msgstr "Enviar"
 
 msgid "settingsSerialPlaceholder"
-msgstr "Escribe un comando..."
+msgstr "Escriu un comanda..."
 
 msgid "settingsSerialConsoleLabel"
-msgstr "Consola de comunicación"
+msgstr "Consola de comunicació"
 
 msgid "speechEuroSingular"
 msgstr "euro"
@@ -156,22 +156,22 @@ msgid "speechEuroPlural"
 msgstr "euros"
 
 msgid "speechCentSingular"
-msgstr "céntimo"
+msgstr "cèntim"
 
 msgid "speechCentPlural"
-msgstr "céntimos"
+msgstr "cèntims"
 
 msgid "speechCon"
-msgstr "con"
+msgstr "amb"
 
 msgid "speechCero"
-msgstr "cero"
+msgstr "zero"
 
 msgid "speechOneEuro"
 msgstr "un euro"
 
 msgid "speechOneCent"
-msgstr "un céntimo"
+msgstr "un cèntim"
 
 msgid "speechChangeResultText"
-msgstr "O troco a devolver é:"
+msgstr "El canvi a retornar és:"

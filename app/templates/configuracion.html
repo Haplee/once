@@ -1,58 +1,71 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Configuración') }}{% endblock %}
+{% block title %}{{ _('settingsPageTitle') }}{% endblock %}
 
 {% block content %}
 <div class="glass-panel" style="padding: 2rem;">
-    <h1>{{ _('Configuración') }}</h1>
+    <h1>{{ _('settingsTitle') }}</h1>
 
     <!-- Theme -->
     <div class="mb-2">
-        <h2>{{ _('Apariencia') }}</h2>
+        <h2>{{ _('settingsDarkModeLabel') }}</h2>
         <div class="d-flex align-items-center gap-2">
             <label class="switch">
                 <input type="checkbox" id="theme-toggle">
                 <span class="slider round"></span>
             </label>
-            <label for="theme-toggle">{{ _('Modo Oscuro') }}</label>
+            <label for="theme-toggle">{{ _('settingsDarkModeLabel') }}</label>
         </div>
     </div>
 
     <!-- Machine Model -->
     <div class="mb-2">
-        <h2>{{ _('Modelo de Máquina') }}</h2>
-        <label for="machine-model">{{ _('Seleccione el modelo de su dispositivo:') }}</label>
+        <h2 data-i18n-key="settingsMachineModelLabel">{{ _('settingsMachineModelLabel') }}</h2>
+        <label for="machine-model" data-i18n-key="settingsMachineModelLabel">{{ _('settingsMachineModelLabel')
+            }}</label>
         <select id="machine-model" class="form-input">
-            <option value="S">Model S</option>
-            <option value="M">Model M</option>
-            <option value="MAX">Model MAX</option>
+            <option value="S" data-i18n-key="settingsMachineModelS">{{ _('settingsMachineModelS') }}</option>
+            <option value="M" data-i18n-key="settingsMachineModelM">{{ _('settingsMachineModelM') }}</option>
+            <option value="MAX" data-i18n-key="settingsMachineModelMax">{{ _('settingsMachineModelMax') }}</option>
+        </select>
+    </div>
+
+    <!-- Voice Gender -->
+    <div class="mb-2">
+        <h2 data-i18n-key="settingsVoiceGenderLabel">Género de la Voz</h2>
+        <label for="voice-gender" data-i18n-key="settingsVoiceGenderLabel">Selecciona el género de la voz</label>
+        <select id="voice-gender" class="form-input">
+            <option value="female" data-i18n-key="settingsVoiceGenderFemale">Femenina</option>
+            <option value="male" data-i18n-key="settingsVoiceGenderMale">Masculina</option>
         </select>
     </div>
 
     <!-- Language -->
     <div class="mb-2">
-        <h2>{{ _('Idioma') }}</h2>
+        <h2 data-i18n-key="settingsLanguageLabel">{{ _('settingsLanguageLabel') }}</h2>
         <div class="d-flex flex-wrap gap-2">
             <a href="{{ url_for('main.set_language', lang_code='es') }}" class="btn btn-primary"
-                style="padding: 0.5rem 1rem;">Español</a>
+                style="padding: 0.5rem 1rem;" data-i18n-key="settingsLangSpanish">{{ _('settingsLangSpanish') }}</a>
             <a href="{{ url_for('main.set_language', lang_code='en') }}" class="btn btn-primary"
-                style="padding: 0.5rem 1rem;">English</a>
+                style="padding: 0.5rem 1rem;" data-i18n-key="settingsLangEnglish">{{ _('settingsLangEnglish') }}</a>
             <a href="{{ url_for('main.set_language', lang_code='ca') }}" class="btn btn-primary"
-                style="padding: 0.5rem 1rem;">Català</a>
+                style="padding: 0.5rem 1rem;" data-i18n-key="settingsLangCatalan">{{ _('settingsLangCatalan') }}</a>
             <a href="{{ url_for('main.set_language', lang_code='gl') }}" class="btn btn-primary"
-                style="padding: 0.5rem 1rem;">Galego</a>
+                style="padding: 0.5rem 1rem;" data-i18n-key="settingsLangGalician">{{ _('settingsLangGalician') }}</a>
             <a href="{{ url_for('main.set_language', lang_code='eu') }}" class="btn btn-primary"
-                style="padding: 0.5rem 1rem;">Euskara</a>
+                style="padding: 0.5rem 1rem;" data-i18n-key="settingsLangBasque">{{ _('settingsLangBasque') }}</a>
             <a href="{{ url_for('main.set_language', lang_code='va') }}" class="btn btn-primary"
-                style="padding: 0.5rem 1rem;">Valencià</a>
+                style="padding: 0.5rem 1rem;" data-i18n-key="settingsLangValencian">{{ _('settingsLangValencian') }}</a>
+            <a href="{{ url_for('main.set_language', lang_code='fr') }}" class="btn btn-primary"
+                style="padding: 0.5rem 1rem;" data-i18n-key="settingsLangFrench">{{ _('settingsLangFrench') }}</a>
         </div>
     </div>
 
     <!-- Serial Port -->
     <div class="mb-2">
-        <h2>{{ _('Conexión Hardware') }}</h2>
-        <p class="text-muted">{{ _('Conecte su dispositivo Arduino/Serial para enviar datos de transacciones.') }}</p>
-        <button id="connect-serial" class="btn btn-primary">{{ _('Conectar Dispositivo') }}</button>
+        <h2>{{ _('settingsSerialTitle') }}</h2>
+        <p class="text-muted">{{ _('settingsSerialDescription') }}</p>
+        <button id="connect-serial" class="btn btn-primary">{{ _('settingsSerialConnect') }}</button>
     </div>
 </div>
 {% endblock %}

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ONCE App{% endblock %}</title>
+    <title>{% block title %}{{ _('appTitle') }}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=4">
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
 </head>
@@ -21,11 +21,11 @@
         </div>
         <div class="nav-links">
             <a href="{{ url_for('main.index') }}" class="{{ 'active' if request.endpoint == 'main.index' else '' }}">{{
-                _('Calculadora') }}</a>
+                _('navCalculator') }}</a>
             <a href="{{ url_for('main.history') }}"
-                class="{{ 'active' if request.endpoint == 'main.history' else '' }}">{{ _('Historial') }}</a>
+                class="{{ 'active' if request.endpoint == 'main.history' else '' }}">{{ _('navHistory') }}</a>
             <a href="{{ url_for('main.configuracion') }}"
-                class="{{ 'active' if request.endpoint == 'main.configuracion' else '' }}">{{ _('Configuración') }}</a>
+                class="{{ 'active' if request.endpoint == 'main.configuracion' else '' }}">{{ _('navSettings') }}</a>
         </div>
     </nav>
 
@@ -33,6 +33,7 @@
         {% block content %}{% endblock %}
     </main>
 
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>

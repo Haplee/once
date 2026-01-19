@@ -1,25 +1,23 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Historial') }}{% endblock %}
+{% block title %}{{ _('historyPageTitle') }}{% endblock %}
 
 {% block content %}
 <div class="glass-panel" style="padding: 2rem;">
-    <h1>{{ _('Historial de Transacciones') }}</h1>
+    <h1>{{ _('historyTitle') }}</h1>
 
     <div class="table-container">
         <table id="history-table">
             <thead>
                 <tr>
-                    <th>{{ _('Fecha') }}</th>
-                    <th>{{ _('Total') }}</th>
-                    <th>{{ _('Recibido') }}</th>
-                    <th>{{ _('Cambio') }}</th>
+                    <th>{{ _('historyHeaderDate') }}</th>
+                    <th>{{ _('historyHeaderTotal') }}</th>
+                    <th>{{ _('historyHeaderReceived') }}</th>
+                    <th>{{ _('historyHeaderChange') }}</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td colspan="4" class="text-center">{{ _('Cargando...') }}</td>
-                </tr>
+                <!-- Contenido cargado dinámicamente -->
             </tbody>
         </table>
     </div>
@@ -29,32 +27,29 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
-        const tbody = document.querySelector('#history-table tbody');
+        const tableBody = document.querySelector('#history-table tbody');
+        const trans = window.currentTranslations || {};
         try {
             const response = await fetch('/api/history');
+            if (!response.ok) throw new Error('Failed to fetch history');
             const data = await response.json();
 
-            tbody.innerHTML = '';
-
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center">{{ _("No hay registros") }}</td></tr>';
+                tableBody.innerHTML = `<tr><td colspan="4" class="text-center">${trans.noHistory || 'No hay registros'}</td></tr>`;
                 return;
             }
 
-            data.forEach(row => {
-                const tr = document.createElement('tr');
-                const date = new Date(row.timestamp).toLocaleString();
-                tr.innerHTML = `
-                <td>${date}</td>
-                <td>€ ${row.total.toFixed(2)}</td>
-                <td>€ ${row.received.toFixed(2)}</td>
-                <td style="font-weight: bold; color: var(--primary);">€ ${row.change.toFixed(2)}</td>
-            `;
-                tbody.appendChild(tr);
-            });
+            tableBody.innerHTML = data.map(item => `
+            <tr>
+                <td>${new Date(item.timestamp).toLocaleString()}</td>
+                <td>€ ${item.total_amount.toFixed(2)}</td>
+                <td>€ ${item.amount_received.toFixed(2)}</td>
+                <td><strong>€ ${item.change_returned.toFixed(2)}</strong></td>
+            </tr>
+        `).join('');
         } catch (err) {
-            console.error(err);
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">{{ _("Error al cargar historial") }}</td></tr>';
+            console.error('Error fetching history:', err);
+            tableBody.innerHTML = `<tr><td colspan="4" class="text-center">${trans.historyLoadError || 'Error al cargar el historial'}</td></tr>`;
         }
     });
 </script>

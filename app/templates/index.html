@@ -1,32 +1,34 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Calculadora de Cambio') }}{% endblock %}
+{% block title %}{{ _('appTitle') }}{% endblock %}
 
 {% block content %}
 <div class="glass-panel" style="padding: 2rem;">
-    <h1 class="text-center">{{ _('Calculadora de Cambio') }}</h1>
+    <h1 class="text-center">{{ _('calculatorTitle') }}</h1>
 
-    <form id="calculator-form">
+    <form id="calculator-form" class="form-centered">
         <div class="form-group">
-            <label for="total">{{ _('Total a Pagar (€)') }}</label>
-            <input type="number" id="total" class="form-input" step="0.01" placeholder="0.00" required>
+            <label for="total">{{ _('totalToPayLabel') }}</label>
+            <input type="number" id="total" class="form-input" step="0.01"
+                placeholder="{{ _('totalToPayPlaceholder') }}" required>
         </div>
 
         <div class="form-group">
-            <label for="received">{{ _('Importe Recibido (€)') }}</label>
-            <input type="number" id="received" class="form-input" step="0.01" placeholder="0.00" required>
+            <label for="received">{{ _('amountReceivedLabel') }}</label>
+            <input type="number" id="received" class="form-input" step="0.01"
+                placeholder="{{ _('amountReceivedPlaceholder') }}" required>
         </div>
 
         <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary w-100">{{ _('Calcular') }}</button>
-            <button type="button" id="mic-btn" class="btn btn-icon" title="{{ _('Hablar') }}">
+            <button type="submit" class="btn btn-primary w-100">{{ _('calculateButton') }}</button>
+            <button type="button" id="mic-btn" class="btn btn-icon" title="{{ _('voiceInputButtonLabel') }}">
                 🎤
             </button>
         </div>
     </form>
 
     <div class="result-box">
-        <span class="text-muted">{{ _('Su cambio es:') }}</span>
+        <span class="text-muted">{{ _('changeResultText') | replace('{change}', '--') }}</span>
         <span id="result-value" class="result-value">--</span>
         <p id="result-text" class="hidden" aria-live="polite"></p>
     </div>
