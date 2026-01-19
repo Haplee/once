@@ -542,9 +542,12 @@
             translatePage();
         };
 
-        // --- Main.js Logic Inline ---
+        // --- Executing Logic ---
         document.addEventListener('DOMContentLoaded', () => {
-            initializeI18n(); // Run i18n first
+            console.log('DOM Loaded. Running i18n...');
+            initializeI18n(); // Ensure text is translated immediately
+
+            console.log('Initializing App Logic...');
 
             const currentLang = window.getCurrentLanguage();
             console.log('App JS Loaded. Lang:', currentLang);
