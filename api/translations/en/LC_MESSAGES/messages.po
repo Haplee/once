@@ -149,6 +149,18 @@ msgstr "Type a command..."
 msgid "settingsSerialConsoleLabel"
 msgstr "Communication console"
 
+msgid "settingsLangFrench"
+msgstr "French"
+
+msgid "settingsVoiceGenderLabel"
+msgstr "Voice Gender"
+
+msgid "settingsVoiceGenderMale"
+msgstr "Male"
+
+msgid "settingsVoiceGenderFemale"
+msgstr "Female"
+
 msgid "speechEuroSingular"
 msgstr "euro"
 

@@ -4,16 +4,16 @@
 
 {% block content %}
 <div class="glass-panel" style="padding: 2rem;">
-    <h1>{{ _('historyTitle') }}</h1>
+    <h1 data-i18n-key="historyTitle">{{ _('historyTitle') }}</h1>
 
     <div class="table-container">
         <table id="history-table">
             <thead>
                 <tr>
-                    <th>{{ _('historyHeaderDate') }}</th>
-                    <th>{{ _('historyHeaderTotal') }}</th>
-                    <th>{{ _('historyHeaderReceived') }}</th>
-                    <th>{{ _('historyHeaderChange') }}</th>
+                    <th data-i18n-key="historyHeaderDate">{{ _('historyHeaderDate') }}</th>
+                    <th data-i18n-key="historyHeaderTotal">{{ _('historyHeaderTotal') }}</th>
+                    <th data-i18n-key="historyHeaderReceived">{{ _('historyHeaderReceived') }}</th>
+                    <th data-i18n-key="historyHeaderChange">{{ _('historyHeaderChange') }}</th>
                 </tr>
             </thead>
             <tbody>

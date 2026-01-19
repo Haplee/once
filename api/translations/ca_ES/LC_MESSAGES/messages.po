@@ -149,6 +149,18 @@ msgstr "Escriu un comanda..."
 msgid "settingsSerialConsoleLabel"
 msgstr "Consola de comunicació"
 
+msgid "settingsLangFrench"
+msgstr "Francés"
+
+msgid "settingsVoiceGenderLabel"
+msgstr "Gènere de la Veu"
+
+msgid "settingsVoiceGenderMale"
+msgstr "Masculina"
+
+msgid "settingsVoiceGenderFemale"
+msgstr "Femenina"
+
 msgid "speechEuroSingular"
 msgstr "euro"
 

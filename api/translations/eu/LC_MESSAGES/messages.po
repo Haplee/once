@@ -149,6 +149,18 @@ msgstr "Idatzi komando bat..."
 msgid "settingsSerialConsoleLabel"
 msgstr "Komunikazio kontsola"
 
+msgid "settingsLangFrench"
+msgstr "Frantsesa"
+
+msgid "settingsVoiceGenderLabel"
+msgstr "Ahots Generoa"
+
+msgid "settingsVoiceGenderMale"
+msgstr "Gizonezkoa"
+
+msgid "settingsVoiceGenderFemale"
+msgstr "Emakumezkoa"
+
 msgid "speechEuroSingular"
 msgstr "euro"
 

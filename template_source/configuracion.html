@@ -4,17 +4,17 @@
 
 {% block content %}
 <div class="glass-panel" style="padding: 2rem;">
-    <h1>{{ _('settingsTitle') }}</h1>
+    <h1 data-i18n-key="settingsTitle">{{ _('settingsTitle') }}</h1>
 
     <!-- Theme -->
     <div class="mb-2">
-        <h2>{{ _('settingsDarkModeLabel') }}</h2>
+        <h2 data-i18n-key="settingsDarkModeLabel">{{ _('settingsDarkModeLabel') }}</h2>
         <div class="d-flex align-items-center gap-2">
             <label class="switch">
                 <input type="checkbox" id="theme-toggle">
                 <span class="slider round"></span>
             </label>
-            <label for="theme-toggle">{{ _('settingsDarkModeLabel') }}</label>
+            <label for="theme-toggle" data-i18n-key="settingsDarkModeLabel">{{ _('settingsDarkModeLabel') }}</label>
         </div>
     </div>
 
