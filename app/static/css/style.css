@@ -110,6 +110,8 @@ body {
     box-shadow: var(--shadow);
     width: 100%;
     margin-bottom: 2rem;
+    padding: 2.5rem;
+    /* Increased padding */
 }
 
 /* Navbar */
@@ -125,10 +127,17 @@ body {
     z-index: 10;
 }
 
+.logo {
+    display: flex;
+    align-items: center;
+}
+
 .logo img {
-    height: 42px;
+    height: 44px;
+    /* Slightly taller */
     width: auto;
     object-fit: contain;
+    display: block;
 }
 
 .nav-links {
@@ -159,12 +168,16 @@ body {
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
-    padding: 0 1.5rem 3rem;
+    padding: 2.5rem 1.5rem 4rem;
+    /* More top padding */
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    /* Vertically center content */
+    align-items: center;
+    /* Center horizontally */
+    justify-content: flex-start;
+    /* Don't center vertically to allow for growth */
     z-index: 5;
+    text-align: center;
 }
 
 /* Forms & Inputs */
@@ -199,9 +212,14 @@ body {
 
 label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
     font-weight: 600;
     opacity: 0.9;
+    text-align: center;
+}
+
+p {
+    text-align: center;
 }
 
 /* Buttons */
@@ -330,6 +348,21 @@ th {
 
 .gap-2 {
     gap: 0.5rem;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+    justify-content: center;
+    /* Center items when wrapping */
+}
+
+h1,
+h2,
+h3 {
+    text-align: center;
+    width: 100%;
+    margin-top: 1.5rem;
+    margin-bottom: 1.25rem;
 }
 
 /* Responsive */

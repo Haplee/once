@@ -7,12 +7,17 @@
       "config": {
         "includeFiles": [
           "app/static/**",
-          "app/translations/**"
+          "app/translations/**",
+          "app/templates/**"
         ]
       }
     }
   ],
   "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "app/static/$1"
+    },
     {
       "src": "/(.*)",
       "dest": "vercel.py"

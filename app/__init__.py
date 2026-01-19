@@ -5,10 +5,11 @@ from flask_babel import Babel, gettext as _
 def create_app(test_config=None):
     # Create and configure the app
     # Default static and template folders (relative to this file)
+    app_dir = os.path.abspath(os.path.dirname(__file__))
     app = Flask(__name__, 
                 instance_relative_config=True,
-                static_folder='static',
-                template_folder='templates')
+                static_folder=os.path.join(app_dir, 'static'),
+                template_folder=os.path.join(app_dir, 'templates'))
     
     # Configure database path
     # On Vercel (serverless), we must use /tmp which is writable
