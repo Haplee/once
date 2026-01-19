@@ -1,7 +1,7 @@
 from flask import (
     Blueprint, render_template, request, jsonify, session, redirect, url_for, current_app
 )
-from app.db import get_db
+from .db import get_db
 
 main = Blueprint('main', __name__)
 
