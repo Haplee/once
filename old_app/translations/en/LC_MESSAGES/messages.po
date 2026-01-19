@@ -1,0 +1,177 @@
+# English translations for the ONCE Change Calculator app.
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"Report-Msgid-Bugs-To: email@example.com\n"
+"POT-Creation-Date: 2025-09-21 11:56+0000\n"
+"PO-Revision-Date: 2025-09-21 11:56+0000\n"
+"Last-Translator: Jules <jules@example.com>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "appTitle"
+msgstr "Change Calculator - ONCE App"
+
+msgid "historyPageTitle"
+msgstr "Transaction History - ONCE App"
+
+msgid "settingsPageTitle"
+msgstr "Settings - ONCE App"
+
+msgid "navCalculator"
+msgstr "Calculator"
+
+msgid "navHistory"
+msgstr "History"
+
+msgid "navSettings"
+msgstr "Settings"
+
+msgid "calculatorTitle"
+msgstr "Change Calculator"
+
+msgid "totalToPayLabel"
+msgstr "Total to Pay (€)"
+
+msgid "totalToPayPlaceholder"
+msgstr "e.g., 5.50"
+
+msgid "amountReceivedLabel"
+msgstr "Amount Received (€)"
+
+msgid "amountReceivedPlaceholder"
+msgstr "e.g., 10.00"
+
+msgid "calculateButton"
+msgstr "Calculate"
+
+msgid "voiceInputButtonLabel"
+msgstr "Use voice input"
+
+msgid "voiceErrorPermission"
+msgstr "Microphone access denied. To use this feature, please allow microphone access in your browser."
+
+msgid "voiceErrorNoSpeech"
+msgstr "No speech detected. Please try again speaking close to the microphone."
+
+msgid "voiceErrorInfo"
+msgstr "Recognition error: {error}. Please try again."
+
+msgid "voiceErrorTimeout"
+msgstr "Speech recognition stopped due to inactivity."
+
+msgid "voiceErrorStart"
+msgstr "Could not start recognition. Ensure microphone is allowed and not in use."
+
+msgid "voiceErrorUnsupported"
+msgstr "Sorry, your browser does not support speech recognition."
+
+msgid "changeResultText"
+msgstr "The change to return is: {change} €"
+
+msgid "invalidInputText"
+msgstr "Please enter valid amounts."
+
+msgid "amountReceivedLowText"
+msgstr "The amount received is less than the total to pay."
+
+msgid "historyTitle"
+msgstr "Transaction History"
+
+msgid "historyHeaderDate"
+msgstr "Date and Time"
+
+msgid "historyHeaderTotal"
+msgstr "Total Paid"
+
+msgid "historyHeaderReceived"
+msgstr "Amount Received"
+
+msgid "historyHeaderChange"
+msgstr "Change Returned"
+
+msgid "settingsTitle"
+msgstr "Settings"
+
+msgid "settingsDarkModeLabel"
+msgstr "Dark Mode"
+
+msgid "settingsLanguageLabel"
+msgstr "Language"
+
+msgid "settingsLangSpanish"
+msgstr "Spanish"
+
+msgid "settingsLangEnglish"
+msgstr "English"
+
+msgid "settingsLangGalician"
+msgstr "Galician"
+
+msgid "settingsLangCatalan"
+msgstr "Catalan"
+
+msgid "settingsLangValencian"
+msgstr "Valencian"
+
+msgid "settingsLangBasque"
+msgstr "Basque"
+
+msgid "settingsSerialTitle"
+msgstr "External Device Communication"
+
+msgid "settingsSerialDescription"
+msgstr "Connect a device via USB to send and receive data."
+
+msgid "settingsMachineModelLabel"
+msgstr "Machine Model"
+
+msgid "settingsMachineModelS"
+msgstr "Model S (Basic)"
+
+msgid "settingsMachineModelM"
+msgstr "Model M (Standard)"
+
+msgid "settingsMachineModelMax"
+msgstr "Model MAX (Complete)"
+
+msgid "settingsSerialConnect"
+msgstr "Connect Device"
+
+msgid "settingsSerialSend"
+msgstr "Send"
+
+msgid "settingsSerialPlaceholder"
+msgstr "Type a command..."
+
+msgid "settingsSerialConsoleLabel"
+msgstr "Communication console"
+
+msgid "speechEuroSingular"
+msgstr "euro"
+
+msgid "speechEuroPlural"
+msgstr "euros"
+
+msgid "speechCentSingular"
+msgstr "cent"
+
+msgid "speechCentPlural"
+msgstr "cents"
+
+msgid "speechCon"
+msgstr "and"
+
+msgid "speechCero"
+msgstr "zero"
+
+msgid "speechOneEuro"
+msgstr "one euro"
+
+msgid "speechOneCent"
+msgstr "one cent"
+
+msgid "speechChangeResultText"
+msgstr "The change to return is:"

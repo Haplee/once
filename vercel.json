@@ -2,25 +2,21 @@
   "version": 2,
   "builds": [
     {
-      "src": "vercel.py",
+      "src": "api/index.py",
       "use": "@vercel/python",
       "config": {
-        "includeFiles": [
-          "app/static/**",
-          "app/translations/**",
-          "app/templates/**"
-        ]
+        "maxDuration": 30
       }
     }
   ],
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/app/static/$1"
+      "dest": "/public/static/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "vercel.py"
+      "dest": "api/index.py"
     }
   ]
 }
