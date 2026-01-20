@@ -2,15 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import translations from '@/data/translations/all.json';
-
-type Language = keyof typeof translations;
-type TranslationKeys = keyof (typeof translations)['es'];
-
-interface I18nContextType {
-    language: Language;
-    t: (key: TranslationKeys, params?: Record<string, string | number>) => string;
-    setLanguage: (lang: Language) => void;
-}
+import { Language, TranslationKeys, I18nContextType } from '@/types/i18n';
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
