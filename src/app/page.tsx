@@ -67,7 +67,7 @@ export default function Home() {
     };
 
     const announceResult = (change: number) => {
-        const text = `${t('speechChangeResultText')} ${change} euros`;
+        const text = `${t('speechChangePrefix')} ${change} euros`;
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = language === 'en' ? 'en-US' : 'es-ES';
         window.speechSynthesis.speak(utterance);
