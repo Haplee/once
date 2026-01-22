@@ -21,7 +21,7 @@ test.describe('Once App E2E Tests', () => {
     });
 
     // Navigate to the local server hosting the app
-    await page.goto('http://localhost:5000/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:3000/', { waitUntil: 'networkidle' });
 
     // Set a flag to disable speech synthesis during tests to avoid CI errors
     await page.evaluate(() => { window.APP_IS_TESTING = true; });
@@ -34,10 +34,10 @@ test.describe('Once App E2E Tests', () => {
 
   test('should perform multiple calculations without freezing', async ({ page }) => {
     // Get handles to the UI elements
-    const totalAmountInput = page.locator('#total-amount');
-    const amountReceivedInput = page.locator('#amount-received');
+    const totalAmountInput = page.locator('#total');
+    const amountReceivedInput = page.locator('#received');
     const calculateBtn = page.locator('#calculate-btn');
-    const resultDiv = page.locator('#result');
+    const resultDiv = page.locator('#result-value');
 
     // --- First operation ---
     console.log('Performing first calculation...');

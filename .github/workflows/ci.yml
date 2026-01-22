@@ -10,21 +10,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.11'
-
-      - name: Install Python dependencies
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
-
-      - name: Initialize Database
-        run: |
-          source venv/bin/activate
-          flask --app app init-db
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install Node.js and project dependencies
         run: |
@@ -33,13 +23,15 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      - name: Start Flask server
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Start Next.js server
         run: |
-          source venv/bin/activate
-          python vercel.py > server.log 2>&1 &
+          npm start > server.log 2>&1 &
 
       - name: Wait for server to be ready
-        run: npx wait-on http://localhost:5000/ --timeout 60000
+        run: npx wait-on http://localhost:3000/ --timeout 60000
 
       - name: Display server log
         if: always()
@@ -49,7 +41,7 @@ jobs:
       - name: Run Playwright tests
         run: npm test
 
-      - name: Stop Flask server
+      - name: Stop Next.js server
         if: always()
         run: |
-          kill $(lsof -t -i:5000) || echo "Server was not running."
+          kill $(lsof -t -i:3000) || echo "Server was not running."
