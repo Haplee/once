@@ -120,7 +120,7 @@ export default function Home() {
                 </div>
 
                 <div className="d-flex gap-2">
-                    <button type="submit" className="btn btn-primary w-100">
+                    <button type="submit" id="calculate-btn" className="btn btn-primary w-100">
                         {t('calculateButton')}
                     </button>
                     <button
