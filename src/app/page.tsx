@@ -35,8 +35,8 @@ export default function Home() {
     const parseVoiceInput = (text: string) => {
         const numbers = text.match(/[\d]+([.,][\d]+)?/g);
         if (numbers && numbers.length >= 2) {
-            setReceived(numbers[0].replace(',', '.'));
-            setTotal(numbers[1].replace(',', '.'));
+            setReceived(numbers[0].replaceAll(',', '.'));
+            setTotal(numbers[1].replaceAll(',', '.'));
             // Auto-calculate after state updates (need a way to trigger sync calculation or use effect)
         }
     };
@@ -67,7 +67,7 @@ export default function Home() {
     };
 
     const announceResult = (change: number) => {
-        const text = `${t('speechChangeResultText')} ${change} euros`;
+        const text = `${t('speechChangePrefix')} ${change} euros`;
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = language === 'en' ? 'en-US' : 'es-ES';
         window.speechSynthesis.speak(utterance);
@@ -136,7 +136,7 @@ export default function Home() {
 
             <div className="result-box">
                 <span className="text-muted">
-                    {t('changeResultText').replace('{change}', result !== null ? result.toFixed(2) : '--')}
+                {t('changeResultText').replaceAll('{change}', result !== null ? result.toFixed(2) : '--')}
                 </span>
                 <span id="result-value" className="result-value">
                     {result !== null ? `€ ${result.toFixed(2)}` : '--'}
