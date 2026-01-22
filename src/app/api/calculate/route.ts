@@ -15,15 +15,17 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'Insufficient funds' }, { status: 400 });
         }
 
+        const roundedChange = parseFloat(change.toFixed(2));
+
         const db = await getDb();
         await db.run(
             'INSERT INTO history (total_amount, amount_received, change_returned) VALUES (?, ?, ?)',
-            [total, received, change]
+            [total, received, roundedChange]
         );
 
         return NextResponse.json({
             success: true,
-            change: parseFloat(change.toFixed(2))
+            change: roundedChange
         });
     } catch (error) {
         console.error('Calculation error:', error);
