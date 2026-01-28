@@ -2,14 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useI18n } from '@/lib/i18n';
-
-interface HistoryItem {
-    id: number;
-    total_amount: number;
-    amount_received: number;
-    change_returned: number;
-    timestamp: string;
-}
+import { HistoryItem } from '@/types/models';
 
 export default function HistoryPage() {
     const { t } = useI18n();

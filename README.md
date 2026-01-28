@@ -62,9 +62,10 @@ npm test
 
 ```
 .
+├── hardware/                  # Código y esquemas del hardware (Arduino)
 ├── src/
-│   ├── app/                    # App Router de Next.js
-│   │   ├── api/               # API Routes
+│   ├── app/                   # App Router de Next.js
+│   │   ├── api/               # API Routes (Backend)
 │   │   │   ├── calculate/     # Endpoint de cálculo
 │   │   │   └── history/       # Endpoint de historial
 │   │   ├── configuracion/     # Página de configuración
@@ -72,18 +73,24 @@ npm test
 │   │   ├── layout.tsx         # Layout principal
 │   │   ├── page.tsx           # Página de inicio (calculadora)
 │   │   └── globals.css        # Estilos globales
-│   ├── components/            # Componentes React
+│   ├── components/            # Componentes React reutilizables
 │   │   ├── Navbar.tsx         # Barra de navegación
 │   │   └── ThemeProvider.tsx  # Proveedor de tema
-│   ├── lib/                   # Utilidades
+│   ├── lib/                   # Utilidades y configuración
 │   │   ├── db.ts              # Conexión a SQLite
-│   │   └── i18n.tsx           # Sistema de internacionalización
+│   │   └── i18n.tsx           # Contexto de internacionalización
+│   ├── types/                 # Definiciones de TypeScript
+│   │   ├── models.ts          # Modelos de datos compartidos
+│   │   └── i18n.ts            # Tipos para traducciones
 │   └── data/                  # Datos estáticos
 │       └── translations/      # Archivos de traducción JSON
 ├── public/                    # Archivos estáticos
-│   └── static/                # Imágenes y assets
-├── arduino_sketch/            # Código de ejemplo para Arduino
-├── tests/                     # Pruebas E2E
+│   └── static/                # Imágenes, CSS y JS legacy
+├── tests/                     # Suite de pruebas
+│   ├── api.spec.ts            # Pruebas de API
+│   ├── ui.spec.ts             # Pruebas de Interfaz (E2E)
+│   └── results/               # Resultados de los tests
+├── playwright.config.ts       # Configuración de pruebas
 ├── next.config.js             # Configuración de Next.js
 ├── tsconfig.json              # Configuración de TypeScript
 ├── package.json               # Dependencias del proyecto
@@ -108,7 +115,7 @@ Este proyecto está optimizado para desplegarse en Vercel:
 
 ## Comunicación con Arduino
 
-El código de ejemplo para un dispositivo compatible con Arduino se encuentra en `arduino_sketch/arduino_sketch.ino`. Puedes cargarlo en tu dispositivo para probar la funcionalidad de comunicación serie desde la página de **Configuración**.
+El código de ejemplo para un dispositivo compatible con Arduino se encuentra en `hardware/arduino_sketch.ino`. Puedes cargarlo en tu dispositivo para probar la funcionalidad de comunicación serie desde la página de **Configuración**.
 
 ## Tecnologías Utilizadas
 
