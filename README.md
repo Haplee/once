@@ -1,5 +1,9 @@
 # 🟢 Calculadora de Cambio ONCE — Edición Profesional v2.0
 
+[![CI - ONCE App](https://github.com/Haplee/once/actions/workflows/ci.yml/badge.svg)](https://github.com/Haplee/once/actions/workflows/ci.yml)
+[![Accessibility Audit](https://github.com/Haplee/once/actions/workflows/accessibility-audit.yml/badge.svg)](https://github.com/Haplee/once/actions/workflows/accessibility-audit.yml)
+[![Vercel](https://img.shields.io/badge/deployed%20on-Vercel-black)](https://vercel.com)
+
 ![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript)
 ![SpacetimeDB](https://img.shields.io/badge/SpacetimeDB-Distributed-green?style=for-the-badge)
@@ -71,6 +75,33 @@ La evolución definitiva de la herramienta de cálculo accesible para la **ONCE*
 ```bash
 docker-compose up --build
 ```
+
+---
+
+## ☁️ Despliegue en Vercel
+
+El proyecto está optimizado para desplegarse automáticamente en la infraestructura de Vercel.
+
+### 1. Preparar SpacetimeDB Cloud
+Publica tu módulo en la nube oficial para que sea accesible vía WebSocket:
+```bash
+spacetime publish --project-path spacetimedb calculadora-once --server maincloud
+```
+
+### 2. Configurar Variables en Vercel
+Añade las siguientes variables en el Dashboard de tu proyecto:
+- `NEXT_PUBLIC_SPACETIMEDB_URI`: `wss://maincloud.spacetimedb.com`
+- `NEXT_PUBLIC_SPACETIMEDB_DB_NAME`: `calculadora-once`
+- `UPSTASH_REDIS_REST_URL`: (Tu URL de Upstash)
+- `UPSTASH_REDIS_REST_TOKEN`: (Tu Token de Upstash)
+- `NEXTAUTH_SECRET`: (Generado con `openssl rand -base64 32`)
+- `NEXTAUTH_URL`: `https://tu-proyecto.vercel.app`
+
+### 3. Automatización GitHub Actions
+Para habilitar el despliegue automático desde CI/CD, añade estos Secrets en GitHub:
+- `VERCEL_TOKEN`: Obtenido en Settings > Tokens.
+- `VERCEL_ORG_ID`: ID de tu organización.
+- `VERCEL_PROJECT_ID`: ID del proyecto en Vercel.
 
 ---
 

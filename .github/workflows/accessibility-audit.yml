@@ -25,10 +25,12 @@ jobs:
       - name: Construir aplicacion
         run: npm run build
         env:
-          NEXT_PUBLIC_SPACETIMEDB_URI: ws://localhost:3000
+          NEXT_PUBLIC_SPACETIMEDB_URI: wss://maincloud.spacetimedb.com
           NEXT_PUBLIC_SPACETIMEDB_DB_NAME: calculadora-once
-          NEXTAUTH_SECRET: ci-secret-placeholder
+          NEXTAUTH_SECRET: ci-secret-placeholder-32-chars-ok
           NEXTAUTH_URL: http://localhost:3000
+          UPSTASH_REDIS_REST_URL: "http://localhost:6379"
+          UPSTASH_REDIS_REST_TOKEN: "test"
 
       - name: Instalar Playwright
         run: npx playwright install --with-deps chromium
@@ -36,18 +38,27 @@ jobs:
       - name: Arrancar servidor y auditar accesibilidad
         run: |
           npm start &
-          sleep 5
+          npx wait-on http://localhost:3000 --timeout 30000
           npx playwright test tests/ui.spec.ts --reporter=html
         env:
-          NEXT_PUBLIC_SPACETIMEDB_URI: ws://localhost:3000
+          NEXT_PUBLIC_SPACETIMEDB_URI: wss://maincloud.spacetimedb.com
           NEXT_PUBLIC_SPACETIMEDB_DB_NAME: calculadora-once
-          NEXTAUTH_SECRET: ci-secret-placeholder
+          NEXTAUTH_SECRET: ci-secret-placeholder-32-chars-ok
           NEXTAUTH_URL: http://localhost:3000
+          UPSTASH_REDIS_REST_URL: "http://localhost:6379"
+          UPSTASH_REDIS_REST_TOKEN: "test"
 
-      - name: Publicar reporte
+      - name: Publicar reporte de accesibilidad
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: accessibility-report
+          name: accessibility-report-${{ github.run_number }}
           path: playwright-report/
           retention-days: 30
+
+      - name: Fallar si hay violaciones WCAG
+        if: failure()
+        run: |
+          echo "Se encontraron violaciones WCAG 2.1 AA"
+          echo "Revisar el reporte en los artifacts de esta ejecucion"
+          exit 1
