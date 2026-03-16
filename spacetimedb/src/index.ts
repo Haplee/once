@@ -1,48 +1,43 @@
-import { table, reducers, ReducerContext, primaryKey, autoInc } from 'spacetimedb';
+import { table, schema } from 'spacetimedb/server';
+import { F64Builder, U64Builder, StringBuilder } from 'spacetimedb';
 
-// Tabla principal de historial de operaciones
-@table({ public: true })
-export class OperationHistory {
-    @primaryKey
-    @autoInc
-    id!: number;
-    amountGiven!: number; // Importe entregado
-    price!: number;       // Precio del artículo
-    change!: number;      // Cambio calculado
-    timestamp!: bigint;   // Unix timestamp en ms
-    userId!: string;      // Identity del usuario (anónimo o autenticado)
-}
+// Definición de la tabla con los dos argumentos separados
+const operation_history = table(
+  { public: true },
+  {
+    id:           new U64Builder().primaryKey().autoInc(),
+    amount_given: new F64Builder(),
+    price:        new F64Builder(),
+    change:       new F64Builder(),
+    timestamp:    new U64Builder(),
+    user_id:      new StringBuilder(),
+  }
+);
 
-// Reducers (lógica server-side dentro de SpacetimeDB)
-@reducers
-export function addOperation(
-    ctx: ReducerContext,
-    amountGiven: number,
-    price: number,
-    change: number
-): void {
-    const timestamp = BigInt(Date.now());
-    const userId = ctx.sender.toHexString(); // Usamos la identidad del remitente
+const spacetimedb = schema({ operation_history });
 
-    // Validaciones básicas de negocio
-    if (amountGiven <= 0 || price <= 0 || change < 0) {
-        throw new Error("Valores de operación inválidos");
-    }
-
-    OperationHistory.insert({
-        amountGiven,
-        price,
-        change,
-        timestamp,
-        userId,
+export const add_operation = spacetimedb.reducer(
+  {
+    amount_given: new F64Builder(),
+    price:        new F64Builder(),
+    change:       new F64Builder(),
+  },
+  (ctx, { amount_given, price, change }) => {
+    ctx.db.operation_history.insert({
+      id:           0n,
+      amount_given,
+      price,
+      change,
+      timestamp:    BigInt(Date.now()),
+      user_id:      ctx.sender?.toHexString() ?? 'anonymous',
     });
-}
+  }
+);
 
-@reducers
-export function clearHistory(ctx: ReducerContext): void {
-    // Solo permitimos borrar si es necesario, 
-    // en una app real aquí validaríamos permisos
-    for (const op of OperationHistory.iter()) {
-        OperationHistory.delete(op.id);
-    }
-}
+export const clear_history = spacetimedb.reducer((ctx) => {
+  for (const op of ctx.db.operation_history.iter()) {
+    ctx.db.operation_history.id.delete(op.id);
+  }
+});
+
+export default spacetimedb;

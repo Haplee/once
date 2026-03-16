@@ -1,0 +1,12 @@
+{
+  "name": "calculadora-once",
+  "version": "1.0.0",
+  "type": "module",
+  "spacetimedb": {
+    "mainFile": "src/index.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "spacetimedb": "^2.0.0"
+  }
+}
