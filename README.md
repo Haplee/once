@@ -125,16 +125,104 @@ npm run lint
 ## 📂 Estructura del Proyecto
 
 ```
-.
-├── spacetimedb/           # Lógica de base de datos (Reducers/Tables)
-├── src/
-│   ├── app/               # Endpoints API y Páginas (App Router)
-│   ├── components/        # Componentes UI con foco en Accesibilidad
-│   ├── lib/               # Utilidades (Auth, DB, Ratelimit, Announcer)
-│   └── data/translations/ # Diccionarios multilingües JSON
-├── tests/                 # Pruebas Playwright y auditorías Axe
-├── Dockerfile             # Configuración de imagen optimizada
-└── .github/workflows/     # Automatización CI/CD
+├── 📁 .github
+│   └── 📁 workflows
+│       ├── ⚙️ accessibility-audit.yml
+│       ├── ⚙️ ci.yml
+│       └── ⚙️ playwright.yml
+├── 📁 hardware
+│   └── 📁 arduino_sketch
+│       └── 📄 arduino_sketch.ino
+├── 📁 notes
+├── 📁 public
+│   ├── 📁 static
+│   │   ├── 📁 css
+│   │   │   └── 🎨 style.css
+│   │   ├── 📁 img
+│   │   │   ├── 🖼️ logo-dark.png
+│   │   │   ├── 🖼️ logo.png
+│   │   │   └── 🖼️ microphone.svg
+│   │   └── 📁 js
+│   │       ├── 📄 i18n.js
+│   │       └── 📄 main.js
+│   ├── ⚙️ manifest.json
+│   ├── 📄 sw.js
+│   └── 📄 workbox-4754cb34.js
+├── 📁 spacetimedb
+│   └── 📁 src
+│       └── 📄 index.ts
+├── 📁 src
+│   ├── 📁 __tests__
+│   │   ├── 📄 calculate.test.ts
+│   │   ├── 📄 env.test.ts
+│   │   ├── 📄 i18n.test.ts
+│   │   └── 📄 setup.ts
+│   ├── 📁 app
+│   │   ├── 📁 api
+│   │   │   ├── 📁 auth
+│   │   │   │   ├── 📁 [...nextauth
+│   │   │   │   │   └── 📁 ]
+│   │   │   │   │       └── 📄 route.ts
+│   │   │   │   └── 📁 [...nextauth]
+│   │   │   │       └── 📄 route.ts
+│   │   │   ├── 📁 calculate
+│   │   │   │   └── 📄 route.ts
+│   │   │   └── 📁 history
+│   │   │       └── 📄 route.ts
+│   │   ├── 📁 configuracion
+│   │   │   └── 📄 page.tsx
+│   │   ├── 📁 history
+│   │   │   └── 📄 page.tsx
+│   │   ├── 📁 offline
+│   │   │   └── 📄 page.tsx
+│   │   ├── 🎨 globals.css
+│   │   ├── 📄 layout.tsx
+│   │   └── 📄 page.tsx
+│   ├── 📁 components
+│   │   ├── 📄 ApiErrorMessage.tsx
+│   │   ├── 📄 AuthButton.tsx
+│   │   ├── 📄 ErrorBoundary.tsx
+│   │   ├── 📄 ExportButtons.tsx
+│   │   ├── 📄 Navbar.tsx
+│   │   ├── 📄 OfflineBanner.tsx
+│   │   ├── 📄 SkipLink.tsx
+│   │   └── 📄 ThemeProvider.tsx
+│   ├── 📁 data
+│   │   └── 📁 translations
+│   │       └── ⚙️ all.json
+│   ├── 📁 module_bindings
+│   │   └── 📄 index.ts
+│   ├── 📁 providers
+│   │   ├── 📄 NextAuthProvider.tsx
+│   │   └── 📄 SpacetimeDBProvider.tsx
+│   ├── 📁 types
+│   │   ├── 📄 i18n.ts
+│   │   └── 📄 models.ts
+│   └── 📄 middleware.ts
+├── 📁 tests
+│   ├── 📁 results
+│   │   ├── ⚙️ .last-run.json
+│   │   └── ⚙️ results.json
+│   ├── 📄 api.spec.ts
+│   └── 📄 ui.spec.ts
+├── ⚙️ .env.example
+├── ⚙️ .eslintrc.json
+├── ⚙️ .gitignore
+├── 🐳 Dockerfile
+├── 📄 Ejecutando
+├── 📝 README.md
+├── 📝 SPACETIMEDB_NOTES.md
+├── ⚙️ docker-compose.yml
+├── 📄 next-env.d.ts
+├── 📄 next.config.js
+├── ⚙️ package-lock.json
+├── ⚙️ package.json
+├── 📄 playwright.config.ts
+├── ⚙️ tsconfig.json
+├── 📄 tsconfig.tsbuildinfo
+├── ⚙️ vercel.json
+├── 📄 verify.sh
+└── 📄 vitest.config.ts
 ```
 
 ---
