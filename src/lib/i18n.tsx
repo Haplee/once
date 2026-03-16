@@ -3,11 +3,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import translations from '@/data/translations/all.json';
 import { Language, TranslationKeys, I18nContextType } from '@/types/i18n';
+import { DEFAULT_LANGUAGE } from './constants';
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-    const [language, setLangState] = useState<Language>('es');
+    const [language, setLangState] = useState<Language>(DEFAULT_LANGUAGE);
 
     useEffect(() => {
         const saved = localStorage.getItem('language') as Language;

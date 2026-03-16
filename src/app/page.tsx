@@ -3,6 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { Mic, Calculator as CalcIcon } from 'lucide-react';
+import { API_ROUTES } from '@/lib/constants';
+import { announceVoice } from '@/lib/announcer';
+import ApiErrorMessage from '@/components/ApiErrorMessage';
 
 export default function Home() {
     const { t, language } = useI18n();
@@ -10,6 +13,7 @@ export default function Home() {
     const [received, setReceived] = useState('');
     const [result, setResult] = useState<number | null>(null);
     const [isListening, setIsListening] = useState(false);
+    const [apiError, setApiError] = useState<string | null>(null);
     const recognitionRef = useRef<any>(null);
 
     useEffect(() => {
@@ -19,58 +23,54 @@ export default function Home() {
             recognitionRef.current.continuous = false;
             recognitionRef.current.interimResults = false;
 
-            recognitionRef.current.onstart = () => setIsListening(true);
+            recognitionRef.current.onstart = () => {
+                setIsListening(true);
+                announceVoice(t('voiceStart' as any) || 'Escuchando...', language);
+            };
             recognitionRef.current.onend = () => setIsListening(false);
             recognitionRef.current.onresult = (event: any) => {
                 const transcript = event.results[0][0].transcript;
                 parseVoiceInput(transcript);
             };
-            recognitionRef.current.onerror = (e: any) => {
-                console.error('Recognition error:', e);
-                setIsListening(false);
-            };
         }
-    }, [language]);
+    }, [language, t]);
 
     const parseVoiceInput = (text: string) => {
         const numbers = text.match(/[\d]+([.,][\d]+)?/g);
         if (numbers && numbers.length >= 2) {
             setReceived(numbers[0].replaceAll(',', '.'));
             setTotal(numbers[1].replaceAll(',', '.'));
-            // Auto-calculate after state updates (need a way to trigger sync calculation or use effect)
+            announceVoice(t('voiceRecognized' as any) || 'Valores reconocidos', language);
         }
     };
 
     const calculate = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
+        setApiError(null);
+        
         const tVal = parseFloat(total);
         const rVal = parseFloat(received);
 
         if (isNaN(tVal) || isNaN(rVal)) return;
 
         try {
-            const resp = await fetch('/api/calculate', {
+            const resp = await fetch(API_ROUTES.CALCULATE, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ total: tVal, received: rVal }),
             });
             const data = await resp.json();
+            
             if (data.success) {
                 setResult(data.change);
-                announceResult(data.change);
+                const voiceMsg = `${t('speechChangeResultText')} ${data.change} euros`;
+                announceVoice(voiceMsg, language);
             } else {
-                alert(data.error);
+                setApiError(data.error);
             }
         } catch (err) {
-            console.error(err);
+            setApiError('Error de conexión');
         }
-    };
-
-    const announceResult = (change: number) => {
-        const text = `${t('speechChangeResultText')} ${change} euros`;
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = language === 'en' ? 'en-US' : 'es-ES';
-        window.speechSynthesis.speak(utterance);
     };
 
     const toggleMic = () => {
@@ -78,19 +78,21 @@ export default function Home() {
             recognitionRef.current?.stop();
         } else {
             if (recognitionRef.current) {
-                recognitionRef.current.lang = language === 'en' ? 'en-US' : 'es-ES';
+                recognitionRef.current.lang = language === 'en' ? 'en-US' : language === 'ca' ? 'ca-ES' : 'es-ES';
                 recognitionRef.current.start();
-            } else {
-                alert(t('voiceErrorUnsupported'));
             }
         }
     };
 
     return (
         <div className="glass-panel" style={{ padding: '2rem' }}>
-            <h1 className="text-center">{t('calculatorTitle')}</h1>
+            <h1 id="calculator-heading">{t('calculatorTitle')}</h1>
+            
+            <p className="sr-only" id="calc-instructions">
+                Introduce el precio y el importe recibido para calcular el cambio. Puedes usar la voz pulsando el botón de micrófono.
+            </p>
 
-            <form onSubmit={calculate} className="form-centered">
+            <form onSubmit={calculate} className="form-centered" aria-labelledby="calculator-heading">
                 <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                     <label htmlFor="total">{t('totalToPayLabel')}</label>
                     <input
@@ -101,6 +103,7 @@ export default function Home() {
                         value={total}
                         onChange={(e) => setTotal(e.target.value)}
                         placeholder={t('totalToPayPlaceholder')}
+                        aria-describedby="calc-instructions"
                         required
                     />
                 </div>
@@ -127,20 +130,29 @@ export default function Home() {
                         type="button"
                         className={`btn btn-icon ${isListening ? 'listening' : ''}`}
                         onClick={toggleMic}
-                        title={t('voiceInputButtonLabel')}
+                        aria-label={t('voiceInputButtonLabel')}
+                        aria-pressed={isListening}
                     >
-                        <Mic size={24} />
+                        <Mic size={24} aria-hidden="true" />
                     </button>
                 </div>
             </form>
 
-            <div className="result-box">
-                <span className="text-muted">
+            {apiError && <ApiErrorMessage message={apiError} critical={true} />}
+
+            <div 
+                className="result-box mt-4" 
+                role="region" 
+                aria-live="polite" 
+                aria-atomic="true"
+                aria-label="Resultado del cálculo"
+            >
+                <p className="text-muted">
                     {t('changeResultText', { change: result !== null ? result.toFixed(2) : '--' })}
-                </span>
-                <span id="result-value" className="result-value">
+                </p>
+                <div className="result-value">
                     {result !== null ? `€ ${result.toFixed(2)}` : '--'}
-                </span>
+                </div>
             </div>
         </div>
     );

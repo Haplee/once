@@ -1,131 +1,120 @@
-# Aplicación Web Accesible para la ONCE (Next.js)
+# 🟢 Calculadora de Cambio ONCE — Edición Profesional v2.0
 
-Esta es la aplicación web de la Calculadora de Cambio, ahora impulsada por **Next.js** con un backend moderno usando API Routes. La aplicación mantiene toda la funcionalidad original, incluyendo la alta accesibilidad, pero ahora con una arquitectura más robusta y escalable.
+![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript)
+![SpacetimeDB](https://img.shields.io/badge/SpacetimeDB-Distributed-green?style=for-the-badge)
+![WCAG](https://img.shields.io/badge/WCAG-2.1_AA-blue?style=for-the-badge)
 
-## Características
+La evolución definitiva de la herramienta de cálculo accesible para la **ONCE**. Esta versión ha sido rediseñada desde los cimientos para ofrecer una robustez industrial, seguridad avanzada y una accesibilidad sin compromisos.
 
-- **Framework Next.js 14**: Arquitectura moderna con App Router y Server Components.
-- **Calculadora de Cambio**: Calcula el cambio de forma rápida y precisa a través de API Routes internas.
-- **Entrada y Salida de Voz**: Utiliza las APIs del navegador para la entrada de voz y para anunciar los resultados en voz alta.
-- **Historial de Operaciones Persistente**: Guarda un registro de todas las transacciones en una base de datos SQLite.
-- **Internacionalización (I18N)**: Soporte para múltiples idiomas (Español, Inglés, Catalán) gestionado por React Context.
-- **Modo Día/Noche**: Tema visual adaptable con `next-themes`.
-- **Comunicación con Hardware**: Mantiene la capacidad de comunicarse con dispositivos externos (como Arduino) a través de la Web Serial API.
-- **Diseño Premium**: Interfaz glassmorphic moderna con animaciones suaves y diseño responsive.
+---
 
-## Requisitos
+## 💎 Características Premium
 
-- Node.js 18+ (recomendado 20+)
-- npm o yarn
+### ♿ Accesibilidad Estelar (WCAG 2.1 AA)
+- **Announcer Engine**: Centralización de anuncios ARIA y síntesis de voz nativa (`speechSynthesis`).
+- **Navegación Fluida**: Implementación de `SkipLinks` y gestión inteligente del foco visual (`focus-visible`).
+- **Diseño Adaptativo**: Soporte completo para `reduced-motion` y alto contraste.
 
-## Cómo Empezar
+### 🛡️ Seguridad y Resiliencia
+- **Rate Limiting Inteligente**: Protección contra ataques de denegación de servicio con **Upstash Redis** (con fallback automático en memoria para desarrollo).
+- **Validación Zod**: Esquemas de entorno estrictos que fallan rápido para evitar despliegues erróneos.
+- **Auth Pro**: Integración de **NextAuth.js** para una gestión de sesiones segura y personalizada.
 
-Sigue estos pasos para configurar y ejecutar la aplicación en tu máquina local.
+### 🚀 Infraestructura Moderna
+- **SpacetimeDB**: Base de datos distribuida en tiempo real que sustituye al legacy SQLite.
+- **PWA Full-Stack**: Instalable en dispositivos móviles con soporte offline robusto y banners de estado de red.
+- **Exportación Accesible**: Generación de reportes en **CSV** y **PDF** (optimizado para lectores de pantalla).
 
-### 1. Clonar el Repositorio
+---
 
+## 🛠️ Stack Tecnológico
+
+| Área | Tecnología |
+|---|---|
+| **Frontend** | React 18 + Next.js 14 (App Router) |
+| **Backend** | Next.js API Routes (Serverless ready) |
+| **Base de Datos** | SpacetimeDB (Cloud/Edge) |
+| **Caché/Security** | Upstash Redis |
+| **Testing** | Vitest + Playwright + axe-core |
+| **DevOps** | Docker Multi-stage + GitHub Actions |
+
+---
+
+## 📦 Instalación y Despliegue
+
+### Requisitos Previos
+- Node.js 20+
+- [SpacetimeDB CLI](https://spacetimedb.com/docs/install)
+
+### Configuración Local
+1. **Clonar e instalar:**
+   ```bash
+   npm install
+   ```
+2. **Setup de entorno:**
+   ```bash
+   cp .env.example .env.local
+   # El sistema ya incluye secretos generados en .env.local para tu comodidad
+   ```
+3. **Lanzar servicios:**
+   ```bash
+   # Terminal 1: Servidor DB
+   spacetime start
+   
+   # Terminal 2: Publicar y lanzar app
+   spacetime publish --project-path spacetimedb calculadora-once
+   npm run dev
+   ```
+
+### Producción con Docker
 ```bash
-git clone <url-del-repositorio>
-cd <nombre-del-repositorio>
+docker-compose up --build
 ```
 
-### 2. Instalar Dependencias
+---
+
+## 🧪 Calidad y Validación
+
+Ejecuta nuestra suite de pruebas para asegurar la integridad de la aplicación:
 
 ```bash
-npm install
+# Unitarias e i18n
+npm run test:unit
+
+# Auditoría de Accesibilidad E2E
+npm run test:a11y
+
+# Linter de producción
+npm run lint
 ```
 
-### 3. Ejecutar el Servidor de Desarrollo
+---
 
-```bash
-npm run dev
-```
-
-La aplicación estará disponible en `http://localhost:3000` en tu navegador.
-
-### 4. Construir para Producción
-
-```bash
-npm run build
-npm start
-```
-
-### 5. Ejecutar las Pruebas (Opcional)
-
-Para ejecutar las pruebas End-to-End de Playwright:
-
-```bash
-npm test
-```
-
-## Estructura del Proyecto
+## 📂 Estructura del Proyecto
 
 ```
 .
-├── hardware/                  # Código y esquemas del hardware (Arduino)
+├── spacetimedb/           # Lógica de base de datos (Reducers/Tables)
 ├── src/
-│   ├── app/                   # App Router de Next.js
-│   │   ├── api/               # API Routes (Backend)
-│   │   │   ├── calculate/     # Endpoint de cálculo
-│   │   │   └── history/       # Endpoint de historial
-│   │   ├── configuracion/     # Página de configuración
-│   │   ├── history/           # Página de historial
-│   │   ├── layout.tsx         # Layout principal
-│   │   ├── page.tsx           # Página de inicio (calculadora)
-│   │   └── globals.css        # Estilos globales
-│   ├── components/            # Componentes React reutilizables
-│   │   ├── Navbar.tsx         # Barra de navegación
-│   │   └── ThemeProvider.tsx  # Proveedor de tema
-│   ├── lib/                   # Utilidades y configuración
-│   │   ├── db.ts              # Conexión a SQLite
-│   │   └── i18n.tsx           # Contexto de internacionalización
-│   ├── types/                 # Definiciones de TypeScript
-│   │   ├── models.ts          # Modelos de datos compartidos
-│   │   └── i18n.ts            # Tipos para traducciones
-│   └── data/                  # Datos estáticos
-│       └── translations/      # Archivos de traducción JSON
-├── public/                    # Archivos estáticos
-│   └── static/                # Imágenes, CSS y JS legacy
-├── tests/                     # Suite de pruebas
-│   ├── api.spec.ts            # Pruebas de API
-│   ├── ui.spec.ts             # Pruebas de Interfaz (E2E)
-│   └── results/               # Resultados de los tests
-├── playwright.config.ts       # Configuración de pruebas
-├── next.config.js             # Configuración de Next.js
-├── tsconfig.json              # Configuración de TypeScript
-├── package.json               # Dependencias del proyecto
-└── README.md                  # Este archivo
+│   ├── app/               # Endpoints API y Páginas (App Router)
+│   ├── components/        # Componentes UI con foco en Accesibilidad
+│   ├── lib/               # Utilidades (Auth, DB, Ratelimit, Announcer)
+│   └── data/translations/ # Diccionarios multilingües JSON
+├── tests/                 # Pruebas Playwright y auditorías Axe
+├── Dockerfile             # Configuración de imagen optimizada
+└── .github/workflows/     # Automatización CI/CD
 ```
 
-## Migración desde Flask
+---
 
-La versión anterior de Flask se encuentra archivada en la rama `old_version`. Para acceder a ella:
+## 🤝 Contribuciones y Soporte
 
-```bash
-git checkout old_version
-```
+Desarrollado para la **ONCE**. Para reportar problemas de accesibilidad o sugerir mejoras, por favor abre un Issue siguiendo las pautas del proyecto.
 
-## Despliegue en Vercel
+---
 
-Este proyecto está optimizado para desplegarse en Vercel:
-
-1. Conecta tu repositorio a Vercel
-2. Vercel detectará automáticamente que es un proyecto Next.js
-3. El despliegue se realizará automáticamente
-
-## Comunicación con Arduino
-
-El código de ejemplo para un dispositivo compatible con Arduino se encuentra en `hardware/arduino_sketch.ino`. Puedes cargarlo en tu dispositivo para probar la funcionalidad de comunicación serie desde la página de **Configuración**.
-
-## Tecnologías Utilizadas
-
-- **Next.js 14**: Framework React con SSR y App Router
-- **TypeScript**: Tipado estático para mayor robustez
-- **SQLite**: Base de datos ligera para el historial
-- **Lucide React**: Iconos modernos
-- **next-themes**: Gestión de temas oscuro/claro
-- **Web APIs**: Speech Recognition, Speech Synthesis, Web Serial
-
-## Licencia
-
-ISC
+### Perfiles del Proyecto
+- **GitHub**: [Haplee/once](https://github.com/Haplee/once)
+- **Instagram**: [Fran Vidal](https://www.instagram.com/franvidalmateo)
+- **X**: [@FranVidalMateo](https://x.com/FranVidalMateo)

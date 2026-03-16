@@ -1,34 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { callReducer } from '@/lib/spacetimedb-server';
+import { CalculateRequest, CalculateResponse, ApiError } from '@/types/models';
+import { getServerSession } from "next-auth/next";
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
     try {
-        const { total, received } = await request.json();
+        const session = await getServerSession();
+        const userId = session?.user?.email || 'anonymous';
 
-        if (total == null || received == null) {
-            return NextResponse.json({ success: false, error: 'Missing values' }, { status: 400 });
+        const body: CalculateRequest = await req.json();
+        const { total, received } = body;
+
+        if (typeof total !== 'number' || typeof received !== 'number') {
+            return NextResponse.json<ApiError>(
+                { success: false, error: 'Los valores deben ser números válidos' },
+                { status: 400 }
+            );
         }
 
-        const change = received - total;
+        const change = parseFloat((received - total).toFixed(2));
 
         if (change < 0) {
-            return NextResponse.json({ success: false, error: 'Insufficient funds' }, { status: 400 });
+            return NextResponse.json<ApiError>(
+                { success: false, error: 'El monto recibido es insuficiente' },
+                { status: 400 }
+            );
         }
 
-        const roundedChange = parseFloat(change.toFixed(2));
+        // Persistencia asíncrona en SpacetimeDB vía Reducer incluyento userId
+        try {
+            await callReducer('addOperation', [received, total, change, userId]);
+        } catch (dbError) {
+            console.error('[API Calculate] Error persistiendo en SpacetimeDB:', dbError);
+        }
 
-        const db = await getDb();
-        await db.run(
-            'INSERT INTO history (total_amount, amount_received, change_returned) VALUES (?, ?, ?)',
-            [total, received, roundedChange]
-        );
-
-        return NextResponse.json({
+        return NextResponse.json<CalculateResponse>({
             success: true,
-            change: roundedChange
+            change
         });
     } catch (error) {
         console.error('Calculation error:', error);
-        return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json<ApiError>(
+            { success: false, error: 'Error interno del servidor' },
+            { status: 500 }
+        );
     }
 }

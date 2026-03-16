@@ -16,3 +16,14 @@ export interface CalculateResponse {
     change?: number;
     error?: string;
 }
+
+export interface ApiResponse<T> {
+    success: true;
+    data: T;
+}
+
+export interface ApiError {
+    success: false;
+    error: string;
+}
+

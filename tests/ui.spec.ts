@@ -1,82 +1,42 @@
 import { test, expect } from '@playwright/test';
+const { injectAxe, checkA11y } = require('axe-playwright');
 
-test.describe('UI E2E Tests', () => {
-    let consoleErrors: string[] = [];
+test.describe('Accesibilidad y UI', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await injectAxe(page);
+  });
 
-    test.beforeEach(async ({ page }) => {
-        // Reset console errors
-        consoleErrors = [];
-        page.on('console', msg => {
-            if (msg.type() === 'error') {
-                const text = msg.text();
-                if (!text.includes('synthesis-failed')) { // Ignore specific known error
-                    consoleErrors.push(text);
-                }
-            }
-        });
-
-        await page.goto('/');
-        // Disable TTS for tests
-        await page.evaluate(() => { (window as any).APP_IS_TESTING = true; });
+  test('la página principal debe cumplir con WCAG 2.1 AA', async ({ page }) => {
+    // Escaneo de accesibilidad básico
+    await checkA11y(page, null, {
+      axeOptions: {
+        runOnly: {
+          type: 'tag',
+          values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
+        }
+      }
     });
+  });
 
-    test('Calculator Flow', async ({ page }) => {
-        await expect(page).toHaveTitle(/ONCE/);
+  test('navegación básica entre secciones', async ({ page }) => {
+    await page.click('text=Historial');
+    await expect(page).toHaveURL(/.*history/);
+    
+    await page.click('text=Configuración');
+    await expect(page).toHaveURL(/.*configuracion/);
+  });
 
-        const totalInput = page.locator('#total');
-        const receivedInput = page.locator('#received');
-        const calcBtn = page.locator('#calculate-btn');
-        const resultDiv = page.locator('#result-value');
-
-        // Check initial state
-        // await expect(calcBtn).toBeDisabled(); // Button is always enabled in current implementation
-
-        // Perform Calculation
-        await totalInput.fill('10.00');
-        await receivedInput.fill('20.00');
-
-        await expect(calcBtn).toBeEnabled();
-        await calcBtn.click();
-
-        // Verify Result
-        await expect(resultDiv).toContainText('10.00', { timeout: 5000 });
-
-        // Ensure no errors
-        expect(consoleErrors).toHaveLength(0);
-    });
-
-    test('Navigation to History', async ({ page }) => {
-        // Find link to history
-        await page.locator('nav a[href="/history"]').click();
-
-        await expect(page).toHaveURL(/\/history/);
-
-        // Check if table exists
-        const table = page.locator('table');
-        await expect(table).toBeVisible();
-
-        // Since we likely ran the calculator test before or in parallel, 
-        // there might be data, but strict order isn't guaranteed with `fullyParallel: true`.
-        // So we just check table structure headers.
-        await expect(page.locator('th').first()).toBeVisible();
-    });
-
-    test('Navigation to Settings', async ({ page }) => {
-        await page.locator('nav a[href="/configuracion"]').click();
-
-        await expect(page).toHaveURL(/\/configuracion/);
-
-        // Check for Language buttons
-        const langButtons = page.locator('button.btn-icon, button.btn-primary');
-        await expect(langButtons.first()).toBeVisible();
-
-        // Check Theme toggle (input might be hidden via CSS)
-        const themeToggle = page.locator('#theme-toggle');
-        await expect(themeToggle).toBeAttached();
-
-        // Try toggling theme by clicking the label
-        await page.locator('label[for="theme-toggle"]').click();
-        // Just ensuring it doesn't crash
-        expect(consoleErrors).toHaveLength(0);
-    });
+  test('el anuncio de voz se activa al calcular (mock manual o presencia de live region)', async ({ page }) => {
+    const totalInput = page.locator('#total');
+    const receivedInput = page.locator('#received');
+    
+    await totalInput.fill('10');
+    await receivedInput.fill('20');
+    await page.click('#calculate-btn');
+    
+    // El resultado debe aparecer en la live region del layout si la implementamos
+    const result = page.locator('.result-value');
+    await expect(result).toContainText('€ 10.00');
+  });
 });

@@ -1,0 +1,53 @@
+name: Accessibility Audit
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Construir aplicacion
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SPACETIMEDB_URI: ws://localhost:3000
+          NEXT_PUBLIC_SPACETIMEDB_DB_NAME: calculadora-once
+          NEXTAUTH_SECRET: ci-secret-placeholder
+          NEXTAUTH_URL: http://localhost:3000
+
+      - name: Instalar Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Arrancar servidor y auditar accesibilidad
+        run: |
+          npm start &
+          sleep 5
+          npx playwright test tests/ui.spec.ts --reporter=html
+        env:
+          NEXT_PUBLIC_SPACETIMEDB_URI: ws://localhost:3000
+          NEXT_PUBLIC_SPACETIMEDB_DB_NAME: calculadora-once
+          NEXTAUTH_SECRET: ci-secret-placeholder
+          NEXTAUTH_URL: http://localhost:3000
+
+      - name: Publicar reporte
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-report
+          path: playwright-report/
+          retention-days: 30

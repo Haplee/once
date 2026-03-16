@@ -3,20 +3,11 @@
 import React from 'react';
 import { useI18n } from '@/lib/i18n';
 import { useTheme } from 'next-themes';
+import { LOCALES, MACHINE_MODELS } from '@/lib/constants';
 
 export default function SettingsPage() {
     const { t, language, setLanguage } = useI18n();
     const { theme, setTheme } = useTheme();
-
-    const locales = [
-        { code: 'es', label: 'settingsLangSpanish' },
-        { code: 'en', label: 'settingsLangEnglish' },
-        { code: 'ca', label: 'settingsLangCatalan' },
-        { code: 'gl', label: 'settingsLangGalician' },
-        { code: 'eu', label: 'settingsLangBasque' },
-        { code: 'va', label: 'settingsLangValencian' },
-        { code: 'fr', label: 'settingsLangFrench' },
-    ];
 
     return (
         <div className="glass-panel" style={{ padding: '2rem' }}>
@@ -43,7 +34,7 @@ export default function SettingsPage() {
             <div className="mb-2">
                 <h2>{t('settingsLanguageLabel')}</h2>
                 <div className="d-flex flex-wrap gap-2">
-                    {locales.map((loc) => (
+                    {LOCALES.map((loc) => (
                         <button
                             key={loc.code}
                             className={`btn ${language === loc.code ? 'btn-primary' : 'btn-icon'}`}
@@ -60,9 +51,11 @@ export default function SettingsPage() {
             <div className="mb-2">
                 <h2>{t('settingsMachineModelLabel')}</h2>
                 <select className="form-input" style={{ maxWidth: '300px', margin: '0 auto', display: 'block' }}>
-                    <option value="S">{t('settingsMachineModelS')}</option>
-                    <option value="M">{t('settingsMachineModelM')}</option>
-                    <option value="MAX">{t('settingsMachineModelMax')}</option>
+                    {MACHINE_MODELS.map((model) => (
+                        <option key={model.value} value={model.value}>
+                            {t(model.label as any)}
+                        </option>
+                    ))}
                 </select>
             </div>
 
